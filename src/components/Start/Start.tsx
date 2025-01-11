@@ -1,5 +1,4 @@
 // src/components/Auth.js
-import React from 'react';
 import { Link } from 'react-router-dom';
 import style from "./Start.module.scss";
 import icon from '../../../public/icon512_rounded.png';

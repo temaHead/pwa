@@ -1,4 +1,3 @@
-import React from "react";
 import Logout from "../../../Auth/Logout/Logout";
 
 function Profile() {

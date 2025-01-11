@@ -1,5 +1,5 @@
 // src/components/Auth.js
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import style from './Home.module.scss';
 import { doc, getDoc } from 'firebase/firestore';

@@ -1,4 +1,3 @@
-import React from 'react';
 import style from './Header.module.scss';
 import icon from '../../../../../public/icon512_maskable.png';
 

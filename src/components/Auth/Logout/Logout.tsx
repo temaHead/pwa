@@ -1,5 +1,3 @@
-// src/components/Logout.js
-import React from 'react';
 import { signOut } from 'firebase/auth';
 import { useDispatch } from 'react-redux';
 import { auth } from '../../../firebase';
