@@ -1,0 +1,45 @@
+.signInPage {
+    display: flex;
+    flex-direction: column;
+    .header {
+        display: flex;
+        .iconWrapper {
+            height: 20px;
+            width: 20px;
+            img {
+                height: 100%;
+                width: 100%;
+                object-fit: contain;
+            }
+        }
+    }
+    .title {
+        font-size: 22px;
+        font-weight: 500;
+        margin-top: 50px;
+        margin-bottom: 50px;
+    }
+    .form {
+        display: flex;
+        flex-direction: column;
+        .input {
+            border: none;
+            background-color: rgb(240, 240, 240);
+            height: 30px;
+            margin-bottom: 10px;
+            padding: 7px;
+            border-radius: 7px;
+        }
+        .checkbox {
+            margin-bottom: 50px;
+        }
+        .buttonSubmit{
+            background-color: #fbe765;
+        }
+    }
+    .buttonSignUp {
+        margin-top: 20px;
+        background-color: transparent;
+
+    }
+}
