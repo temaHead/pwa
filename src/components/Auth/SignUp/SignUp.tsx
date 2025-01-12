@@ -17,7 +17,6 @@ const SignUp = () => {
     const [password, setPassword] = useState('');
     const [passwordConfirm, setPassConfirm] = useState('');
     const [error, setError] = useState('');
-    const [isChecked, setIsChecked] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -53,9 +52,7 @@ const SignUp = () => {
                             token: userCredential.user.refreshToken,
                         })
                     );
-                    if (isChecked) {
-                        window.localStorage.setItem('id', userCredential.user.uid);
-                    }
+                    window.localStorage.setItem('id', userCredential.user.uid);
                     setEmail('');
                     setPassword('');
                     setPassConfirm('');
@@ -113,14 +110,6 @@ const SignUp = () => {
                     onChange={(e) => setPassConfirm(e.target.value)}
                     required
                 />
-                <label className={style.checkbox}>
-                    <input
-                        type='checkbox'
-                        checked={isChecked}
-                        onChange={(e) => setIsChecked(e.target.checked)}
-                    />
-                    Запомнить на этом устройстве
-                </label>
                 <button
                     className={style.buttonSubmit}
                     type='submit'

@@ -1,0 +1,33 @@
+.profile {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 30px;
+    box-sizing: border-box;
+    .buttonsWrapper{
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        .cancel{
+
+        }
+        .save{
+
+        }
+        .edit{
+            width: 100%;
+
+        }
+    }
+
+    .container {
+        flex: 1 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    .logout {
+        justify-self: flex-end;
+    }
+}

@@ -1,24 +1,19 @@
-// src/components/Auth.js
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import style from './Home.module.scss';
 import { doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../../firebase';
 import Header from './components/Header/Header';
-import Desktop from './components/Desktop/Desktop';
 import NavBar from './components/NavBar/NavBar';
-interface User {
-    email: string | null;
-    id: string;
-    token: string;
-    name: string;
-}
+import { useDispatch } from 'react-redux';
+import { setUser } from '../../store/slices/userSlice';
 const Home = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const id = window.localStorage.getItem('id');
-    const [user, setUser] = useState<User | null>(null);
+    const [isAuth, setIsAuth] = useState<boolean>(false);
 
     useEffect(() => {
         // Проверяем, есть ли id в localStorage
@@ -32,15 +27,23 @@ const Home = () => {
                         // Загружаем данные пользователя из Firestore
                         const userDocRef = doc(db, 'users', firebaseUser.uid);
                         const userDoc = await getDoc(userDocRef);
-
                         if (userDoc.exists()) {
                             // Обновляем состояние с данными пользователя
-                            setUser({
-                                email: firebaseUser.email,
-                                id: firebaseUser.uid,
-                                token: firebaseUser.refreshToken,
-                                name: userDoc.data()?.name || 'Без имени',
-                            });
+                            dispatch(
+                                setUser({
+                                    email: firebaseUser.email,
+                                    id: firebaseUser.uid,
+                                    token: firebaseUser.refreshToken,
+                                    name: userDoc.data()?.name || null,
+                                    birthDate: userDoc.data()?.birthDate || null,
+                                    currentWeight: userDoc.data()?.currentWeight || null,
+                                    initialWeight: userDoc.data()?.initialWeight || null,
+                                    desiredWeight: userDoc.data()?.desiredWeight || null,
+                                    gender: userDoc.data()?.gender || null,
+                                    height: userDoc.data()?.height || null,
+                                })
+                            );
+                            setIsAuth(true);
                         } else {
                             console.log('Документ пользователя не найден в базе данных');
                         }
@@ -49,23 +52,24 @@ const Home = () => {
                     }
                 } else {
                     console.log('Пользователь не авторизован или id не совпадает');
+                    window.localStorage.removeItem('id');
                 }
             });
 
             // Очистка при размонтировании компонента
             return () => unsubscribe();
         }
-    }, [id, navigate]);
+    }, [id]);
 
-    if (!user) {
+    if (!isAuth) {
         return null;
     }
 
     return (
         <div className={style.homePage}>
-            <Header name= {user.name}/>
-            <Desktop/>
-            <NavBar/>
+            <Header />
+            <Outlet />
+            <NavBar />
         </div>
     );
 };
