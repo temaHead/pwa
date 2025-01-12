@@ -1,7 +1,6 @@
-import React, { ChangeEvent } from 'react';
+import { ChangeEvent } from 'react';
 import { Select, MenuItem, Typography, FormControl, InputLabel } from '@mui/material';
 import style from './Selector.module.scss';
-
 
 function Selector({
     name,
@@ -21,7 +20,10 @@ function Selector({
     return (
         <div className={style.selector}>
             {isEditing ? (
-                <FormControl fullWidth variant="outlined">
+                <FormControl
+                    fullWidth
+                    variant='outlined'
+                >
                     <InputLabel id={`${name}-label`}>{label}</InputLabel>
                     <Select
                         labelId={`${name}-label`}
@@ -35,14 +37,17 @@ function Selector({
                         label={label}
                     >
                         {options.map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
+                            <MenuItem
+                                key={option.value}
+                                value={option.value}
+                            >
                                 {option.label}
                             </MenuItem>
                         ))}
                     </Select>
                 </FormControl>
             ) : (
-                <Typography variant="body1">
+                <Typography variant='body1'>
                     <strong>{label}:</strong> {value || 'Не указан'}
                 </Typography>
             )}

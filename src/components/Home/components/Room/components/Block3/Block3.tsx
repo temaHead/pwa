@@ -1,4 +1,3 @@
-import React from "react";
 import style from './Block3.module.scss';
 
 function Block3() {
