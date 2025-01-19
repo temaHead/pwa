@@ -1,0 +1,44 @@
+.addUser{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 30px;
+    box-sizing: border-box;
+    .header{
+        display: flex;
+        flex-direction: column;
+        padding: 0 16px; /* Добавляет отступы слева и справа */
+        .buttonBack {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            cursor: pointer;
+            height: 40px;
+        }
+        .stepCounter{
+            display: flex;
+            justify-content: flex-start;
+        }
+
+    }
+    .subForm{
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+        .field{
+            display: flex;
+            flex-direction: column;
+            margin-top: 20px;
+        }
+        .buttonCalculate{
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+    }
+
+    .buttons{
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+    }
+}

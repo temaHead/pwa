@@ -1,4 +1,4 @@
-import { TextField, Typography } from '@mui/material';
+import { TextField } from '@mui/material';
 import { ChangeEvent } from 'react';
 import style from './Input.module.scss';
 
@@ -6,9 +6,9 @@ import style from './Input.module.scss';
 interface InputProps {
     name: string;
     value: string | number | null;
-    isEditing: boolean;
     onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-    label: string;
+    label?: string;
+    placeholder?: string
     postValue?: string | number | null;
     type?: string;
 }
@@ -16,14 +16,12 @@ interface InputProps {
 const Input = ({
     name,
     value,
-    isEditing,
     onChange,
     label,
     type = 'text',
-    postValue = '',
+    placeholder
 }: InputProps) => (
     <div className={style.input}>
-        {isEditing ? (
             <TextField
                 variant="outlined"
                 fullWidth
@@ -33,12 +31,8 @@ const Input = ({
                 onChange={onChange}
                 label={label}
                 InputLabelProps={{ shrink: true }}
+                placeholder={placeholder}
             />
-        ) : (
-            <Typography variant="body1">
-                <strong>{label}:</strong> {value ? `${value} ${postValue}` : 'Не указано'}
-            </Typography>
-        )}
     </div>
 );
 

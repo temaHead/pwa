@@ -29,7 +29,6 @@ createRoot(document.getElementById('root')!).render(
                 >
                     <App />
                 </LocalizationProvider>
-                ,
             </Provider>
         </BrowserRouter>
     </StrictMode>

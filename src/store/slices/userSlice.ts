@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { addUserProfile, updateUserProfile } from '../../api/user-api';
+import { FatMeasuring, UserProfile } from '../../types';
 import { RootState } from '..';
-import { updateUserProfile } from '../../api/user-api';
-import { UserProfileType } from '../../types';
 
-const initialState: UserProfileType = {
+const initialState: UserProfile = {
     email: null,
     id: null,
     name: null,
@@ -13,19 +13,31 @@ const initialState: UserProfileType = {
     desiredWeight: null,
     gender: null,
     height: null,
+    bodyFat: null,
 };
 
-  export const updateUserProfileAsync = createAsyncThunk(
+export const updateUserProfileAsync = createAsyncThunk(
     'user/updateUserProfile',
-    async (profile: UserProfileType, { getState }) => {
-      const state = getState() as RootState;
-      const userId = state.user.id;
-      if (!userId) throw new Error('User ID not found');
-      
-      const updatedUserData = await updateUserProfile(profile, userId);
-      return updatedUserData; // Возвращаем обновленные данные для обновления состояния
+    async (profile: UserProfile, { getState }) => {
+        const state = getState() as RootState;
+        const userId = state.user.id;
+        if (!userId) throw new Error('User ID not found');
+
+        const updatedUserData = await updateUserProfile(profile, userId);
+        return updatedUserData; // Возвращаем обновленные данные для обновления состояния
     }
-  );
+);
+
+export const addUserProfileAsync = createAsyncThunk(
+    'user/addUserProfile',
+    async( {profile, fatMeasuring}:{profile: UserProfile, fatMeasuring: FatMeasuring}, {getState}) => {
+        const state = getState() as RootState;
+        const userId = state.user.id;
+        if (!userId) throw new Error('User ID not found');
+        const updatedUserData = await addUserProfile(profile, userId , fatMeasuring);
+        return updatedUserData;
+    }
+)
 
 
 const userSlice = createSlice({
@@ -69,7 +81,21 @@ const userSlice = createSlice({
             state.desiredWeight = updatedData.desiredWeight || null;
             state.gender = updatedData.gender || null;
             state.height = updatedData.height || null;
-        });
+        })
+        builder.addCase(addUserProfileAsync.fulfilled, (state, action) => {
+            // Обновляем профиль в состоянии после успешного запроса
+            const updatedData = action.payload;
+            state.email = updatedData.email || null;
+            state.id = updatedData.id || null;
+            state.name = updatedData.name || null;
+            state.birthDate = updatedData.birthDate || null;
+            state.currentWeight = updatedData.currentWeight || null;
+            state.initialWeight = updatedData.initialWeight || null;
+            state.desiredWeight = updatedData.desiredWeight || null;
+            state.gender = updatedData.gender || null;
+            state.height = updatedData.height || null;
+        })
+        
     },
 });
 

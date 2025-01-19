@@ -1,0 +1,72 @@
+.editProfile {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 30px;
+    box-sizing: border-box;
+
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between; /* Для распределения пространства между элементами */
+        position: relative; /* Для управления абсолютным позиционированием тайтла */
+        padding: 0 16px; /* Отступы слева и справа */
+    
+        .icon {
+            flex-shrink: 0; /* Иконка не сжимается */
+            display: flex;
+            align-items: center;
+            cursor: pointer; /* Указатель мыши меняется на "руку" */
+        }
+    
+        .title {
+            position: absolute; /* Абсолютное позиционирование */
+            left: 50%; /* Центрируем по горизонтали */
+            transform: translateX(-50%); /* Смещение на половину ширины */
+            font-size: 18px; /* Размер текста */
+            font-weight: bold; /* Жирный шрифт */
+        }
+    }
+    .avatar{
+        display: flex; /* Используем Flexbox для выравнивания содержимого */
+        align-items: stretch; /* Растягиваем элементы по высоте контейнера */
+        justify-content: center; /* Центрируем содержимое по горизонтали */
+        height: 70px; /* Высота блока .avatar */
+        .icon {
+            flex-grow: 1; /* Заставляем иконку занимать всё доступное пространство */
+            display: flex; /* Чтобы содержимое внутри было центрировано */
+            align-items: center; /* Центрируем иконку по вертикали */
+            justify-content: center; /* Центрируем иконку по горизонтали */
+            svg {
+                height: 40px; /* Фиксированная высота иконки */
+                width: 40px; /* Фиксированная ширина иконки */
+            }
+        }
+    }
+    .buttonsWrapper{
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        .cancel{
+
+        }
+        .save{
+
+        }
+        .edit{
+            width: 100%;
+
+        }
+    }
+
+    .container {
+        flex: 1 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    .logout {
+        justify-self: flex-end;
+    }
+}

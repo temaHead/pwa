@@ -4,28 +4,84 @@
     height: 100%;
     padding: 30px;
     box-sizing: border-box;
-    .buttonsWrapper{
+    .header {
         display: flex;
-        justify-content: space-between;
-        margin-bottom: 20px;
-        .cancel{
+        align-items: center; /* Выравнивание элементов по вертикали */
+        justify-content: space-between; /* Раздвигает элементы в стороны */
+        position: relative;
+        padding: 0 16px; /* Добавляет отступы слева и справа */
+        height: 56px; /* Высота блока */
 
+        .title {
+            flex-grow: 1; /* Заставляет заголовок занимать свободное пространство */
+            text-align: center; /* Центрирует текст внутри */
+            font-weight: bold; /* Жирный текст */
+            font-size: 18px; /* Размер шрифта */
+            color: #333; /* Цвет текста */
+            position: absolute; /* Фиксирует заголовок в центре */
+            left: 50%;
+            transform: translateX(-50%);
         }
-        .save{
 
+        .icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
         }
-        .edit{
-            width: 100%;
-
+    }
+    .avatar {
+        display: flex; /* Используем Flexbox для выравнивания содержимого */
+        align-items: stretch; /* Растягиваем элементы по высоте контейнера */
+        justify-content: center; /* Центрируем содержимое по горизонтали */
+        height: 70px; /* Высота блока .avatar */
+        .icon {
+            flex-grow: 1; /* Заставляем иконку занимать всё доступное пространство */
+            display: flex; /* Чтобы содержимое внутри было центрировано */
+            align-items: center; /* Центрируем иконку по вертикали */
+            justify-content: center; /* Центрируем иконку по горизонтали */
+            svg {
+                height: 40px; /* Фиксированная высота иконки */
+                width: 40px; /* Фиксированная ширина иконки */
+            }
         }
     }
 
     .container {
-        flex: 1 auto;
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        align-items: flex-start;
+        .userInfo {
+            display: flex;
+            justify-content: space-between;
+            .item {
+                flex: 1;
+                text-align: center;
+            }
+            .weight {
+            }
+            .height {
+                border-left: 1px solid #ccc;
+                border-right: 1px solid #ccc;
+            }
+            .age {
+            }
+        }
+        .currentGoals {
+            .title{
+
+            }
+            .currentGoalsList{
+                height: 200px;
+                border: 1px solid #ccc;
+            }
+        }
+        .goals{
+            .title{
+
+            }
+            .goalsList{
+                height: 200px;
+                border: 1px solid #ccc;
+            }
+        }
     }
     .logout {
         justify-self: flex-end;
