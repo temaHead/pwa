@@ -1,6 +1,9 @@
 .signInPage {
     display: flex;
     flex-direction: column;
+    height: 100%;
+    padding: 30px;
+    box-sizing: border-box;
     .header {
         display: flex;
         .iconWrapper {
@@ -22,6 +25,7 @@
     .form {
         display: flex;
         flex-direction: column;
+        gap: 10px;
         .input {
             border: none;
             background-color: rgb(240, 240, 240);

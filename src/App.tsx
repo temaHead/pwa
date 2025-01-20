@@ -1,5 +1,5 @@
 import './App.css';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import SignIn from './components/Auth/SignIn/SignIn';
 import SignUp from './components/Auth/SignUp/SignUp';
 import './firebase';
@@ -22,66 +22,73 @@ import { auth, db } from './firebase';
 function App() {
     const user = useSelector((state: RootState) => state.user);
 
-    const navigate = useNavigate();
     const dispatch = useDispatch();
 
     const id = window.localStorage.getItem('id');
     const [isAuth, setIsAuth] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true); // Добавляем состояние загрузки
 
     useEffect(() => {
-        // Проверяем, есть ли id в localStorage
-        if (!id) {
-            navigate('/start');
-        } else {
-            // Устанавливаем слушатель на состояние авторизации
-            const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-                if (firebaseUser && firebaseUser.uid === id) {
-                    try {
-                        // Загружаем данные пользователя из Firestore
-                        const userDocRef = doc(db, 'users', firebaseUser.uid);
-                        const userDoc = await getDoc(userDocRef);
-                        if (userDoc.exists()) {
-                            // Обновляем состояние с данными пользователя
-                            dispatch(
-                                setUser({
-                                    email: firebaseUser.email,
-                                    id: firebaseUser.uid,
-                                    token: firebaseUser.refreshToken,
-                                    name: userDoc.data()?.name || null,
-                                    birthDate: userDoc.data()?.birthDate || null,
-                                    currentWeight: userDoc.data()?.currentWeight || null,
-                                    initialWeight: userDoc.data()?.initialWeight || null,
-                                    desiredWeight: userDoc.data()?.desiredWeight || null,
-                                    gender: userDoc.data()?.gender || null,
-                                    height: userDoc.data()?.height || null,
-                                })
-                            );
-                            setIsAuth(true);
-                        } else {
-                            console.log('Документ пользователя не найден в базе данных');
-                        }
-                    } catch (error) {
-                        console.error('Ошибка при загрузке данных пользователя:', error);
+        setLoading(true); // Запускаем загрузку
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+            if (firebaseUser && firebaseUser.uid === id) {
+                try {
+                    const userDocRef = doc(db, 'users', firebaseUser.uid);
+                    const userDoc = await getDoc(userDocRef);
+
+                    if (userDoc.exists()) {
+                        dispatch(
+                            setUser({
+                                email: firebaseUser.email,
+                                id: firebaseUser.uid,
+                                token: firebaseUser.refreshToken,
+                                name: userDoc.data()?.name || null,
+                                birthDate: userDoc.data()?.birthDate || null,
+                                currentWeight: userDoc.data()?.currentWeight || null,
+                                initialWeight: userDoc.data()?.initialWeight || null,
+                                desiredWeight: userDoc.data()?.desiredWeight || null,
+                                gender: userDoc.data()?.gender || null,
+                                height: userDoc.data()?.height || null,
+                            })
+                        );
+                        setIsAuth(true);
                     }
-                } else {
-                    console.log('Пользователь не авторизован или id не совпадает');
-                    window.localStorage.removeItem('id');
+                } catch (error) {
+                    console.error('Ошибка при загрузке данных пользователя:', error);
                 }
-            });
+            } else {
+                setIsAuth(false);
+                window.localStorage.removeItem('id');
+            }
+            setLoading(false); // Завершаем загрузку
+        });
 
-            // Очистка при размонтировании компонента
-            return () => unsubscribe();
-        }
-    }, [dispatch, id, navigate]);
+        return () => unsubscribe();
+    }, [dispatch, id]);
 
-    if (!isAuth) {
-        return null;
+    if (loading) {
+        return <div>Загрузка...</div>; // Показываем индикатор загрузки
     }
+
     return (
         <Routes>
             <Route
                 path='/'
-                element={user && user.currentWeight ? <Home /> : <Navigate to='/addUser' />}
+                element={
+                    !loading ? (
+                        isAuth ? (
+                            user?.currentWeight ? (
+                                <Home />
+                            ) : (
+                                <Navigate to='/addUser' />
+                            )
+                        ) : (
+                            <Navigate to='/start' />
+                        )
+                    ) : (
+                        <div>Загрузка...</div>
+                    )
+                }
             >
                 <Route
                     path=''
@@ -111,15 +118,15 @@ function App() {
             </Route>
             <Route
                 path='/start'
-                element={<Start />}
+                element={ isAuth ? <Navigate to='/' /> : <Start />}
             />
             <Route
                 path='/signIn'
-                element={<SignIn />}
+                element={ isAuth ? <Navigate to='/' /> : <SignIn />}
             />
             <Route
                 path='/signUp'
-                element={<SignUp />}
+                element={ isAuth ? <Navigate to='/' /> : <SignUp />}
             />
             <Route
                 path='/addUser'

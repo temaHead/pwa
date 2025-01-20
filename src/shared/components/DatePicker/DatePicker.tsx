@@ -11,12 +11,12 @@ function DatePicker({
 }: {
     name: string;
     value: string | null;
-    onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-    label: string;
+    onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+    label?: string;
     placeholder?: string
 }) {
     // Преобразование значения в формат Day.js для работы с MUI DatePicker
-    const dateValue = value ? dayjs(value) : null;
+    const dateValue = value ? dayjs(value) : dayjs();
 
     return (
         <div className={style.datePicker}>
