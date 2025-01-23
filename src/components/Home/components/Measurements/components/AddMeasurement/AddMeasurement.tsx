@@ -72,6 +72,7 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
         tricepsCaliper: 'Трицепс',
         waistCaliper: 'Талия',
     };
+    
 
     // Обработчик изменения инпутов
     const handleSubFormInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,8 +215,8 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
     const bind = useDrag(
         ({ last, movement: [, my], cancel }) => {
             if (my > 200) cancel?.();
-            api.start({ y: last ? (my > 50 ? 100 : 0) : my });
-            if (last && my > 50) onClose();
+            api.start({ y: last ? (my > 15 ? 100 : 0) : my });
+            if (last && my >15 ) onClose();
         },
         { from: () => [0, y.get()] }
     );
@@ -230,11 +231,10 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
                 className={style.modal}
                 style={{
                     transform: y.to((v) => `translateY(${v}%)`),
-                    touchAction: 'none',
                 }}
-                {...bind()}
+                // {...bind()}
             >
-                <div className={style.header}>
+                <div className={style.header}  {...bind()}>
                     <h2>Добавить замер</h2>
                     <Button
                         onClick={close}
