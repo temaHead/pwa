@@ -1,11 +1,10 @@
-export type Gender = 'male' | 'female';
 
 interface Measurements {
-    chest?: number; // Грудь
-    abdomen?: number; // Живот
-    thigh?: number; // Бедро
-    tricep?: number; // Трицепс
-    waist?: number; // Талия
+    chest?: number | null; // Грудь
+    abdomen?: number | null; // Живот
+    thigh?: number | null; // Бедро
+    tricep?: number | null; // Трицепс
+    waist?: number | null; // Талия
 }
 
 /**
@@ -13,7 +12,7 @@ interface Measurements {
  * @param gender Пол пользователя
  * @param measurements Объект с измерениями кожных складок
  */
-function validateMeasurements(gender: Gender, measurements: Measurements): void {
+function validateMeasurements(gender: string, measurements: Measurements): void {
     const requiredFields = gender === 'male' ? ['chest', 'abdomen', 'thigh'] : ['tricep', 'thigh', 'waist'];
 
     for (const field of requiredFields) {
@@ -54,7 +53,7 @@ function calculateFemaleBodyDensity(sumOfSkinFolds: number, age: number): number
  * @param age Возраст пользователя
  * @returns Процент жира в организме
  */
-export function calculateBodyFat(gender: Gender, measurements: Measurements, birthDate: string): number {
+export function calculateBodyFat(gender: string, measurements: Measurements, birthDate: string): number {
     validateMeasurements(gender, measurements);
     const age = calculateAge(birthDate);
 

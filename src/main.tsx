@@ -12,8 +12,8 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import 'dayjs/locale/ru'; // Импорт локализации
 import dayjs from 'dayjs';
+import 'dayjs/locale/ru'; // Импорт локализации
 
 dayjs.locale('ru'); // Установка русской локали
 
@@ -26,6 +26,12 @@ createRoot(document.getElementById('root')!).render(
                 <LocalizationProvider
                     dateAdapter={AdapterDayjs}
                     adapterLocale='ru'
+                    localeText={{
+                        cancelButtonLabel: 'Отмена',
+                        okButtonLabel: 'ОК',
+                        clearButtonLabel: 'Очистить',
+                        todayButtonLabel: 'Сегодня',
+                    }}
                 >
                     <App />
                 </LocalizationProvider>

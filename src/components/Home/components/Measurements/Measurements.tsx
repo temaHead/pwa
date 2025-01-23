@@ -9,8 +9,11 @@ import {
     getAllFatMeasuringAsync,
     getAllWeightMeasuringAsync,
 } from '../../../../store/slices/measurementSlice';
-import { formatTimestamp } from '../../../Auth/SignUp/components/AddUser/utils';
 import AddMeasurement from './components/AddMeasurement/AddMeasurement';
+import FatMeasurement from './components/FatMeasurement/FatMeasurement';
+import WeightMeasurement from './components/WeightMeasurement/WeightMeasurement';
+import BodyMeasurement from './components/BodyMeasurement/BodyMeasurement';
+import Filter from './components/Filter/Filter';
 
 function Measurements() {
     const navigate = useNavigate();
@@ -18,9 +21,13 @@ function Measurements() {
 
     const fatMeasuring = useSelector((state: RootState) => state.measurements.fatMeasuring);
     const weightMeasuring = useSelector((state: RootState) => state.measurements.weightMeasuring);
+    const bodyMeasuring = useSelector((state: RootState) => state.measurements.bodyMeasuring);
 
-    const {id,gender } = useSelector((state: RootState) => state.user); // Получение ID пользователя из хранилища
+    const filter = useSelector((state: RootState) => state.filter);
+
+    const { id, gender, birthDate } = useSelector((state: RootState) => state.user); // Получение ID пользователя из хранилища
     const [isModalOpen, setModalOpen] = useState(false);
+
     useEffect(() => {
         if (id) {
             dispatch(getAllFatMeasuringAsync(id));
@@ -35,8 +42,6 @@ function Measurements() {
     const handleAddMeasurement = () => {
         setModalOpen(true);
     };
-    console.log(fatMeasuring);
-    console.log(weightMeasuring);
 
     return (
         <div className={style.measurements}>
@@ -55,31 +60,53 @@ function Measurements() {
                     <AddIcon />
                 </div>
             </div>
-            <div className={style.filter}>Фильтр</div>
-            <div className={style.measurementsList}>
-                <h3>Жировые измерения</h3>
-                <ul>
-                    {fatMeasuring.map((item, index) => (
-                        <>
-                            <li key={index}>
-                                {item.bodyFat}
-                                {/* Здесь вы можете отформатировать данные под ваши нужды */}
-                            </li>
-                            <div>{formatTimestamp(item.timestamp.seconds, item.timestamp.nanoseconds)}</div>
-                        </>
-                    ))}
-                </ul>
-                <h3>Измерения веса</h3>
-                <ul>
-                    {weightMeasuring.map((item, index) => (
-                        <>
-                            <li key={index}>{item.weight}</li>
-                            <div>{formatTimestamp(item.timestamp.seconds, item.timestamp.nanoseconds)}</div>
-                        </>
-                    ))}
-                </ul>
+            <div className={style.filter}>
+                <Filter />
             </div>
-            <AddMeasurement isOpen={isModalOpen} onClose={() => setModalOpen(false)} gender={gender} />
+            <div className={style.measurementsList}>
+                {filter.showFat && fatMeasuring.length > 0 && (
+                    <>
+                        <h3>Жировые измерения</h3>
+                        <ul>
+                            {fatMeasuring.map((item, index) => (
+                                <div key={index}>
+                                    <FatMeasurement item={item} />
+                                </div>
+                            ))}
+                        </ul>
+                    </>
+                )}
+                {filter.showWeight && weightMeasuring.length > 0 && (
+                    <>
+                        <h3>Измерения веса</h3>
+                        <ul>
+                            {weightMeasuring.map((item, index) => (
+                                <div key={index}>
+                                    <WeightMeasurement item={item} />
+                                </div>
+                            ))}
+                        </ul>
+                    </>
+                )}
+                {filter.showBody && bodyMeasuring.length > 0 && (
+                    <>
+                        <h3>Измерения тела</h3>
+                        <ul>
+                            {bodyMeasuring.map((item, index) => (
+                                <div key={index}>
+                                    <BodyMeasurement item={item} />
+                                </div>
+                            ))}
+                        </ul>
+                    </>
+                )}
+            </div>
+            <AddMeasurement
+                isOpen={isModalOpen}
+                onClose={() => setModalOpen(false)}
+                gender={gender}
+                birthDate={birthDate || ''}
+            />
         </div>
     );
 }

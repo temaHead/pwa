@@ -19,24 +19,34 @@ export type FatMeasuring = {
     waist: number | null;
 };
 
+export type BodyMeasuring = {
+    chest: number | null;
+    hips: number | null;
+    thigh: number | null;
+    arms: number | null;
+    waist: number | null;
+};
+
 export type WeightMeasuringData = {
+    id: string;
     weight: number | null;
-    timestamp: {
-        seconds: number;
-        nanoseconds: number;
-    };
+    timestamp: string;
 };
 
 export type FatMeasuringData = {
+    id: string;
     bodyFat: number | null;
     measurements: FatMeasuring;
-    timestamp: {
-        seconds: number;
-        nanoseconds: number;
-    };
+    timestamp: string;
+};
+export type BodyMeasuringData = {
+    id: string;
+    measurements: BodyMeasuring;
+    timestamp: string;
 };
 
 export type Measurements = {
     fatMeasuring: FatMeasuringData[]; // Массив объектов с данными о замерах жира
     weightMeasuring: WeightMeasuringData[]; // Массив объектов с данными о замерах веса
+    bodyMeasuring: BodyMeasuringData[];
 };

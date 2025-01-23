@@ -34,6 +34,7 @@ export const addUserProfileAsync = createAsyncThunk(
         const state = getState() as RootState;
         const userId = state.user.id;
         if (!userId) throw new Error('User ID not found');
+        
         const updatedUserData = await addUserProfile(profile, userId , fatMeasuring);
         return updatedUserData;
     }

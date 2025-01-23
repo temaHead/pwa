@@ -4,7 +4,7 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import Selector from '../../../../../shared/components/Selector/Selector';
 import style from './AddUser.module.scss';
 import { Button } from '@mui/material';
-import { calculateBodyFat, Gender } from './utils';
+import { calculateBodyFat } from './utils';
 import { addUserProfileAsync } from '../../../../../store/slices/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../../store';
@@ -211,7 +211,7 @@ const AddUser: React.FC = () => {
     };
 
     const handleCalculateBodyFat = () => {
-        const gender = formData.gender as Gender;
+        const gender = formData.gender;
         const birthDate = formData.birthDate;
         try {
             // Проверка и расчет процента жира
