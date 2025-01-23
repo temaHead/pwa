@@ -53,13 +53,13 @@ const filterSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(fetchFilterAsync.fulfilled, (state, action) => {
+            .addCase(fetchFilterAsync.fulfilled, (_state, action) => {
                 return action.payload;
             })
-            .addCase(saveFilterAsync.fulfilled, (state, action) => {
+            .addCase(saveFilterAsync.fulfilled, (_state, action) => {
                 return action.payload;
             })
-            .addCase(resetFilterAsync.fulfilled, (state, action) => {
+            .addCase(resetFilterAsync.fulfilled, (_state, action) => {
                 return action.payload;
             });
     },
