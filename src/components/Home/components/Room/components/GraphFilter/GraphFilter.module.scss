@@ -1,0 +1,58 @@
+.filter {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.filterHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.filterIcon {
+    font-size: 20px;
+}
+
+.filterContent {
+    margin-top: 10px;
+}
+
+.widgetItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.dragHandle {
+    cursor: grab;
+    user-select: none;
+    margin-left: auto;
+}
+
+.filterButtons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.applyButton {
+    background-color: #4caf50; /* Зеленый цвет */
+    color: white;
+}
+
+.resetButton {
+    background-color: #f44336; /* Красный цвет */
+    color: white;
+}

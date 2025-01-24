@@ -1,9 +1,19 @@
-.room{
+.room {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
     gap: 20px;
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding: 20px;
+}
+
+.graphsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.graphWrapper {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #fff;
 }

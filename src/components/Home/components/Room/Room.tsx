@@ -1,17 +1,42 @@
-
-import Block1 from './components/Block1/Block1';
-import Block2 from './components/Block2/Block2';
-import Block3 from './components/Block3/Block3';
+import React from 'react';
+import { useSelector } from 'react-redux';
+import WeightChart from './components/WeightChart/WeightChart';
+import FatChart from './components/FatChart/FatChart';
+import BodyChart from './components/BodyChart/BodyChart';
+import GraphFilter from './components/GraphFilter/GraphFilter';
 import style from './Room.module.scss';
+import { RootState } from '../../../../store';
 
+const Room: React.FC = () => {
+    const widgets = useSelector((state: RootState) => state.widgets.widgets);
 
-function Room() {
+    const getGraphComponent = (id: string) => {
+        switch (id) {
+            case 'weight':
+                return <WeightChart />;
+            case 'fat':
+                return <FatChart />;
+            case 'body':
+                return <BodyChart />;
+            default:
+                return null;
+        }
+    };
 
-  return <div className={style.room}>
-    <Block1 />
-    <Block2 />
-    <Block3 />
-  </div>;
-}
+    return (
+        <div className={style.room}>
+            <GraphFilter />
+            <div className={style.graphsContainer}>
+                {widgets
+                    .filter((widget) => widget.visible) // Показываем только включенные графики
+                    .map((widget) => (
+                        <div key={widget.id} className={style.graphWrapper}>
+                            {getGraphComponent(widget.id)}
+                        </div>
+                    ))}
+            </div>
+        </div>
+    );
+};
 
 export default Room;

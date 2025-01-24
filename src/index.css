@@ -1,16 +1,13 @@
 html {
     box-sizing: border-box;
-    overflow: hidden;
-    touch-action: none; /* Отключает все жесты касания, включая масштабирование */
-    overscroll-behavior: none; /* Отключает overscroll (эффект "отскока") */
-    -webkit-text-size-adjust: 100%; /* Отключает автоматическое изменение размера текста */
+    overflow: auto; /* Позволяет контенту прокручиваться */
+    touch-action:none ; /* Разрешает базовые жесты, необходимые для dnd */
+    overscroll-behavior: contain; /* Ограничивает overscroll, но не полностью отключает */
+    -webkit-text-size-adjust: 100%;
     -moz-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    -webkit-user-select: none; /* Для Safari */
-    -moz-user-select: none; /* Для Firefox */
-    -ms-user-select: none; /* Для IE/Edge */
-    user-select: none; /* Стандартный синтаксис */
+    user-select: none; /* Разрешает выбор текста */
 }
 
 *,
@@ -40,10 +37,11 @@ body {
     margin: 0;
     display: flex;
     justify-content: center;
-    height: 100dvh;
-    width: 100dvw;
-    overflow: hidden;
-    touch-action: none;
+    align-items: center;
+    min-height: 100vh; /* Используйте min-height для адаптивности */
+    min-width: 100vw;
+    overflow: auto; /* Разрешает прокрутку */
+    touch-action: none; /* Поддержка базовых жестов */
 }
 
 h1 {
