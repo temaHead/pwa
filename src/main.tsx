@@ -17,13 +17,39 @@ import 'dayjs/locale/ru'; // Импорт локализации
 
 dayjs.locale('ru'); // Установка русской локали
 
+let lastTouchEnd = 0;
+
+document.addEventListener(
+    'touchend',
+    (event) => {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            // Если между двумя касаниями прошло меньше 300 мс
+            event.preventDefault(); // Предотвращаем масштабирование
+        }
+        lastTouchEnd = now;
+    },
+    { passive: false }
+);
+
+document.addEventListener('contextmenu', (event) => {
+    event.preventDefault();
+});
+document.addEventListener(
+    'touchmove',
+    (event) => {
+        if (event.touches.length > 1) {
+            // Если касаний больше одного (два пальца)
+            event.preventDefault(); // Предотвращаем масштабирование
+        }
+    },
+    { passive: false }
+);
 // Регистрация Service Worker с обработкой обновлений
 const updateSW = registerSW({
     onNeedRefresh() {
         // Показываем уведомление пользователю
-        const shouldUpdate = window.confirm(
-            'Доступна новая версия приложения. Хотите обновить?'
-        );
+        const shouldUpdate = window.confirm('Доступна новая версия приложения. Хотите обновить?');
         if (shouldUpdate) {
             updateSW(); // Обновляем Service Worker
         }

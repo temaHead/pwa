@@ -9,13 +9,13 @@ const manifest: Partial<ManifestOptions> = {
         { purpose: 'maskable', sizes: '512x512', src: 'icon512_maskable.png', type: 'image/png' },
         { purpose: 'any', sizes: '512x512', src: 'icon512_rounded.png', type: 'image/png' },
     ],
-    orientation: 'any',
     display: 'standalone',
     lang: 'ru-RU',
     name: 'Sport App',
     short_name: 'Sport',
     start_url: '/', // Стартовая страница
     scope: '/', // Область действия PWA
+    orientation: 'portrait',
 };
 export default defineConfig({
     plugins: [

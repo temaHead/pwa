@@ -250,7 +250,8 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
                               <Input 
                                 name='date'
                                 value={formData.date}
-                                onChange={handleSubFormInputChange} 
+                                onChange={handleSubFormInputChange}
+                                type='date'
                             />
                         </div>
                         <div className={style.fieldGroup}>
@@ -297,6 +298,7 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
                             </div>
                         ))}
                            <h3>Процент жира</h3>
+                           <div>Подставится автоматически после заполнения замеров калипером</div>
                         <div className={style.fieldGroup}>
                             <Input
                                 name='bodyFat'

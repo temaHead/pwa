@@ -1,10 +1,21 @@
 html {
     box-sizing: border-box;
-    touch-action: none;
     overflow: hidden;
+    touch-action: none; /* Отключает все жесты касания, включая масштабирование */
+    overscroll-behavior: none; /* Отключает overscroll (эффект "отскока") */
+    -webkit-text-size-adjust: 100%; /* Отключает автоматическое изменение размера текста */
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-user-select: none; /* Для Safari */
+    -moz-user-select: none; /* Для Firefox */
+    -ms-user-select: none; /* Для IE/Edge */
+    user-select: none; /* Стандартный синтаксис */
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: inherit;
 }
 :root {
