@@ -17,8 +17,21 @@ import 'dayjs/locale/ru'; // Импорт локализации
 
 dayjs.locale('ru'); // Установка русской локали
 
-registerSW({ immediate: true });
-
+// Регистрация Service Worker с обработкой обновлений
+const updateSW = registerSW({
+    onNeedRefresh() {
+        // Показываем уведомление пользователю
+        const shouldUpdate = window.confirm(
+            'Доступна новая версия приложения. Хотите обновить?'
+        );
+        if (shouldUpdate) {
+            updateSW(); // Обновляем Service Worker
+        }
+    },
+    onOfflineReady() {
+        console.log('Приложение готово для работы в оффлайн-режиме.');
+    },
+});
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <BrowserRouter>

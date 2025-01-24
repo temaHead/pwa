@@ -1,4 +1,4 @@
-import { TextField } from '@mui/material';
+import { TextField, TextFieldVariants } from '@mui/material';
 import { ChangeEvent } from 'react';
 import style from './Input.module.scss';
 
@@ -11,6 +11,7 @@ interface InputProps {
     placeholder?: string
     postValue?: string | number | null;
     type?: string;
+    variant?: TextFieldVariants | undefined
 }
 
 const Input = ({
@@ -19,11 +20,12 @@ const Input = ({
     onChange,
     label,
     type = 'text',
-    placeholder
+    placeholder,
+    variant
 }: InputProps) => (
     <div className={style.input}>
             <TextField
-                variant="outlined"
+                variant={variant || 'outlined'}
                 fullWidth
                 type={type}
                 name={name}

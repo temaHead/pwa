@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
 import {
+    getAllBodyMeasuringAsync,
     getAllFatMeasuringAsync,
     getAllWeightMeasuringAsync,
 } from '../../../../store/slices/measurementSlice';
@@ -32,6 +33,7 @@ function Measurements() {
         if (id) {
             dispatch(getAllFatMeasuringAsync(id));
             dispatch(getAllWeightMeasuringAsync(id));
+            dispatch(getAllBodyMeasuringAsync(id));
         }
     }, [dispatch, id]);
 
@@ -66,38 +68,32 @@ function Measurements() {
             <div className={style.measurementsList}>
                 {filter.showFat && fatMeasuring.length > 0 && (
                     <>
-                        <h3>Жировые измерения</h3>
-                        <ul>
-                            {fatMeasuring.map((item, index) => (
-                                <div key={index}>
+                        <h3>Измерения % жира в теле</h3>
+                            {fatMeasuring.map((item) => (
+                                <div key={item.id}>
                                     <FatMeasurement item={item} />
                                 </div>
                             ))}
-                        </ul>
                     </>
                 )}
                 {filter.showWeight && weightMeasuring.length > 0 && (
                     <>
                         <h3>Измерения веса</h3>
-                        <ul>
-                            {weightMeasuring.map((item, index) => (
-                                <div key={index}>
+                            {weightMeasuring.map((item) => (
+                                <div key={item.id}>
                                     <WeightMeasurement item={item} />
                                 </div>
                             ))}
-                        </ul>
                     </>
                 )}
                 {filter.showBody && bodyMeasuring.length > 0 && (
                     <>
                         <h3>Измерения тела</h3>
-                        <ul>
-                            {bodyMeasuring.map((item, index) => (
-                                <div key={index}>
+                            {bodyMeasuring.map((item) => (
+                                <div key={item.id}>
                                     <BodyMeasurement item={item} />
                                 </div>
                             ))}
-                        </ul>
                     </>
                 )}
             </div>

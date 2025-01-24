@@ -74,6 +74,10 @@ export default defineConfig({
                 ],
             },
             manifest: manifest,
+            injectManifest: {
+                swSrc: 'src/sw.ts', // Путь к вашему кастомному Service Worker
+                swDest: 'dist/sw.js', // Куда сохранить сгенерированный Service Worker
+            },
         }),
     ],
     build: {

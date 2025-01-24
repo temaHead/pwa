@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDocs, query, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { BodyMeasuring, BodyMeasuringData, FatMeasuring, FatMeasuringData, WeightMeasuringData } from "../types";
 import { db } from "../firebase";
 import dayjs from "dayjs";
@@ -12,7 +12,7 @@ export async function addFatMeasuring(
 ): Promise<FatMeasuringData> {
     try {
         const fatMeasuringRef = collection(db, 'fatMeasuring');
-        const formattedTimestamp = timestamp ?? dayjs().format('DD.MM.YYYY HH:mm');
+        const formattedTimestamp = timestamp ?? dayjs().format('YYYY-MM-DD');
         const docRef =await addDoc(fatMeasuringRef, {
             userId,
             bodyFat,
@@ -32,17 +32,30 @@ export async function addFatMeasuring(
     }
 }
 
+// Функция для обновления замеров жира в коллекции FatMeasuring
 export async function updateFatMeasuring(
     id: string,
     measurements: FatMeasuring,
-    bodyFat: number | null
+    bodyFat: number | null,
+    timestamp?: string
 ): Promise<void> {
     try {
         const docRef = doc(db, 'fatMeasuring', id);
-        await updateDoc(docRef, { measurements, bodyFat });
+        await updateDoc(docRef, { measurements, bodyFat, timestamp });
         console.log('Замеры жира успешно обновлены');
     } catch (error) {
         console.error('Ошибка обновления замеров жира:', error);
+        throw error;
+    }
+}
+
+export async function deleteFatMeasuring(id: string): Promise<void> {
+    try {
+        const docRef = doc(db, 'fatMeasuring', id);
+        await deleteDoc(docRef);
+        console.log('Замер успешно удален');
+    } catch (error) {
+        console.error('Ошибка удаления замера:', error);
         throw error;
     }
 }
@@ -56,7 +69,7 @@ export async function addWeightMeasuring(
 ): Promise<WeightMeasuringData> {
     try {
         const weightMeasuringRef = collection(db, 'weightMeasuring');
-        const formattedTimestamp = timestamp ?? dayjs().format('DD.MM.YYYY HH:mm');
+        const formattedTimestamp = timestamp ?? dayjs().format('YYYY-MM-DD');
 
         const docRef = await addDoc(weightMeasuringRef, {
             userId,
@@ -78,14 +91,26 @@ export async function addWeightMeasuring(
 // Функция для обновления замеров веса в коллекции WeightMeasuring
 export async function updateWeightMeasuring(
     id: string,
-    weight: number | null
+    weight: number | null,
+    timestamp?: string
 ): Promise<void> {
     try {
         const docRef = doc(db, 'weightMeasuring', id);
-        await updateDoc(docRef, { weight });
+        await updateDoc(docRef, { weight, timestamp });
         console.log('Замеры веса успешно обновлены');
     } catch (error) {
         console.error('Ошибка обновления замеров веса:', error);
+        throw error;
+    }
+}
+// Функция для удаления замера веса
+export async function deleteWeightMeasuring(id: string): Promise<void> {
+    try {
+        const docRef = doc(db, 'weightMeasuring', id);
+        await deleteDoc(docRef);
+        console.log('Замер веса успешно удален');
+    } catch (error) {
+        console.error('Ошибка удаления замера веса:', error);
         throw error;
     }
 }
@@ -98,7 +123,7 @@ export async function addBodyMeasuring(
 ): Promise<BodyMeasuringData> {
     try {
         const bodyMeasuringRef = collection(db, 'bodyMeasuring');
-        const formattedTimestamp = timestamp ?? dayjs().format('DD.MM.YYYY HH:mm');
+        const formattedTimestamp = timestamp ?? dayjs().format('YYYY-MM-DD');
          const docRef =await addDoc(bodyMeasuringRef, {
             userId,
             bodyMeasuring,
@@ -107,7 +132,7 @@ export async function addBodyMeasuring(
         console.log('Измерение лентой успешно добавлено');
         return {
             id: docRef.id,
-            measurements: bodyMeasuring,
+            bodyMeasuring: bodyMeasuring,
             timestamp: formattedTimestamp,
         };
     } catch (error) {
@@ -115,14 +140,15 @@ export async function addBodyMeasuring(
         throw error;
     }
 }
-
+// Функция для обновления измерения лентой
  export async function updateBodyMeasuring(
     id: string,
-    measurements: BodyMeasuring
+    measurements: BodyMeasuring,
+    timestamp?: string
  ): Promise<void> {
     try {
         const docRef = doc(db, 'bodyMeasuring', id);
-        await updateDoc(docRef, { measurements });
+        await updateDoc(docRef, { measurements, timestamp });
         console.log('Измерение лентой успешно обновлено');
     }catch (error) {
         console.error('Ошибка обновления измерения лентой:', error);
@@ -130,12 +156,23 @@ export async function addBodyMeasuring(
     
     }
 } 
+// Функция для удаления измерения лентой
+export async function deleteBodyMeasuring(id: string): Promise<void> {
+    try {
+        const docRef = doc(db, 'bodyMeasuring', id);
+        await deleteDoc(docRef);
+        console.log('Замер тела успешно удален');
+    } catch (error) {
+        console.error('Ошибка удаления замера тела:', error);
+        throw error;
+    }
+}
 
 // Функция для добавления цели в коллекцию Goals
 export async function addGoal(goal: unknown, userId: string) {
     try {
         const goalRef = collection(db, 'goals');
-        const formattedTimestamp = dayjs().format('DD.MM.YYYY HH:mm');
+        const formattedTimestamp = dayjs().format('YYYY-MM-DD');
 
         await addDoc(goalRef, {
             userId,
@@ -154,7 +191,10 @@ export async function getAllFatMeasuring(userId: string): Promise<FatMeasuringDa
     try {
         const q = query(collection(db, 'fatMeasuring'), where('userId', '==', userId));
         const querySnapshot = await getDocs(q);
-        const fatMeasuringData = querySnapshot.docs.map((doc) => doc.data() as FatMeasuringData);
+        const fatMeasuringData = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        })) as FatMeasuringData[];
         return fatMeasuringData;
     } catch (error) {
         console.error('Ошибка получения замеров жира:', error);
@@ -167,10 +207,28 @@ export async function getAllWeightMeasuring(userId: string): Promise<WeightMeasu
     try {
         const q = query(collection(db, 'weightMeasuring'), where('userId', '==', userId));
         const querySnapshot = await getDocs(q);
-        const weightMeasuringData = querySnapshot.docs.map((doc) => doc.data() as WeightMeasuringData);
+        const weightMeasuringData = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        })) as WeightMeasuringData[];
         return weightMeasuringData;
     } catch (error) {
         console.error('Ошибка получения замеров веса:', error);
+        throw error;
+    }
+}
+ // Функция для получения всех измерений лентой из коллекции BodyMeasuring
+ export async function getAllBodyMeasuring(userId: string): Promise<BodyMeasuringData[]> {
+    try {
+        const q = query(collection(db, 'bodyMeasuring'), where('userId', '==', userId));
+        const querySnapshot = await getDocs(q);
+        const bodyMeasuringData = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        })) as BodyMeasuringData[];
+        return bodyMeasuringData;
+    } catch (error) {
+        console.error('Ошибка получения измерений лентой:', error);
         throw error;
     }
 }

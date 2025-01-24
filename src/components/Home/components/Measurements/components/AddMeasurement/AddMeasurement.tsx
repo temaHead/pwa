@@ -5,7 +5,6 @@ import { useDrag } from '@use-gesture/react';
 import { Button } from '@mui/material';
 import Input from '../../../../../../shared/components/Input/Input';
 import dayjs from 'dayjs';
-import { MobileDateTimePicker } from '@mui/x-date-pickers';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../../../../store';
 import {
@@ -45,7 +44,7 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
     const [{ y }, api] = useSpring(() => ({ y: 100 }));
 
     const [formData, setFormData] = useState<FormData>({
-        date: dayjs().format('YYYY.MM.DD HH:mm'),
+        date: dayjs().format('YYYY-MM-DD'),
         weight: null,
         chest: null,
         hips: null,
@@ -85,7 +84,7 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
 
     const clearFormData = useCallback(() => {
         setFormData({
-            date: dayjs().format('YYYY.MM.DD HH:mm'),
+            date: dayjs().format('YYYY-MM-DD'),
             weight: null,
             chest: null,
             hips: null,
@@ -248,22 +247,10 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
                     <form>
                         <div className={style.fieldGroup}>
                             <div>Дата замера</div>
-                            <MobileDateTimePicker
-                                value={dayjs(formData.date)} // Преобразование строки в объект Day.js
-                                onChange={(newValue) => {
-                                    setFormData((prevState) => ({
-                                        ...prevState,
-                                        date: newValue ? newValue.format('DD.MM.YYYY HH:mm') : '', // Сохранение в ISO-формате
-                                    }));
-                                }}
-                                slotProps={{
-                                    textField: {
-                                        fullWidth: true,
-                                    },
-                                    
-                                }}
-                                openTo='day'
-                                format='DD.MM.YYYY HH:mm' // Формат отображения
+                              <Input 
+                                name='date'
+                                value={formData.date}
+                                onChange={handleSubFormInputChange} 
                             />
                         </div>
                         <div className={style.fieldGroup}>

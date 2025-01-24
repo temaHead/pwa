@@ -58,6 +58,7 @@ const AddUser: React.FC = () => {
             placeholder: 'Ваш текущий вес (кг)',
             type: 'number',
             pattern: /^\d+$/,
+            required: true,
         },
         {
             id: 'desiredWeight',
@@ -91,19 +92,19 @@ const AddUser: React.FC = () => {
             id: 'chest',
             label: 'Измерьте складку между подмышкой и соском.',
             placeholder: 'Введите толщину складки на груди (мм)',
-            imageUrl: '../../../../../../public/calipers-chest.jpg',
+            imageUrl: '/calipers-chest.jpg',
         },
         {
             id: 'abdomen',
             label: 'Измерьте складку вертикально на 3 сантиметра в сторону от пупка.',
             placeholder: 'Введите толщину складки на животе (мм)',
-            imageUrl: '../../../../../../public/calipers-abdomen.jpg',
+            imageUrl: '/calipers-abdomen.jpg',
         },
         {
             id: 'thigh',
             label: 'Измерьте складку между коленом и бедром.',
             placeholder: 'Введите толщину складки на бедре (мм)',
-            imageUrl: '../../../../../../public/calipers-thigh.jpg',
+            imageUrl: '/calipers-thigh.jpg',
         },
     ];
 
@@ -113,19 +114,19 @@ const AddUser: React.FC = () => {
             id: 'thigh',
             label: 'Измерьте складку между коленом и бедром.',
             placeholder: 'Введите толщину складки на бедре (мм)',
-            imageUrl: '../../../../../../public/calipers-thigh.jpg',
+            imageUrl: '/public/calipers-thigh.jpg',
         },
         {
             id: 'tricep',
             label: 'Измерьте складку между локтем и плечом.',
             placeholder: 'Введите толщину складки на трицепсе (мм)',
-            imageUrl: '../../../../../../public/calipers-tricep.jpg',
+            imageUrl: '/calipers-tricep.jpg',
         },
         {
             id: 'waist',
             label: 'Измерьте складку на 2 сантиметра выше подвздошной кости.',
             placeholder: 'Введите толщину складки на талии (мм)',
-            imageUrl: '../../../../../../public/calipers-waist.jpg',
+            imageUrl: '/calipers-waist.jpg',
         },
     ];
 
@@ -134,7 +135,7 @@ const AddUser: React.FC = () => {
     const [subFormData, setSubFormData] = useState<Record<string, number>>({});
     const [showSubForm, setShowSubForm] = useState(false);
     const [errors, setErrors] = useState<string>('');
-    
+
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
     const user = useSelector((state: RootState) => state.user);
@@ -190,11 +191,17 @@ const AddUser: React.FC = () => {
                     thigh: subFormData['thigh'] || null,
                     tricep: subFormData['tricep'] || null,
                     waist: subFormData['waist'] || null,
-                }
+                },
             };
-            dispatch(addUserProfileAsync(profileData));
+            dispatch(addUserProfileAsync(profileData))
+                .unwrap() // Обрабатываем результат
+                .then(() => {
+                    navigate('/'); // Редирект после успешного сохранения
+                })
+                .catch((error) => {
+                    console.error('Ошибка при сохранении данных:', error);
+                });
             console.log('Данные сохранены:', formData, subFormData);
-            navigate('/');
         }
     };
 

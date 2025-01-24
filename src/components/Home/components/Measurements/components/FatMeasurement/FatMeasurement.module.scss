@@ -1,0 +1,97 @@
+.container {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 10px;
+
+    .deleteArea {
+        position: absolute;
+        top: 0;
+        right: -80px; /* Начальное положение за пределами блока */
+        width: 80px;
+        height: 100%;
+        background-color: red;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: right 0.3s ease;
+        z-index: 0;
+
+        .deleteIcon {
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+    }
+
+    .deleteArea.visible {
+        right: 0; /* Показываем красную область */
+    }
+
+    .fatMeasurement {
+        position: relative;
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 10px;
+        transition: transform 0.3s ease;
+        z-index: 1;
+    }
+
+    .fatMeasurement.swiped {
+        transform: translateX(-80px); /* Сдвигаем основной блок влево */
+    }
+
+    .content {
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            .leftRow {
+                display: flex;
+                gap: 5px;
+                .title {
+                    font-weight: bold;
+                    width: 120px;
+                }
+                .value {
+                    width: 70px;
+                }
+            }
+            .rightRow {
+                display: flex;
+                gap: 10px;
+                .icon {
+                    height: 30px;
+                    width: 30px;
+                }
+            }
+        }
+        .toggleCollapse {
+            display: flex;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .measurements {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            max-height: 0; /* Начальное состояние: скрыто */
+            overflow: hidden; /* Скрываем содержимое */
+            transition: max-height 0.5s ease; /* Плавное изменение высоты */
+            .title {
+                width: 120px;
+            }
+            .measurement {
+                display: flex;
+                gap: 5px;
+            }
+        }
+        .measurements.open {
+            max-height: 500px; /* Максимальная высота (должна быть больше, чем высота содержимого) */
+        }
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+    }
+}

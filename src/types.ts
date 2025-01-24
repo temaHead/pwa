@@ -30,19 +30,19 @@ export type BodyMeasuring = {
 export type WeightMeasuringData = {
     id: string;
     weight: number | null;
-    timestamp: string;
+    timestamp: string | undefined;
 };
 
 export type FatMeasuringData = {
     id: string;
     bodyFat: number | null;
     measurements: FatMeasuring;
-    timestamp: string;
+    timestamp: string | undefined;
 };
 export type BodyMeasuringData = {
     id: string;
-    measurements: BodyMeasuring;
-    timestamp: string;
+    bodyMeasuring: BodyMeasuring;
+    timestamp: string | undefined;
 };
 
 export type Measurements = {
