@@ -6,6 +6,7 @@ import BodyChart from './components/BodyChart/BodyChart';
 import GraphFilter from './components/GraphFilter/GraphFilter';
 import style from './Room.module.scss';
 import { RootState } from '../../../../store';
+import PureWeightChart from './components/PureWeightChart/PureWeightChart';
 
 const Room: React.FC = () => {
     const widgets = useSelector((state: RootState) => state.widgets.widgets);
@@ -18,6 +19,8 @@ const Room: React.FC = () => {
                 return <FatChart />;
             case 'body':
                 return <BodyChart />;
+            case 'pureWeight':
+                return <PureWeightChart />;
             default:
                 return null;
         }
@@ -30,7 +33,10 @@ const Room: React.FC = () => {
                 {widgets
                     .filter((widget) => widget.visible) // Показываем только включенные графики
                     .map((widget) => (
-                        <div key={widget.id} className={style.graphWrapper}>
+                        <div
+                            key={widget.id}
+                            className={style.graphWrapper}
+                        >
                             {getGraphComponent(widget.id)}
                         </div>
                     ))}

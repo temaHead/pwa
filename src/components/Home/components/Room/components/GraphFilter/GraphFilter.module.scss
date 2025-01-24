@@ -24,7 +24,11 @@
 .filterContent {
     margin-top: 10px;
 }
-
+.widgetsList{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 .widgetItem {
     display: flex;
     align-items: center;
@@ -33,6 +37,10 @@
     border: 1px solid #ccc;
     border-radius: 8px;
     background-color: #fff;
+    .content{
+        display: flex;
+        flex-grow: 1;
+    }
 }
 
 .dragHandle {
@@ -43,7 +51,7 @@
 
 .filterButtons {
     display: flex;
-    gap: 10px;
+    justify-content: space-between;
     margin-top: 10px;
 }
 

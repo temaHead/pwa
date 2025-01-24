@@ -1,5 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import React, { useState, useEffect, CSSProperties } from 'react';
+import {
+    DragDropContext,
+    Droppable,
+    Draggable,
+    DropResult,
+    DraggableProvidedDraggableProps,
+} from '@hello-pangea/dnd';
 import { Button, Checkbox, Collapse } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList'; // Иконка фильтра
 import CheckIcon from '@mui/icons-material/Check'; // Иконка "Применить"
@@ -20,6 +26,21 @@ interface WidgetSettings {
     visible: boolean;
 }
 
+// Стили для перетаскиваемого элемента
+const getItemStyle = (
+    isDragging: boolean,
+    draggableStyle: DraggableProvidedDraggableProps['style'] | undefined // Разрешаем undefined
+): CSSProperties => ({
+    userSelect: 'none', // Допустимое значение для userSelect
+    padding: '8px',
+    margin: '0 0 8px 0',
+    background: isDragging ? '#2196F3' : '#fff', // Синий фон при перетаскивании
+    color: isDragging ? '#fff' : '#000', // Белый текст при перетаскивании
+    borderRadius: '4px',
+    boxShadow: isDragging ? '0 4px 8px rgba(0, 0, 0, 0.2)' : 'none', // Тень при перетаскивании
+    transition: 'background 0.2s, color 0.2s, box-shadow 0.2s', // Плавные переходы
+    ...(draggableStyle || {}), // Если draggableStyle undefined, используем пустой объект
+});
 const GraphFilter: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const userId = useSelector((state: RootState) => state.user.id);
@@ -30,6 +51,7 @@ const GraphFilter: React.FC = () => {
         { id: 'weight', label: 'График веса', visible: true },
         { id: 'fat', label: 'График жира', visible: true },
         { id: 'body', label: 'График замеров', visible: true },
+        { id: 'pureWeight', label: 'График чистой массы тела', visible: true },
     ]);
 
     // Загружаем настройки виджетов при монтировании компонента
@@ -48,9 +70,7 @@ const GraphFilter: React.FC = () => {
 
     const handleWidgetChange = (id: string) => {
         setWidgets((prev) =>
-            prev.map((widget) =>
-                widget.id === id ? { ...widget, visible: !widget.visible } : widget
-            )
+            prev.map((widget) => (widget.id === id ? { ...widget, visible: !widget.visible } : widget))
         );
     };
 
@@ -78,14 +98,17 @@ const GraphFilter: React.FC = () => {
 
     return (
         <div className={style.filter}>
-            <div className={style.filterHeader} onClick={() => setIsExpanded(!isExpanded)}>
+            <div
+                className={style.filterHeader}
+                onClick={() => setIsExpanded(!isExpanded)}
+            >
                 <FilterListIcon className={style.filterIcon} /> {/* Иконка фильтра */}
                 <span>{isExpanded ? 'Скрыть настройки' : 'Настроить графики'}</span>
             </div>
             <Collapse in={isExpanded}>
                 <div className={style.filterContent}>
                     <DragDropContext onDragEnd={onDragEnd}>
-                        <Droppable droppableId="widgets">
+                        <Droppable droppableId='widgets'>
                             {(provided) => (
                                 <div
                                     {...provided.droppableProps}
@@ -93,20 +116,31 @@ const GraphFilter: React.FC = () => {
                                     className={style.widgetsList}
                                 >
                                     {widgets.map((widget, index) => (
-                                        <Draggable key={widget.id} draggableId={widget.id} index={index}>
-                                            {(provided) => (
+                                        <Draggable
+                                            key={widget.id}
+                                            draggableId={widget.id}
+                                            index={index}
+                                        >
+                                            {(provided, snapshot) => (
                                                 <div
                                                     ref={provided.innerRef}
                                                     {...provided.draggableProps}
+                                                    {...provided.dragHandleProps}
+                                                    style={getItemStyle(
+                                                        snapshot.isDragging,
+                                                        provided.draggableProps.style
+                                                    )}
                                                     className={style.widgetItem}
                                                 >
                                                     <Checkbox
                                                         checked={widget.visible}
                                                         onChange={() => handleWidgetChange(widget.id)}
                                                     />
-                                                    <span>{widget.label}</span>
-                                                    <div {...provided.dragHandleProps} className={style.dragHandle}>
-                                                        <MoreVertIcon />
+                                                    <div className={style.content}>
+                                                        <div className={style.label}>{widget.label}</div>
+                                                        <div className={style.dragHandle}>
+                                                            <MoreVertIcon />
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )}
@@ -119,7 +153,7 @@ const GraphFilter: React.FC = () => {
                     </DragDropContext>
                     <div className={style.filterButtons}>
                         <Button
-                            variant="contained"
+                            variant='contained'
                             className={style.applyButton}
                             onClick={handleSaveWidgets}
                             startIcon={<CheckIcon />} // Иконка "Применить"
@@ -127,7 +161,7 @@ const GraphFilter: React.FC = () => {
                             Сохранить
                         </Button>
                         <Button
-                            variant="contained"
+                            variant='contained'
                             className={style.resetButton}
                             onClick={handleResetWidgets}
                             startIcon={<DeleteIcon />} // Иконка "Сбросить"

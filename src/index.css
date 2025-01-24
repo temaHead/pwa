@@ -1,6 +1,6 @@
 html {
     box-sizing: border-box;
-    overflow: auto; /* Позволяет контенту прокручиваться */
+    overflow: hidden; /* Позволяет контенту прокручиваться */
     touch-action:none ; /* Разрешает базовые жесты, необходимые для dnd */
     overscroll-behavior: contain; /* Ограничивает overscroll, но не полностью отключает */
     -webkit-text-size-adjust: 100%;
@@ -40,7 +40,7 @@ body {
     align-items: center;
     min-height: 100vh; /* Используйте min-height для адаптивности */
     min-width: 100vw;
-    overflow: auto; /* Разрешает прокрутку */
+    overflow: hidden; /* Разрешает прокрутку */
     touch-action: none; /* Поддержка базовых жестов */
 }
 

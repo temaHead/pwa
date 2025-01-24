@@ -13,16 +13,14 @@ interface FatChartProps {
 const FatChart: React.FC<FatChartProps> = () => {
     const fatMeasuring = useSelector((state: RootState) => state.measurements.fatMeasuring);
     const dispatch = useDispatch<AppDispatch>();
-    const { id } = useSelector((state: RootState) => state.user);
+    const { id, gender } = useSelector((state: RootState) => state.user);
 
-    const [visibleLines, setVisibleLines] = React.useState({
-        chest: true,
-        abdomen: true,
-        thigh: true,
-        tricep: true,
-        waist: true,
-        bodyFat: true,
-    });
+    // Определяем, какие линии отображать в зависимости от пола
+    const defaultVisibleLines = gender === 'male'
+        ? { chest: true, abdomen: true, thigh: true, bodyFat: true } // Для мужчин
+        : { thigh: true, tricep: true, waist: true, bodyFat: true }; // Для женщин
+
+    const [visibleLines, setVisibleLines] = React.useState(defaultVisibleLines);
 
     // Преобразуем данные для графика
     const chartData = fatMeasuring.map((item) => ({
@@ -54,16 +52,21 @@ const FatChart: React.FC<FatChartProps> = () => {
             <div style={{ marginBottom: '20px' }}>
                 {Object.keys(visibleLines).map((key) => (
                     <label
-                        key={key}
-                        style={{ marginRight: '10px' }}
-                    >
-                        <input
-                            type='checkbox'
-                            checked={visibleLines[key as keyof typeof visibleLines]}
-                            onChange={() => handleToggleLine(key as keyof typeof visibleLines)}
-                        />
-                        {key === 'bodyFat' ? '% жира' : key}
-                    </label>
+                    key={key}
+                    style={{ marginRight: '10px' }}
+                >
+                    <input
+                        type='checkbox'
+                        checked={visibleLines[key as keyof typeof visibleLines]}
+                        onChange={() => handleToggleLine(key as keyof typeof visibleLines)}
+                    />
+                    {key === 'chest' && 'Грудь'}
+                    {key === 'abdomen' && 'Живот'}
+                    {key === 'thigh' && 'Бедро'}
+                    {key === 'tricep' && 'Трицепс'}
+                    {key === 'waist' && 'Талия'}
+                    {key === 'bodyFat' && '% жира'}
+                </label>
                 ))}
             </div>
             <div className={style.chartContainer}>
