@@ -1,4 +1,3 @@
-import React from 'react';
 import style from './Goal.module.scss';
 
 const status = ['active', 'done'];

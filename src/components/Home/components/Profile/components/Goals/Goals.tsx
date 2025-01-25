@@ -1,4 +1,3 @@
-import React from 'react';
 import Goal from './components/Goal/Goal';
 import style from './Goals.module.scss';
 import AddIcon from '@mui/icons-material/Add';
