@@ -1,0 +1,39 @@
+.goal {
+    height: 100px;
+    width: 100px;
+
+    .circle {
+        height: 100px;
+        width: 100px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .statusLine {
+            height: 90px; // Немного меньше, чтобы бордер был виден
+            width: 90px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &.active {
+                border: 3px solid #38b42d; // Зеленый бордер для активного статуса
+            }
+
+            &.done {
+                border: 3px solid #2e1aa1; // Синий бордер для завершенного статуса
+            }
+
+            .content {
+                text-align: center;
+
+                .title {
+                    font-size: 14px;
+                    font-weight: bold;
+                }
+            }
+        }
+    }
+}

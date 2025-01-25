@@ -50,3 +50,26 @@ export type Measurements = {
     weightMeasuring: WeightMeasuringData[]; // Массив объектов с данными о замерах веса
     bodyMeasuring: BodyMeasuringData[];
 };
+
+export type Goal = {
+    userId: string;
+    startDate: string;
+    endDate: string;
+    daysToComplete: number;
+    type: 'weight' | 'body' | 'fat';
+    currentWeight?: number | null;
+    desiredWeight?: number | null;
+    currentBody?: BodyMeasuring | null;
+    desiredBody?: BodyMeasuring | null;
+    currentFat?: number | null;
+    desiredFat?: number | null;
+    currentCaliper?: FatMeasuring | null;
+    desiredCaliper?: FatMeasuring | null;
+};
+
+
+export type GoalData={
+    id: string;
+    goal: Goal
+    timestamp: string
+}

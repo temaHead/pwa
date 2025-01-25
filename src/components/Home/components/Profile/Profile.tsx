@@ -7,6 +7,7 @@ import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
 import { calculateAge } from '../../../Auth/SignUp/components/AddUser/utils';
+import Goals from './components/Goals/Goals';
 
 function Profile() {
     const navigate = useNavigate();
@@ -67,7 +68,9 @@ function Profile() {
                 </div>
                 <div className={style.goals}>
                     <div className={style.title}>Цели</div>
-                    <div className={style.goalsList}></div>
+                    <div className={style.goalsList}>
+                    <Goals />
+                    </div>
                 </div>
             </div>
             <div className={style.logout}>

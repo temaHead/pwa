@@ -1,0 +1,37 @@
+.goals{
+    display: flex;
+    gap : 10px;
+    overflow: auto;
+    .addGoal {
+        height: 100px;
+        width: 100px;
+    
+        .circle {
+            height: 100px;
+            width: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+    
+            .statusLine {
+                height: 90px; // Немного меньше, чтобы бордер был виден
+                width: 90px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 3px solid #818181; // Зеленый бордер для активного статуса
+    
+    
+                .content {
+                    text-align: center;
+    
+                    .icon {                    
+                      
+                    }
+                }
+            }
+        }
+    }
+}
