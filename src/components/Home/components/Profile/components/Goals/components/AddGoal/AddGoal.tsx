@@ -8,98 +8,62 @@ import { AppDispatch, RootState } from '../../../../../../../../store';
 import { addGoalAsync } from '../../../../../../../../store/slices/goalsSlice';
 import {
     addWeightMeasuringAsync,
-    addBodyMeasuringAsync,
     addFatMeasuringAsync,
 } from '../../../../../../../../store/slices/measurementSlice';
 import Input from '../../../../../../../../shared/components/Input/Input';
+import style from './AddGoal.module.scss';
+
+// Типы для состояния цели
+interface GoalState {
+    startDate: string;
+    endDate: string;
+    daysToComplete: number;
+    status: 'active' | 'done' | 'failed' | 'pending' | 'initial';
+    type: 'weight' | 'fat' | '';
+    currentWeight: number | null;
+    desiredWeight: number | null;
+    currentFat: number | null;
+    desiredFat: number | null;
+}
 
 function AddGoal() {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
 
-    const { id, currentWeight, gender } = useSelector((state: RootState) => state.user);
-    const latestWeight = useSelector((state: RootState) => state.measurements.weightMeasuring[0]);
-    const latestBody = useSelector((state: RootState) => state.measurements.bodyMeasuring[0]);
-    const latestFat = useSelector((state: RootState) => state.measurements.fatMeasuring[0]);
+    const { id, currentWeight, bodyFat } = useSelector((state: RootState) => state.user);
 
-    const [goal, setGoal] = useState({
+    const [goal, setGoal] = useState<GoalState>({
         startDate: '',
         endDate: '',
         daysToComplete: 0,
-        type: '' as 'weight' | 'body' | 'fat'  , // Указываем допустимые значения
-        currentWeight: currentWeight|| null,
+        status: 'initial',
+        type: '',
+        currentWeight: currentWeight || null,
         desiredWeight: null,
-        currentBody: latestBody?.bodyMeasuring || {
-            chest: null,
-            waist: null,
-            hips: null,
-            thigh: null,
-            arms: null,
-        },
-        desiredBody: {
-            chest: null,
-            waist: null,
-            hips: null,
-            thigh: null,
-            arms: null,
-        },
-        currentFat: latestFat?.bodyFat || null,
+        currentFat: bodyFat || null,
         desiredFat: null,
-        currentCaliper: latestFat?.measurements || {
-            chest: null,
-            abdomen: null,
-            thigh: null,
-            tricep: null,
-            waist: null,
-        },
-        desiredCaliper: {
-            chest: null,
-            abdomen: null,
-            thigh: null,
-            tricep: null,
-            waist: null,
-        },
     });
 
-    const filteredCaliperFields =
-    gender === 'male' ? ['chest', 'abdomen', 'thigh'] : ['thigh', 'tricep', 'waist'];
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
-const caliperLabels = {
-    chest: 'Грудь',
-    abdomen: 'Живот',
-    thigh: 'Бедро',
-    tricep: 'Трицепс',
-    waist: 'Талия',
-};
-
+    // Обработка изменений в инпутах
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-
-        // Обработка вложенных полей (например, currentBody.chest)
-        if (name.includes('.')) {
-            const [parent, child] = name.split('.');
-            setGoal((prev) => ({
-                ...prev,
-                [parent]: {
-                    ...(prev[parent as keyof typeof prev] as Record<string, unknown>), // Приведение типа
-                    [child]: value === '' ? null : parseFloat(value),
-                },
-            }));
-        } else {
-            setGoal((prev) => ({
-                ...prev,
-                [name]: value === '' ? null : value,
-            }));
-        }
+        setGoal((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+        // Очищаем ошибку при изменении поля
+        setErrors((prev) => ({ ...prev, [name]: '' }));
     };
 
+    // Обработка изменений дат
     const handleDateChange = (name: string, value: string) => {
         setGoal((prev) => ({
             ...prev,
             [name]: value,
         }));
 
-        // Если изменяется startDate или endDate, пересчитываем daysToComplete
         if (name === 'startDate' || name === 'endDate') {
             const startDate = name === 'startDate' ? new Date(value) : new Date(goal.startDate);
             const endDate = name === 'endDate' ? new Date(value) : new Date(goal.endDate);
@@ -113,8 +77,11 @@ const caliperLabels = {
                 }));
             }
         }
+        // Очищаем ошибку при изменении поля
+        setErrors((prev) => ({ ...prev, [name]: '' }));
     };
 
+    // Обработка изменений дней
     const handleDaysChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const days = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
         if (!isNaN(days)) {
@@ -128,54 +95,81 @@ const caliperLabels = {
                 endDate: endDate.toISOString().split('T')[0],
             }));
         }
+        // Очищаем ошибку при изменении поля
+        setErrors((prev) => ({ ...prev, daysToComplete: '' }));
     };
 
+    // Валидация формы
+    const validateForm = () => {
+        const newErrors: Record<string, string> = {};
+
+        if (!goal.startDate) newErrors.startDate = 'Дата начала обязательна';
+        if (!goal.endDate) newErrors.endDate = 'Дата окончания обязательна';
+        if (goal.daysToComplete <= 0) newErrors.daysToComplete = 'Укажите количество дней';
+        if (!goal.type) newErrors.type = 'Тип цели обязателен';
+
+        if (goal.type === 'weight') {
+            if (goal.currentWeight === null || goal.currentWeight === undefined) {
+                newErrors.currentWeight = 'Текущий вес обязателен';
+            }
+            if (goal.desiredWeight === null || goal.desiredWeight === undefined) {
+                newErrors.desiredWeight = 'Желаемый вес обязателен';
+            }
+        } else if (goal.type === 'fat') {
+            if (goal.currentFat === null || goal.currentFat === undefined) {
+                newErrors.currentFat = 'Текущий % жира обязателен';
+            }
+            if (goal.desiredFat === null || goal.desiredFat === undefined) {
+                newErrors.desiredFat = 'Желаемый % жира обязателен';
+            }
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0; // Возвращает true, если ошибок нет
+    };
+
+    // Сохранение цели
     const handleSaveGoal = async () => {
         if (!id) return;
 
+        // Проверяем форму на ошибки
+        if (!validateForm()) return;
+
         const newGoal = {
-            userId: id,
             startDate: goal.startDate,
             endDate: goal.endDate,
-            daysToComplete: goal.daysToComplete, // Добавляем daysToComplete
             type: goal.type,
             currentWeight: goal.currentWeight,
             desiredWeight: goal.desiredWeight,
-            currentBody: goal.currentBody,
-            desiredBody: goal.desiredBody,
+            initialWeight: goal.currentWeight,
             currentFat: goal.currentFat,
             desiredFat: goal.desiredFat,
-            currentCaliper: goal.currentCaliper,
-            desiredCaliper: goal.desiredCaliper,
+            initialFat: goal.currentFat,
+            status: goal.status,
         };
 
         // Сохраняем цель
         await dispatch(addGoalAsync({ userId: id, goal: newGoal }));
 
-        // Если тип цели связан с замерами, обновляем замеры
-        if (goal.type === 'weight' && goal.currentWeight && goal.currentWeight !== latestWeight?.weight) {
+        // Обновляем замеры, если тип цели связан с ними
+        if (goal.type === 'weight' && goal.currentWeight && goal.currentWeight !== currentWeight) {
             await dispatch(
                 addWeightMeasuringAsync({
                     weight: goal.currentWeight,
                     timestamp: goal.startDate,
                 })
             );
-        } else if (
-            goal.type === 'body' &&
-            goal.currentBody &&
-            goal.currentBody !== latestBody?.bodyMeasuring
-        ) {
-            await dispatch(
-                addBodyMeasuringAsync({
-                    measurements: goal.currentBody,
-                    timestamp: goal.startDate,
-                })
-            );
-        } else if (goal.type === 'fat' && goal.currentFat && goal.currentFat !== latestFat?.bodyFat) {
+        } else if (goal.type === 'fat' && goal.currentFat && goal.currentFat !== bodyFat) {
             await dispatch(
                 addFatMeasuringAsync({
                     bodyFat: goal.currentFat,
-                    measurements: goal.currentCaliper,
+                    measurements: {
+                        thigh: null,
+                        chest: null,
+                        abdomen: null,
+                        tricep: null,
+                        waist: null,
+                    },
                     timestamp: goal.startDate,
                 })
             );
@@ -184,6 +178,7 @@ const caliperLabels = {
         navigate('/profile');
     };
 
+    // Навигация назад
     const handleGoBack = () => {
         navigate('/profile');
     };
@@ -201,184 +196,102 @@ const caliperLabels = {
             </div>
 
             <div className='form'>
-                <Input
-                    label='Дата начала'
-                    type='date'
-                    name='startDate'
-                    value={goal.startDate}
-                    onChange={(e) => handleDateChange('startDate', e.target.value)}
-                />
-                <Input
-                    label='Дата окончания'
-                    type='date'
-                    name='endDate'
-                    value={goal.endDate}
-                    onChange={(e) => handleDateChange('endDate', e.target.value)}
-                />
-                <Input
-                    label='Дней на выполнение'
-                    name='daysToComplete'
-                    value={goal.daysToComplete === null ? '' : goal.daysToComplete.toString()}
-                    onChange={handleDaysChange}
-                    type='number'
-                />
+                <div className={style.inputs}>
+                    <Input
+                        label='Дата начала'
+                        type='date'
+                        name='startDate'
+                        value={goal.startDate}
+                        onChange={(e) => handleDateChange('startDate', e.target.value)}
+                        error={errors.startDate}
+                    />
+                    <Input
+                        label='Дата окончания'
+                        type='date'
+                        name='endDate'
+                        value={goal.endDate}
+                        onChange={(e) => handleDateChange('endDate', e.target.value)}
+                        error={errors.endDate}
+                    />
+                    {goal.startDate && goal.endDate && (
+                        <Input
+                            label='Дней на выполнение'
+                            name='daysToComplete'
+                            value={goal.daysToComplete === null ? '' : goal.daysToComplete.toString()}
+                            onChange={handleDaysChange}
+                            type='number'
+                            error={errors.daysToComplete}
+                        />
+                    )}
 
-                <Selector
-                    label='Тип цели'
-                    name='type'
-                    value={goal.type}
-                    onChange={handleInputChange}
-                    options={[
-                        { value: '', label: 'Выберите тип цели' },
-                        { value: 'weight', label: 'Похудеть/Набрать вес' },
-                        { value: 'body', label: 'Изменить свои объемы' },
-                        { value: 'fat', label: 'Изменить % жира в организме' },
-                    ]}
-                />
+                    <Selector
+                        label='Тип цели'
+                        name='type'
+                        value={goal.type}
+                        onChange={handleInputChange}
+                        options={[
+                            { value: '', label: 'Выберите тип цели' },
+                            { value: 'weight', label: 'Похудеть/Набрать вес' },
+                            { value: 'fat', label: 'Изменить % жира в организме' },
+                        ]}
+                    />
 
-                {goal.type === 'weight' && (
-                    <>
-                        <Input
-                            label='Текущий вес'
-                            name='currentWeight'
-                            value={goal.currentWeight || ''}
-                            onChange={handleInputChange}
-                            type='number'
-                            postValue='кг'
-                        />
-                        <Input
-                            label='Желаемый вес'
-                            name='desiredWeight'
-                            value={goal.desiredWeight || ''}
-                            onChange={handleInputChange}
-                            type='number'
-                            postValue='кг'
-                        />
-                    </>
-                )}
+                    <div className={style.content}>
+                        {goal.type === 'weight' && (
+                            <>
+                                <Input
+                                    label='Текущий вес'
+                                    name='currentWeight'
+                                    value={goal.currentWeight || ''}
+                                    onChange={handleInputChange}
+                                    type='number'
+                                    postValue='кг'
+                                    error={errors.currentWeight}
+                                />
+                                <Input
+                                    label='Желаемый вес'
+                                    name='desiredWeight'
+                                    value={goal.desiredWeight || ''}
+                                    onChange={handleInputChange}
+                                    type='number'
+                                    postValue='кг'
+                                    error={errors.desiredWeight}
+                                />
+                            </>
+                        )}
 
-                {goal.type === 'body' && (
-                    <>
-                        <Input
-                            label='Текущий объем груди'
-                            name='currentBody.chest'
-                            value={goal.currentBody?.chest || ''}
-                            onChange={handleInputChange}
-                            type='number'
-                            postValue='см'
-                        />
-                        <Input
-                            label='Желаемый объем груди'
-                            name='desiredBody.chest'
-                            value={goal.desiredBody?.chest || ''}
-                            onChange={handleInputChange}
-                            type='number'
-                            postValue='см'
-                        />
-                        <Input
-                            label='Текущий объем талии'
-                            name='currentBody.waist'
-                            value={goal.currentBody?.waist || ''}
-                            onChange={handleInputChange}
-                            type='number'
-                            postValue='см'
-                        />
-                        <Input
-                            label='Желаемый объем талии'
-                            name='desiredBody.waist'
-                            value={goal.desiredBody?.waist || ''}
-                            onChange={handleInputChange}
-                            type='number'
-                            postValue='см'
-                        />
-                        <Input
-                            label='Текущий объем бедер'
-                            name='currentBody.hips'
-                            value={goal.currentBody?.hips || ''}
-                            onChange={handleInputChange}
-                            type='number'
-                            postValue='см'
-                        />
-                        <Input
-                            label='Желаемый объем бедер'
-                            name='desiredBody.hips'
-                            value={goal.desiredBody?.hips || ''}
-                            onChange={handleInputChange}
-                            type='number'
-                            postValue='см'
-                        />
-                        <Input
-                            label='Текущий объем бедра'
-                            name='currentBody.thigh'
-                            value={goal.currentBody?.thigh || ''}
-                            onChange={handleInputChange}
-                            type='number'
-                            postValue='см'
-                        />
-                        <Input
-                            label='Желаемый объем бедра'
-                            name='desiredBody.thigh'
-                            value={goal.desiredBody?.thigh || ''}
-                            onChange={handleInputChange}
-                            type='number'
-                            postValue='см'
-                        />
-                        <Input
-                            label='Текущий объем рук'
-                            name='currentBody.arms'
-                            value={goal.currentBody?.arms || ''}
-                            onChange={handleInputChange}
-                            type='number'
-                            postValue='см'
-                        />
-                        <Input
-                            label='Желаемый объем рук'
-                            name='desiredBody.arms'
-                            value={goal.desiredBody?.arms || ''}
-                            onChange={handleInputChange}
-                            type='number'
-                            postValue='см'
-                        />
-                    </>
-                )}
+                        {goal.type === 'fat' && (
+                            <>
+                                <Input
+                                    label='Текущий % жира'
+                                    name='currentFat'
+                                    value={goal.currentFat || ''}
+                                    onChange={handleInputChange}
+                                    type='number'
+                                    postValue='%'
+                                    error={errors.currentFat}
+                                />
+                                <Input
+                                    label='Желаемый % жира'
+                                    name='desiredFat'
+                                    value={goal.desiredFat || ''}
+                                    onChange={handleInputChange}
+                                    type='number'
+                                    postValue='%'
+                                    error={errors.desiredFat}
+                                />
+                            </>
+                        )}
+                    </div>
 
-                {goal.type === 'fat' && (
-                    <>
-                        {/* Поля калипера в зависимости от гендера */}
-                        <div>текущие замеры калипером</div>
-                    {filteredCaliperFields.map((field) => (
-                        <Input
-                            key={field}
-                            label={caliperLabels[field as keyof typeof caliperLabels]}
-                            name={`currentCaliper.${field}`}
-                            value={goal.currentCaliper[field as keyof typeof goal.currentCaliper]}
-                            onChange={handleInputChange}
-                            type='number'
-                            postValue='мм'
-                        />
-                    ))}
-                    <div>желаемые замеры калипером</div>
-                    {filteredCaliperFields.map((field) => (
-                        <Input
-                            key={field}
-                            label={caliperLabels[field as keyof typeof caliperLabels]}
-                            name={`desiredCaliper.${field}`}
-                            value={goal.desiredCaliper[field as keyof typeof goal.desiredCaliper]}
-                            onChange={handleInputChange}
-                            type='number'
-                            postValue='мм'
-                        />
-                    ))}
-                    </>
-                )}
-
-                <Button
-                    variant='contained'
-                    color='primary'
-                    onClick={handleSaveGoal}
-                >
-                    Сохранить цель
-                </Button>
+                    <Button
+                        variant='contained'
+                        color='primary'
+                        onClick={handleSaveGoal}
+                    >
+                        Сохранить цель
+                    </Button>
+                </div>
             </div>
         </div>
     );

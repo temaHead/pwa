@@ -4,14 +4,10 @@ import { GoalData, Goal } from '../../types';
 
 interface GoalsState {
     goals: GoalData[];
-    status: 'idle' | 'loading' | 'succeeded' | 'failed';
-    error: string | null;
 }
 
 const initialState: GoalsState = {
     goals: [],
-    status: 'idle',
-    error: null,
 };
 
 // Загрузка всех целей
@@ -50,22 +46,12 @@ const goalsSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            // Обработка загрузки целей
-            .addCase(getAllGoalsAsync.pending, (state) => {
-                state.status = 'loading';
-            })
             .addCase(getAllGoalsAsync.fulfilled, (state, action) => {
-                state.status = 'succeeded';
                 state.goals = action.payload;
             })
-            .addCase(getAllGoalsAsync.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.error.message || 'Failed to fetch goals';
-            })
-
             // Обработка добавления цели
             .addCase(addGoalAsync.fulfilled, (state, action) => {
-                state.goals.push(action.payload);
+                state.goals = [...state.goals, action.payload];
             })
 
             // Обработка обновления цели

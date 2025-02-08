@@ -7,16 +7,39 @@ export async function addGoal(userId: string, goal: Goal, timestamp?: string): P
     try {
         const goalsRef = collection(db, 'goals');
         const formattedTimestamp = timestamp ?? dayjs().format('YYYY-MM-DD');
-
-        const docRef = await addDoc(goalsRef, {
+           // Формируем объект данных для записи в базу
+           const goalData: Partial<Goal> & {
+            userId: string;
+            startDate: string;
+            endDate: string;
+            type: 'weight' | 'fat' | '';
+            status: 'active' | 'done' | 'failed' | 'pending' | 'success' | 'initial';
+            timestamp: string;
+        } = {
             userId,
-            goal,
+            startDate: goal.startDate,
+            endDate: goal.endDate,
+            type: goal.type,
+            status: goal.status,
             timestamp: formattedTimestamp,
-        });
+        };
+
+        // Добавляем поля в зависимости от типа цели
+        if (goal.type === 'weight') {
+            goalData.currentWeight = goal.currentWeight || null;
+            goalData.desiredWeight = goal.desiredWeight || null;
+            goalData.initialWeight = goal.initialWeight || null;
+        } else if (goal.type === 'fat') {
+            goalData.currentFat = goal.currentFat || null;
+            goalData.desiredFat = goal.desiredFat || null;
+            goalData.initialFat = goal.initialFat || null;
+        }
+
+        const docRef = await addDoc(goalsRef, { goal: goalData as Goal, timestamp: formattedTimestamp });
         console.log('Цель успешно добавлена');
         return {
             id: docRef.id,
-            goal,
+            goal: goalData as Goal, // Приводим тип к Goal
             timestamp: formattedTimestamp,
         };
     } catch (error) {
@@ -25,10 +48,10 @@ export async function addGoal(userId: string, goal: Goal, timestamp?: string): P
     }
 }
 
-export async function updateGoal(id: string, goal: Goal, timestamp?: string): Promise<void> {
+export async function updateGoal(id: string, goal: Goal): Promise<void> {
     try {
         const docRef = doc(db, 'goals', id);
-        await updateDoc(docRef, { goal, timestamp });
+        await updateDoc(docRef, { goal });
         console.log('Цель успешно обновлена');
     } catch (error) {
         console.error('Ошибка обновления цели:', error);

@@ -1,16 +1,20 @@
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../../store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../../../store';
 import Logout from '../../../Auth/Logout/Logout';
 import style from './Profile.module.scss';
 import { useNavigate } from 'react-router-dom';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
-import { calculateAge } from '../../../Auth/SignUp/components/AddUser/utils';
 import Goals from './components/Goals/Goals';
+import { useEffect } from 'react';
+import { getAllGoalsAsync } from '../../../../store/slices/goalsSlice';
+import CurrentGoals from './components/Goals/components/CurrentGoals/CurrentGoals';
 
 function Profile() {
     const navigate = useNavigate();
+    const dispatch = useDispatch<AppDispatch>();
+
 
     // Извлечение данных из Redux Store
     const user = useSelector((state: RootState) => state.user);
@@ -21,6 +25,9 @@ function Profile() {
     const handleGoToEditProfile = () => {
         navigate('/editProfile');
     };
+    useEffect(() => {
+        if (user.id) dispatch(getAllGoalsAsync(user.id));
+    }, [dispatch, user.id]);
 
     return (
         <div className={style.profile}>
@@ -50,21 +57,21 @@ function Profile() {
             <div className={style.container}>
                 <div className={style.userInfo}>
                     <div className={` ${style.item}`}>
-                        <div className={style.value}>{`${user.currentWeight} кг`}</div>
+                        <div className={style.value}>{`${user.currentWeight || 0} кг`}</div>
                         <div className={style.label}>Вес</div>
                     </div>
                     <div className={`${style.height} ${style.item}`}>
-                        <div className={style.value}>{`${user.height} см`}</div>
+                        <div className={style.value}>{`${user.height || 0} см`}</div>
                         <div className={style.label}>Рост</div>
                     </div>
                     <div className={`${style.item}`}>
-                        <div className={style.value}>{`${calculateAge(user.birthDate || '')} лет`}</div>
-                        <div className={style.label}>Возраст</div>
+                        <div className={style.value}>{`${user.bodyFat || 0}` } </div>
+                        <div className={style.label}>% жира</div>
                     </div>
                 </div>
                 <div className={style.currentGoals}>
                     <div className={style.title}>Текущие цели</div>
-                    <div className={style.currentGoalsList}></div>
+                    <CurrentGoals />
                 </div>
                 <div className={style.goals}>
                     <div className={style.title}>Цели</div>

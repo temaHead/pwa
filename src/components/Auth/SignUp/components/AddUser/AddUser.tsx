@@ -61,13 +61,6 @@ const AddUser: React.FC = () => {
             required: true,
         },
         {
-            id: 'desiredWeight',
-            label: 'Введите ваш желаемый вес',
-            placeholder: 'Ваш желаемый вес (кг)',
-            type: 'number',
-            pattern: /^\d+$/,
-        },
-        {
             id: 'gender',
             label: 'Выберите ваш пол',
             placeholder: 'Ваш пол',
@@ -178,8 +171,6 @@ const AddUser: React.FC = () => {
                     birthDate: formData['birthDate'] || null,
                     gender: formData['gender'] || null,
                     currentWeight: formData['currentWeight'] ? parseFloat(formData['currentWeight']) : null,
-                    desiredWeight: formData['desiredWeight'] ? parseFloat(formData['desiredWeight']) : null,
-                    initialWeight: formData['initialWeight'] ? parseFloat(formData['initialWeight']) : null,
                     height: formData['height'] ? parseFloat(formData['height']) : null,
                     email: user.email,
                     id: user.id,

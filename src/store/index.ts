@@ -3,6 +3,7 @@ import userReducer from './slices/userSlice';
 import measurementReducer from './slices/measurementSlice';
 import filterReducer from './slices/filterSlice';
 import widgetsReducer from './slices/widgetsSlice';
+import goalsReducer from './slices/goalsSlice';
 import { useDispatch } from 'react-redux';
 
 const store = configureStore({
@@ -10,7 +11,8 @@ const store = configureStore({
         user: userReducer,
         measurements: measurementReducer,
         filter:filterReducer,
-        widgets:widgetsReducer
+        widgets:widgetsReducer,
+        goals: goalsReducer,
     },
 });
 export type RootState = ReturnType<typeof store.getState>;

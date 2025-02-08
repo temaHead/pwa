@@ -9,8 +9,6 @@ const initialState: UserProfile = {
     name: null,
     birthDate: null,
     currentWeight: null,
-    initialWeight: null,
-    desiredWeight: null,
     gender: null,
     height: null,
     bodyFat: null,
@@ -40,7 +38,6 @@ export const addUserProfileAsync = createAsyncThunk(
     }
 )
 
-
 const userSlice = createSlice({
     name: 'user',
     initialState,
@@ -51,10 +48,9 @@ const userSlice = createSlice({
             state.name = action.payload.name || null;
             state.birthDate = action.payload.birthDate || null;
             state.currentWeight = action.payload.currentWeight || null;
-            state.initialWeight = action.payload.initialWeight || null;
-            state.desiredWeight = action.payload.desiredWeight || null;
             state.gender = action.payload.gender || null;
             state.height = action.payload.height || null;
+            state.bodyFat = action.payload.bodyFat || null;
         },
         removeUser(state) {
             state.email = null;
@@ -62,10 +58,9 @@ const userSlice = createSlice({
             state.name = null;
             state.birthDate = null;
             state.currentWeight = null;
-            state.initialWeight = null;
-            state.desiredWeight = null;
             state.gender = null;
             state.height = null;
+            state.bodyFat = null;
             window.localStorage.removeItem('id');
         },
     },
@@ -78,10 +73,9 @@ const userSlice = createSlice({
             state.name = updatedData.name || null;
             state.birthDate = updatedData.birthDate || null;
             state.currentWeight = updatedData.currentWeight || null;
-            state.initialWeight = updatedData.initialWeight || null;
-            state.desiredWeight = updatedData.desiredWeight || null;
             state.gender = updatedData.gender || null;
             state.height = updatedData.height || null;
+            state.bodyFat = updatedData.bodyFat || null;
         })
         builder.addCase(addUserProfileAsync.fulfilled, (state, action) => {
             // Обновляем профиль в состоянии после успешного запроса
@@ -91,10 +85,9 @@ const userSlice = createSlice({
             state.name = updatedData.name || null;
             state.birthDate = updatedData.birthDate || null;
             state.currentWeight = updatedData.currentWeight || null;
-            state.initialWeight = updatedData.initialWeight || null;
-            state.desiredWeight = updatedData.desiredWeight || null;
             state.gender = updatedData.gender || null;
             state.height = updatedData.height || null;
+            state.bodyFat = updatedData.bodyFat || null;
         })
         
     },

@@ -2,8 +2,6 @@ export type UserProfile = {
     name: string | null;
     birthDate: string | null;
     currentWeight: number | null;
-    initialWeight: number | null;
-    desiredWeight: number | null;
     gender: string | null;
     height: number | null;
     email: string | null;
@@ -52,19 +50,16 @@ export type Measurements = {
 };
 
 export type Goal = {
-    userId: string;
     startDate: string;
     endDate: string;
-    daysToComplete: number;
-    type: 'weight' | 'body' | 'fat';
+    type: 'weight' | 'fat' | ''; 
     currentWeight?: number | null;
     desiredWeight?: number | null;
-    currentBody?: BodyMeasuring | null;
-    desiredBody?: BodyMeasuring | null;
+    initialWeight?: number | null;
     currentFat?: number | null;
     desiredFat?: number | null;
-    currentCaliper?: FatMeasuring | null;
-    desiredCaliper?: FatMeasuring | null;
+    initialFat?: number | null;
+    status: 'active' | 'done' | 'failed' | 'pending'| 'success'| 'initial';
 };
 
 

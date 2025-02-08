@@ -52,6 +52,7 @@ function App() {
                                 desiredWeight: userDoc.data()?.desiredWeight || null,
                                 gender: userDoc.data()?.gender || null,
                                 height: userDoc.data()?.height || null,
+                                bodyFat: userDoc.data()?.bodyFat || null,
                             })
                         );
                         setIsAuth(true);

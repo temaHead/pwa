@@ -23,8 +23,6 @@ function EditProfile() {
         name: user.name,
         birthDate: user.birthDate,
         currentWeight: user.currentWeight,
-        initialWeight: user.initialWeight,
-        desiredWeight: user.desiredWeight,
         gender: user.gender,
         height: user.height,
         email: user.email,
@@ -38,8 +36,6 @@ function EditProfile() {
             name: user.name,
             birthDate: user.birthDate,
             currentWeight: user.currentWeight,
-            initialWeight: user.initialWeight,
-            desiredWeight: user.desiredWeight,
             gender: user.gender,
             height: user.height,
             email: user.email,
@@ -66,9 +62,11 @@ function EditProfile() {
         }));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         // Приведение типов перед отправкой
-        dispatch(updateUserProfileAsync(profile));
+        await dispatch(updateUserProfileAsync(profile));
+        navigate('/profile');
+
     };
     const handleGoToProfile = () => {
         navigate('/profile');
@@ -125,18 +123,10 @@ function EditProfile() {
                     type='number'
                 />
                 <Input
-                    label='Желаемый вес'
-                    name='desiredWeight'
-                    value={profile.desiredWeight}
-                    postValue='кг'
-                    onChange={handleInputChange}
-                    type='number'
-                />
-                <Input
-                    label='Начальный вес'
-                    name='initialWeight'
-                    value={profile.initialWeight}
-                    postValue='кг'
+                    label='Текущий % жира'
+                    name='bodyFat'
+                    value={profile.bodyFat}
+                    postValue='%'
                     onChange={handleInputChange}
                     type='number'
                 />

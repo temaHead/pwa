@@ -1,6 +1,7 @@
 .goal {
     height: 100px;
     width: 100px;
+    position: relative;
 
     .circle {
         height: 100px;
@@ -9,6 +10,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        position: relative;
 
         .statusLine {
             height: 90px; // Немного меньше, чтобы бордер был виден
@@ -23,8 +25,16 @@
             }
 
             &.done {
+                border: 3px solid #d75916; // Синий бордер для завершенного статуса
+            }
+            &.pending {
                 border: 3px solid #2e1aa1; // Синий бордер для завершенного статуса
             }
+
+            &.failed {
+                border: 3px solid #ccdc1f; // Синий бордер для завершенного статуса
+            }
+
 
             .content {
                 text-align: center;
