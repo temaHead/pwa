@@ -13,14 +13,13 @@ interface WeightChartProps {
 
 const WeightChart: React.FC<WeightChartProps> = () => {
     const weightMeasuring = useSelector((state: RootState) => state.measurements.weightMeasuring);
-    const { desiredWeight, id } = useSelector((state: RootState) => state.user);
+    const { id } = useSelector((state: RootState) => state.user);
     const dispatch = useDispatch<AppDispatch>();
 
     // Преобразуем данные для графика
     const chartData = weightMeasuring.map((item) => ({
         date: new Date(item.timestamp || 0).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }), // Форматируем дату
         weight: item.weight, // Вес
-        desiredWeight,
     }));
 
     useEffect(() => {

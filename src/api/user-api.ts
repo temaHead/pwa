@@ -1,7 +1,7 @@
 import { doc, DocumentData, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { FatMeasuring, UserProfile } from '../types';
-import { addFatMeasuring, addGoal, addWeightMeasuring } from './measurement-api';
+import { addFatMeasuring, addWeightMeasuring } from './measurement-api';
 
 export async function updateUserProfile(profile: UserProfile, id: string): Promise<DocumentData> {
     try {
@@ -24,9 +24,6 @@ export async function addUserProfile(
         const userRef = doc(db, 'users', id);
         await setDoc(userRef, profile);
         const newData = await getDoc(userRef);
-        if (profile.desiredWeight) {
-            await addGoal(profile.desiredWeight, id);
-        }
         if (profile.bodyFat && fatMeasuring) {
             await addFatMeasuring(profile.bodyFat, fatMeasuring, id);
         }
