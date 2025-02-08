@@ -9,14 +9,12 @@ export async function addGoal(userId: string, goal: Goal, timestamp?: string): P
         const formattedTimestamp = timestamp ?? dayjs().format('YYYY-MM-DD');
            // Формируем объект данных для записи в базу
            const goalData: Partial<Goal> & {
-            userId: string;
             startDate: string;
             endDate: string;
             type: 'weight' | 'fat' | '';
             status: 'active' | 'done' | 'failed' | 'pending' | 'success' | 'initial';
             timestamp: string;
         } = {
-            userId,
             startDate: goal.startDate,
             endDate: goal.endDate,
             type: goal.type,
@@ -35,7 +33,11 @@ export async function addGoal(userId: string, goal: Goal, timestamp?: string): P
             goalData.initialFat = goal.initialFat || null;
         }
 
-        const docRef = await addDoc(goalsRef, { goal: goalData as Goal, timestamp: formattedTimestamp });
+        const docRef = await addDoc(goalsRef, {
+             goal: goalData as Goal,
+              timestamp: formattedTimestamp,
+              userId,
+             });
         console.log('Цель успешно добавлена');
         return {
             id: docRef.id,

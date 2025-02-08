@@ -35,7 +35,6 @@
                 border: 3px solid #ccdc1f; // Синий бордер для завершенного статуса
             }
 
-
             .content {
                 text-align: center;
 
@@ -46,4 +45,48 @@
             }
         }
     }
+}
+.progressCircle {
+    position: relative;
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+}
+
+.progressCircle svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg); /* Начало отсчета с 12 часов */
+}
+
+.progressCircle circle {
+    fill: none;
+    stroke-linecap: round;
+}
+
+.background {
+    stroke: #e7e7e7;
+    stroke-dasharray: none;
+}
+
+.progress {
+    transition: stroke-dashoffset 0.3s ease;
+}
+
+.progressText {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.progressValue {
+    font-size: 25px;
+    color: #3e3e3e;
 }

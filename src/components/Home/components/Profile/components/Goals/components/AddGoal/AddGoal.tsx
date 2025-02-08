@@ -184,8 +184,8 @@ function AddGoal() {
     };
 
     return (
-        <div className='addGoal'>
-            <div className='header'>
+        <div className={style.addGoal}>
+            <div className={style.header}>
                 <div
                     className='icon'
                     onClick={handleGoBack}
@@ -195,7 +195,7 @@ function AddGoal() {
                 <div className='title'>Добавить цель</div>
             </div>
 
-            <div className='form'>
+            <div className={style.form}>
                 <div className={style.inputs}>
                     <Input
                         label='Дата начала'
