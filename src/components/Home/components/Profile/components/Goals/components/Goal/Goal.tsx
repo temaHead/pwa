@@ -5,6 +5,7 @@ import { updateGoalAsync } from '../../../../../../../../store/slices/goalsSlice
 import { useEffect, useState } from 'react';
 import { AppDispatch } from '../../../../../../../../store';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 interface GoalProps {
     goal: GoalData;
@@ -15,9 +16,13 @@ interface GoalProps {
 function Goal({ goal, currentWeight, bodyFat }: GoalProps) {
     const currentDate = new Date();
     const dispatch = useDispatch<AppDispatch>();
-
+    const navigate = useNavigate(); // Хук для навигации
     const goalData = goal.goal;
     const [status, setStatus] = useState(goalData.status || '');
+
+    const handleGoalClick = () => {
+        navigate(`/goalEditing/${goal.id}`);
+    };
 
     // Функция определения статуса
     const isGoalDoneStatus = () => {
@@ -43,20 +48,42 @@ function Goal({ goal, currentWeight, bodyFat }: GoalProps) {
         checkAndEditStatus();
     }, [goal]);
 
-    // Рассчитываем прогресс только для active и в зависимости от type
+    // Рассчитываем прогресс
     const initialWeight = Number(goalData.initialWeight);
     const targetWeight = Number(goalData.desiredWeight);
     const initialFat = Number(goalData.initialFat);
     const targetFat = Number(goalData.desiredFat);
+
     const totalDifferenceWeight = Math.abs(targetWeight - initialWeight);
     const totalDifferenceFat = Math.abs(targetFat - initialFat);
-    const currentDifferenceWeight = Math.abs(currentWeight - initialWeight);
-    const currentDifferenceFat = Math.abs(bodyFat - initialFat);
+
+    const isLosingWeight = initialWeight > targetWeight;
+    const isLosingFat = initialFat > targetFat;
+
+    let currentDifferenceWeight = Math.abs(currentWeight - initialWeight);
+    let currentDifferenceFat = Math.abs(bodyFat - initialFat);
+
+    // Коррекция, если цель "провалена" или текущий вес ушел в обратную сторону
+    if ((isLosingWeight && currentWeight > initialWeight) || (!isLosingWeight && currentWeight < initialWeight)) {
+        currentDifferenceWeight = 0;
+    }
+    if ((isLosingWeight && currentWeight < targetWeight) || (!isLosingWeight && currentWeight > targetWeight)) {
+        currentDifferenceWeight = totalDifferenceWeight;
+    }
+
+    if ((isLosingFat && bodyFat > initialFat) || (!isLosingFat && bodyFat < initialFat)) {
+        currentDifferenceFat = 0;
+    }
+    if ((isLosingFat && bodyFat < targetFat) || (!isLosingFat && bodyFat > targetFat)) {
+        currentDifferenceFat = totalDifferenceFat;
+    }
+
     const resultMath =
         goalData.type === 'weight'
             ? currentDifferenceWeight / totalDifferenceWeight
             : currentDifferenceFat / totalDifferenceFat;
-    const progress = status === 'active' ? resultMath * 100 : 100;
+
+    const progress = status === 'active' ? Math.min(resultMath * 100, 100) : 100;
 
     // Размеры круга
     const r = 40;
@@ -66,24 +93,24 @@ function Goal({ goal, currentWeight, bodyFat }: GoalProps) {
     const circumference = 2 * Math.PI * r;
     const offset = circumference * ((100 - progress) / 100);
 
-    // Цвет прогресса в зависимости от статуса
+    // Цвета прогресса в зависимости от статуса
     const progressColors: Record<string, string> = {
-        active: '#1976d2', // синий
         failed: '#d32f2f', // красный
+        active: '#2196f3', // синий
         pending: '#9e9e9e', // серый
         success: '#388e3c', // зеленый
-        done: '#d75916', // Дополнительный цвет для "done"
+        done: '#ff9800', // оранжевый
     };
 
     return (
-        <div className={style.goal}>
+        <div className={style.goal} onClick={handleGoalClick}>
             <Badge
-                color='secondary'
+                color="secondary"
                 badgeContent={goalData.status === 'done' ? '!' : 0}
-                overlap='circular' // Убедимся, что бейдж прекрывает круг
+                overlap="circular"
             >
                 <div className={style.progressCircle}>
-                    <svg viewBox='0 0 100 100'>
+                    <svg viewBox="0 0 100 100" data-status={status}>
                         {/* Серый фон */}
                         <circle
                             className={style.background}
@@ -95,6 +122,7 @@ function Goal({ goal, currentWeight, bodyFat }: GoalProps) {
 
                         {/* Прогресс */}
                         <circle
+                            data-status={status}
                             className={style.progress}
                             cx={cx}
                             cy={cy}

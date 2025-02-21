@@ -20,7 +20,6 @@ export const updateUserProfileAsync = createAsyncThunk(
         const state = getState() as RootState;
         const userId = state.user.id;
         if (!userId) throw new Error('User ID not found');
-
         const updatedUserData = await updateUserProfile(profile, userId);
         return updatedUserData; // Возвращаем обновленные данные для обновления состояния
     }

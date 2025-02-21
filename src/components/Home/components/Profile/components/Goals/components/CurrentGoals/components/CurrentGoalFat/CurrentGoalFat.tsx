@@ -31,8 +31,8 @@ function CurrentGoalFat( props: CurrentGoalFatProps) {
         <div className={style.targetFat}>{targetFat} %</div>
     </div>
     <div className={style.currentFat}>
-        <div className={style.title}>Текущий % жира:</div>
-        <div className={style.value}>{bodyFat}%</div>
+        <div className={style.title}>Текущий % жира: </div>
+        <div className={style.value}>{bodyFat}</div>
     </div>
 </div>
   );

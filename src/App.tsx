@@ -17,6 +17,7 @@ import { setUser } from './store/slices/userSlice';
 import { auth, db } from './firebase';
 import LoadingSpinner from './shared/components/LoadingSpinner/LoadingSpinner';
 import AddGoal from './components/Home/components/Profile/components/Goals/components/AddGoal/AddGoal';
+import GoalEditing from './components/Home/components/Profile/components/Goals/components/GoalEditing/GoalEditing';
 
 const SignIn = lazy(() => import('./components/Auth/SignIn/SignIn'));
 const SignUp = lazy(() => import('./components/Auth/SignUp/SignUp'));
@@ -121,6 +122,10 @@ function App() {
                     <Route
                         path='/addGoal'
                         element={<AddGoal />}
+                    />
+                    <Route
+                        path='/goalEditing/:goalId'
+                        element={<GoalEditing />}
                     />
                 </Route>
             </Route>

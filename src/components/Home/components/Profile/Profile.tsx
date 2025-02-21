@@ -70,7 +70,6 @@ function Profile() {
                     </div>
                 </div>
                 <div className={style.currentGoals}>
-                    <div className={style.title}>Текущие цели</div>
                     <CurrentGoals />
                 </div>
                 <div className={style.goals}>

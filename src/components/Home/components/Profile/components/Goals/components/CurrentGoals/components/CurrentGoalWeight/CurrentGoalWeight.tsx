@@ -11,10 +11,30 @@ function CurrentGoalWeight(props: CurrentGoalWeightProps) {
 
     const initialWeight = Number(goal.initialWeight);
     const targetWeight = Number(goal.desiredWeight);
+    
+    console.log("Начальный вес:", initialWeight);
+    console.log("Целевой вес:", targetWeight);
+    console.log("Текущий вес:", currentWeight);
 
     const totalDifference = Math.abs(targetWeight - initialWeight);
-    const currentDifference = Math.abs(currentWeight - initialWeight);
-    const progress = (currentDifference / totalDifference) * 100;
+    let currentDifference = Math.abs(currentWeight - initialWeight);
+
+    // Определяем, надо ли худеть
+    const isLosingWeight = initialWeight > targetWeight;
+
+    // Если вес вышел за границы цели, корректируем прогресс
+    if ((isLosingWeight && currentWeight > initialWeight) || 
+        (!isLosingWeight && currentWeight < initialWeight)) {
+        currentDifference = 0; // Если ушли в другую сторону, прогресс = 0%
+    }
+
+    if ((isLosingWeight && currentWeight < targetWeight) || 
+        (!isLosingWeight && currentWeight > targetWeight)) {
+        currentDifference = totalDifference; // Если достигли цели или перешли её, 100%
+    }
+
+    let progress = (currentDifference / totalDifference) * 100;
+    progress = Math.min(progress, 100); // Ограничиваем 100%
 
     return (
         <div className={style.goalWeight}>

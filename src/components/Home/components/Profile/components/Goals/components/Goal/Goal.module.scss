@@ -20,20 +20,20 @@
             align-items: center;
             justify-content: center;
 
-            &.active {
-                border: 3px solid #38b42d; // Зеленый бордер для активного статуса
-            }
+            // &.active {
+            //     border: 3px solid #38b42d; // Зеленый бордер для активного статуса
+            // }
 
-            &.done {
-                border: 3px solid #d75916; // Синий бордер для завершенного статуса
-            }
-            &.pending {
-                border: 3px solid #2e1aa1; // Синий бордер для завершенного статуса
-            }
+            // &.done {
+            //     border: 3px solid #a08fed; // Синий бордер для завершенного статуса
+            // }
+            // &.pending {
+            //     border: 3px solid #2e1aa1; // Синий бордер для завершенного статуса
+            // }
 
-            &.failed {
-                border: 3px solid #ccdc1f; // Синий бордер для завершенного статуса
-            }
+            // &.failed {
+            //     border: 3px solid #ccdc1f; // Синий бордер для завершенного статуса
+            // }
 
             .content {
                 text-align: center;
@@ -65,7 +65,7 @@
 }
 
 .background {
-    stroke: #e7e7e7;
+    stroke: #d1e4fd;
     stroke-dasharray: none;
 }
 

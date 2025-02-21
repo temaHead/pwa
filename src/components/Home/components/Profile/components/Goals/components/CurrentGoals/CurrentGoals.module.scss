@@ -1,11 +1,16 @@
 .currentGoalsList {
     min-height: 120px;
-    max-height: 240px;
+    max-height: 241px;
     border: 1px solid #ccc;
+    background-color: #ccc;
     border-radius: 5px;
     overflow: auto;
     display: flex;
     flex-direction: column;
     gap: 10px;
     padding: 5px;
+}
+.title{
+    font-size: 18px;
+    font-weight: bold;
 }
