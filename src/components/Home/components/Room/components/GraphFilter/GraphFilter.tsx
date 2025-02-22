@@ -6,8 +6,7 @@ import {
     DropResult,
     DraggableProvidedDraggableProps,
 } from '@hello-pangea/dnd';
-import { Button, Checkbox, Collapse } from '@mui/material';
-import FilterListIcon from '@mui/icons-material/FilterList'; // Иконка фильтра
+import { Button, Checkbox } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check'; // Иконка "Применить"
 import DeleteIcon from '@mui/icons-material/Delete'; // Иконка "Сбросить"
 import MoreVertIcon from '@mui/icons-material/MoreVert'; // Иконка для перетаскивания
@@ -19,6 +18,7 @@ import {
     saveWidgetsAsync,
     resetWidgetsAsync,
 } from '../../../../../../store/slices/widgetsSlice';
+import CollapsibleSection from '../../../../../../shared/components/CollapsibleSection/CollapsibleSection';
 
 interface WidgetSettings {
     id: string;
@@ -46,7 +46,6 @@ const GraphFilter: React.FC = () => {
     const userId = useSelector((state: RootState) => state.user.id);
     const savedWidgets = useSelector((state: RootState) => state.widgets.widgets);
 
-    const [isExpanded, setIsExpanded] = useState(false);
     const [widgets, setWidgets] = useState<WidgetSettings[]>([
         { id: 'weight', label: 'График веса', visible: true },
         { id: 'fat', label: 'График жира', visible: true },
@@ -98,14 +97,7 @@ const GraphFilter: React.FC = () => {
 
     return (
         <div className={style.filter}>
-            <div
-                className={style.filterHeader}
-                onClick={() => setIsExpanded(!isExpanded)}
-            >
-                <FilterListIcon className={style.filterIcon} /> {/* Иконка фильтра */}
-                <span>{isExpanded ? 'Скрыть настройки' : 'Настроить графики'}</span>
-            </div>
-            <Collapse in={isExpanded}>
+            <CollapsibleSection title='Настройки виджетов'>
                 <div className={style.filterContent}>
                     <DragDropContext onDragEnd={onDragEnd}>
                         <Droppable droppableId='widgets'>
@@ -170,7 +162,7 @@ const GraphFilter: React.FC = () => {
                         </Button>
                     </div>
                 </div>
-            </Collapse>
+            </CollapsibleSection>
         </div>
     );
 };

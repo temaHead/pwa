@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Checkbox, FormControlLabel, Collapse } from '@mui/material';
-import FilterListIcon from '@mui/icons-material/FilterList'; // Иконка фильтра
+import { Button, Checkbox, FormControlLabel } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check'; // Иконка "Применить"
 import DeleteIcon from '@mui/icons-material/Delete'; // Иконка "Сбросить"
 import style from './Filter.module.scss';
 import { AppDispatch, RootState } from '../../../../../../store';
-import { fetchFilterAsync, resetFilterAsync, saveFilterAsync } from '../../../../../../store/slices/filterSlice';
+import {
+    fetchFilterAsync,
+    resetFilterAsync,
+    saveFilterAsync,
+} from '../../../../../../store/slices/filterSlice';
+import CollapsibleSection from '../../../../../../shared/components/CollapsibleSection/CollapsibleSection';
 
 const Filter: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const userId = useSelector((state: RootState) => state.user.id);
     const savedFilter = useSelector((state: RootState) => state.filter);
 
-    const [isExpanded, setIsExpanded] = useState(false);
     const [filters, setFilters] = useState({
         showFat: true,
         showWeight: true,
@@ -56,47 +59,43 @@ const Filter: React.FC = () => {
 
     return (
         <div className={style.filter}>
-            <div className={style.filterHeader} onClick={() => setIsExpanded(!isExpanded)}>
-                <FilterListIcon className={style.filterIcon} /> {/* Иконка фильтра */}
-                <span>{isExpanded ? 'Скрыть фильтр' : 'Показать фильтр'}</span>
-            </div>
-            <Collapse in={isExpanded}>
+            <CollapsibleSection title='Фильтр'>
                 <div className={style.filterContent}>
                     <div className={style.filterOptions}>
                         <FormControlLabel
                             control={
                                 <Checkbox
-                                    name="showFat"
+                                    name='showFat'
                                     checked={filters.showFat}
                                     onChange={handleFilterChange}
                                 />
                             }
-                            label="Показать жировые измерения"
+                            label='Показать жировые измерения'
                         />
                         <FormControlLabel
                             control={
                                 <Checkbox
-                                    name="showWeight"
+                                    name='showWeight'
                                     checked={filters.showWeight}
                                     onChange={handleFilterChange}
                                 />
                             }
-                            label="Показать измерения веса"
+                            label='Показать измерения веса'
                         />
                         <FormControlLabel
                             control={
                                 <Checkbox
-                                    name="showBody"
+                                    name='showBody'
                                     checked={filters.showBody}
                                     onChange={handleFilterChange}
                                 />
                             }
-                            label="Показать измерения лентой"
+                            label='Показать измерения лентой'
                         />
                     </div>
                     <div className={style.filterButtons}>
                         <Button
-                            variant="contained"
+                            variant='contained'
                             className={style.applyButton}
                             onClick={handleSaveFilter}
                             startIcon={<CheckIcon />} // Иконка "Применить"
@@ -104,7 +103,7 @@ const Filter: React.FC = () => {
                             Применить
                         </Button>
                         <Button
-                            variant="contained"
+                            variant='contained'
                             className={style.resetButton}
                             onClick={handleResetFilter}
                             startIcon={<DeleteIcon />} // Иконка "Сбросить"
@@ -113,7 +112,7 @@ const Filter: React.FC = () => {
                         </Button>
                     </div>
                 </div>
-            </Collapse>
+            </CollapsibleSection>
         </div>
     );
 };

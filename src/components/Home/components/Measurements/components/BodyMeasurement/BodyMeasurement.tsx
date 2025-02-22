@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../../../../store';
 import { BodyMeasuringData } from '../../../../../../types';
-import { updateBodyMeasuringAsync, deleteBodyMeasuringAsync } from '../../../../../../store/slices/measurementSlice';
-import { useSwipeable } from 'react-swipeable';
+import {
+    updateBodyMeasuringAsync,
+    deleteBodyMeasuringAsync,
+} from '../../../../../../store/slices/measurementSlice';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
@@ -24,7 +26,6 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
 
     const [isEditing, setIsEditing] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(true);
-    const [showDeleteArea, setShowDeleteArea] = useState(false);
     const [editedBody, setEditedBody] = useState({
         chest: item.bodyMeasuring?.chest || null,
         hips: item.bodyMeasuring?.hips || null,
@@ -33,6 +34,26 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
         waist: item.bodyMeasuring?.waist || null,
     });
     const [editedTimestamp, setEditedTimestamp] = useState(item.timestamp);
+    const [translateX, setTranslateX] = useState(0);
+    const startX = useRef(0);
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        startX.current = e.touches[0].clientX;
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        const deltaX = e.touches[0].clientX - startX.current;
+        const newTranslateX = Math.min(0, Math.max(-75, deltaX));
+        setTranslateX(newTranslateX);
+    };
+
+    const handleTouchEnd = () => {
+        if (translateX < -40) {
+            setTranslateX(-75); // Закрываем
+        } else {
+            setTranslateX(0); // Возвращаем назад
+        }
+    };
 
     const handleInputChange = (field: keyof BodyMeasuringData['bodyMeasuring'], value: string) => {
         setEditedBody((prev) => ({
@@ -90,11 +111,6 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
         setIsCollapsed((prev) => !prev);
     };
 
-    const swipeHandlers = useSwipeable({
-        onSwipedLeft: () => setShowDeleteArea(true),
-        onSwipedRight: () => setShowDeleteArea(false),
-    });
-
     const measurementLabels = {
         chest: 'Грудь',
         hips: 'Ягодицы',
@@ -105,26 +121,25 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
 
     return (
         <div className={style.container}>
-            {/* Красная область с кнопкой удаления */}
-            <div className={`${style.deleteArea} ${showDeleteArea ? style.visible : ''}`}>
+            <div className={style.deleteArea}>
                 <DeleteIcon
                     className={style.deleteIcon}
                     onClick={handleDelete}
                 />
             </div>
 
-            {/* Основной блок */}
             <div
-                className={`${style.bodyMeasurement} ${showDeleteArea ? style.swiped : ''}`}
-                {...swipeHandlers}
+                className={style.bodyMeasurement}
+                style={{ transform: `translateX(${translateX}px)` }}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
             >
                 <div className={style.content}>
                     <div className={style.header}>
                         <div className={style.leftRow}>
                             <div className={style.title}>Замеры тела:</div>
-                            
                         </div>
-
                         <div className={style.rightRow}>
                             <div className={style.date}>
                                 {isEditing ? (
@@ -159,7 +174,6 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
                         </div>
                     </div>
 
-                    {/* Убрали условный рендеринг и добавили класс для анимации */}
                     <div className={`${style.measurements} ${!isCollapsed ? style.open : ''}`}>
                         {Object.entries(measurementLabels).map(([key, label]) => (
                             <div
@@ -184,7 +198,9 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
                                     />
                                 ) : (
                                     <div className={style.value}>
-                                        {item.bodyMeasuring?.[key as keyof BodyMeasuringData['bodyMeasuring']] ?? 'Не указано'}{' '}
+                                        {item.bodyMeasuring?.[
+                                            key as keyof BodyMeasuringData['bodyMeasuring']
+                                        ] ?? '-'}{' '}
                                         см
                                     </div>
                                 )}

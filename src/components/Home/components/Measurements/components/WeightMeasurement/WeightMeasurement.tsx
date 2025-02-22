@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../../../../store';
 import { WeightMeasuringData } from '../../../../../../types';
-import { updateWeightMeasuringAsync, deleteWeightMeasuringAsync } from '../../../../../../store/slices/measurementSlice';
-import { useSwipeable } from 'react-swipeable';
+import {
+    updateWeightMeasuringAsync,
+    deleteWeightMeasuringAsync,
+} from '../../../../../../store/slices/measurementSlice';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import Check from '@mui/icons-material/Check';
@@ -21,9 +23,29 @@ const WeightMeasurement: React.FC<WeightMeasurementProps> = ({ item }) => {
     const dispatch = useDispatch<AppDispatch>();
 
     const [isEditing, setIsEditing] = useState(false);
-    const [showDeleteArea, setShowDeleteArea] = useState(false);
     const [editedWeight, setEditedWeight] = useState(item.weight);
     const [editedTimestamp, setEditedTimestamp] = useState(item.timestamp);
+
+    const [translateX, setTranslateX] = useState(0);
+    const startX = useRef(0);
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        startX.current = e.touches[0].clientX;
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        const deltaX = e.touches[0].clientX - startX.current;
+        const newTranslateX = Math.min(0, Math.max(-75, deltaX));
+        setTranslateX(newTranslateX);
+    };
+
+    const handleTouchEnd = () => {
+        if (translateX < -40) {
+            setTranslateX(-75); // Закрываем
+        } else {
+            setTranslateX(0); // Возвращаем назад
+        }
+    };
 
     const handleSave = async () => {
         if (!item.id) {
@@ -59,30 +81,26 @@ const WeightMeasurement: React.FC<WeightMeasurementProps> = ({ item }) => {
     };
 
     const handleCancel = () => {
-        setEditedWeight(item.weight); // Сброс к исходному значению
-        setEditedTimestamp(item.timestamp); // Сброс даты
-        setIsEditing(false); // Выход из режима редактирования
+        setEditedWeight(item.weight);
+        setEditedTimestamp(item.timestamp);
+        setIsEditing(false);
     };
-
-    const swipeHandlers = useSwipeable({
-        onSwipedLeft: () => setShowDeleteArea(true),
-        onSwipedRight: () => setShowDeleteArea(false),
-    });
 
     return (
         <div className={style.container}>
-            {/* Красная область с кнопкой удаления */}
-            <div className={`${style.deleteArea} ${showDeleteArea ? style.visible : ''}`}>
+            <div className={style.deleteArea}>
                 <DeleteIcon
                     className={style.deleteIcon}
                     onClick={handleDelete}
                 />
             </div>
 
-            {/* Основной блок */}
             <div
-                className={`${style.measurement} ${showDeleteArea ? style.swiped : ''}`}
-                {...swipeHandlers}
+                className={style.measurement}
+                style={{ transform: `translateX(${translateX}px)` }}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
             >
                 <div className={style.content}>
                     <div className={style.header}>

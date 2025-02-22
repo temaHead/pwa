@@ -6,15 +6,16 @@
     .deleteArea {
         position: absolute;
         top: 0;
-        right: -80px; /* Начальное положение за пределами блока */
+        right: 0px;
         width: 80px;
         height: 100%;
         background-color: red;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: right 0.3s ease;
-        z-index: 0;
+        z-index: -1;
+        border: white 1px solid;
+        border-radius: 0 8px 8px 0;
 
         .deleteIcon {
             color: white;
@@ -23,22 +24,14 @@
         }
     }
 
-    .deleteArea.visible {
-        right: 0; /* Показываем красную область */
-    }
-
     .fatMeasurement {
         position: relative;
         background-color: white;
         border: 1px solid #ccc;
         border-radius: 8px;
         padding: 10px;
-        transition: transform 0.3s ease;
+        transition: transform 0.2s ease;
         z-index: 1;
-    }
-
-    .fatMeasurement.swiped {
-        transform: translateX(-80px); /* Сдвигаем основной блок влево */
     }
 
     .content {
@@ -88,11 +81,6 @@
         }
         .measurements.open {
             max-height: 500px; /* Максимальная высота (должна быть больше, чем высота содержимого) */
-        }
-        .actions {
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
         }
     }
 }

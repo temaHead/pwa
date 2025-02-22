@@ -94,7 +94,7 @@ function Measurements() {
             </div>
             <div className={style.measurementsList}>
                 {filter.showFat && fatMeasuring.length > 0 && (
-                    <CollapsibleSection title='Измерения % жира в теле'>
+                    <CollapsibleSection title='Измерения % жира в теле' defaultExpanded>
                         {fatMeasuring.map((item) => (
                             <div key={item.id}>
                                 <FatMeasurement item={item} />
@@ -103,7 +103,7 @@ function Measurements() {
                     </CollapsibleSection>
                 )}
                 {filter.showWeight && weightMeasuring.length > 0 && (
-                    <CollapsibleSection title='Измерения веса'>
+                    <CollapsibleSection title='Измерения веса' defaultExpanded>
                         {weightMeasuring.map((item) => (
                             <div key={item.id}>
                                 <WeightMeasurement item={item} />
@@ -112,7 +112,7 @@ function Measurements() {
                     </CollapsibleSection>
                 )}
                 {filter.showBody && bodyMeasuring.length > 0 && (
-                    <CollapsibleSection title='Измерения тела'>
+                    <CollapsibleSection title='Измерения тела' defaultExpanded>
                         {bodyMeasuring.map((item) => (
                             <div key={item.id}>
                                 <BodyMeasurement item={item} />

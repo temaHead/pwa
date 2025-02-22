@@ -1,6 +1,4 @@
 .filter {
-    background-color: #f5f5f5; // Серый фон
-    padding: 16px;
     border-radius: 8px;
     margin-bottom: 16px;
     margin-top: 25px;
@@ -16,7 +14,6 @@
     }
 
     .filterContent {
-        margin-top: 16px;
 
         .filterOptions {
             display: flex;
@@ -27,25 +24,17 @@
 
         .filterButtons {
             display: flex;
-            gap: 8px;
+            justify-content: space-between;
             margin-top: 16px;
 
             .applyButton {
                 background-color: #4caf50; // Зеленый цвет для кнопки "Применить"
                 color: white;
-
-                &:hover {
-                    background-color: #45a049;
-                }
             }
 
             .resetButton {
                 background-color: #f44336; // Красный цвет для кнопки "Сбросить"
                 color: white;
-
-                &:hover {
-                    background-color: #e53935;
-                }
             }
         }
     }

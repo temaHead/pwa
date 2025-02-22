@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../../../store';
 import { FatMeasuringData } from '../../../../../../types';
@@ -6,7 +6,6 @@ import {
     updateFatMeasuringAsync,
     deleteFatMeasuringAsync,
 } from '../../../../../../store/slices/measurementSlice';
-import { useSwipeable } from 'react-swipeable';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
@@ -28,10 +27,11 @@ const FatMeasurement: React.FC<FatMeasurementProps> = ({ item }) => {
 
     const [isEditing, setIsEditing] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(true);
-    const [showDeleteArea, setShowDeleteArea] = useState(false);
     const [editedMeasurements, setEditedMeasurements] = useState(item.measurements);
     const [editedBodyFat, setEditedBodyFat] = useState(item.bodyFat);
     const [editedTimestamp, setEditedTimestamp] = useState(item.timestamp);
+    const [translateX, setTranslateX] = useState(0);
+    const startX = useRef(0);
 
     const filteredMeasurements =
         gender === 'male' ? ['chest', 'abdomen', 'thigh'] : ['thigh', 'tricep', 'waist'];
@@ -42,6 +42,24 @@ const FatMeasurement: React.FC<FatMeasurementProps> = ({ item }) => {
         thigh: 'Бедро',
         tricep: 'Трицепс',
         waist: 'Талия',
+    };
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        startX.current = e.touches[0].clientX;
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        const deltaX = e.touches[0].clientX - startX.current;
+        const newTranslateX = Math.min(0, Math.max(-75, deltaX));
+        setTranslateX(newTranslateX);
+    };
+
+    const handleTouchEnd = () => {
+        if (translateX < -40) {
+            setTranslateX(-75); // Закрываем
+        } else {
+            setTranslateX(0); // Возвращаем назад
+        }
     };
 
     const handleInputChange = (field: keyof FatMeasuringData['measurements'], value: string) => {
@@ -89,22 +107,20 @@ const FatMeasurement: React.FC<FatMeasurementProps> = ({ item }) => {
         setIsCollapsed((prev) => !prev);
     };
 
-    const swipeHandlers = useSwipeable({
-        onSwipedLeft: () => setShowDeleteArea(true),
-        onSwipedRight: () => setShowDeleteArea(false),
-    });
-
     return (
         <div className={style.container}>
-            <div className={`${style.deleteArea} ${showDeleteArea ? style.visible : ''}`}>
+            <div className={style.deleteArea}>
                 <DeleteIcon
                     className={style.deleteIcon}
                     onClick={handleDelete}
                 />
             </div>
             <div
-                className={`${style.fatMeasurement} ${showDeleteArea ? style.swiped : ''}`}
-                {...swipeHandlers}
+                className={style.fatMeasurement}
+                style={{ transform: `translateX(${translateX}px)` }}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
             >
                 <div className={style.content}>
                     <div className={style.header}>
@@ -169,7 +185,9 @@ const FatMeasurement: React.FC<FatMeasurementProps> = ({ item }) => {
                                 key={key}
                                 className={style.measurement}
                             >
-                                <div className={style.title}>{measurementLabels[key as keyof typeof measurementLabels]}: </div>
+                                <div className={style.title}>
+                                    {measurementLabels[key as keyof typeof measurementLabels]}:{' '}
+                                </div>
                                 {isEditing ? (
                                     <Input
                                         name={key}
