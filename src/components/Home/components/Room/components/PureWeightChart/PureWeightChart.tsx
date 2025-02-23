@@ -1,82 +1,192 @@
-import React, { useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { WeightMeasuringData } from '../../../../../../types';
+import React, { useEffect, useState, useMemo } from 'react';
+import { ResponsiveLine } from '@nivo/line';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../../../store';
-import { getAllWeightMeasuringAsync, getAllFatMeasuringAsync } from '../../../../../../store/slices/measurementSlice';
+import {
+    getAllWeightMeasuringAsync,
+    getAllFatMeasuringAsync,
+} from '../../../../../../store/slices/measurementSlice';
 import style from './PureWeightChart.module.scss';
+import { calculatePureWeight, FatMeasurement, WeightMeasurement } from './utils';
 
-interface PureWeightChartProps {
-    data?: WeightMeasuringData[]; // Данные с весом
-}
-
-const PureWeightChart: React.FC<PureWeightChartProps> = () => {
+const PureWeightChart: React.FC = () => {
+    const dispatch = useDispatch<AppDispatch>();
     const weightMeasuring = useSelector((state: RootState) => state.measurements.weightMeasuring);
     const fatMeasuring = useSelector((state: RootState) => state.measurements.fatMeasuring);
     const { id } = useSelector((state: RootState) => state.user);
-    const dispatch = useDispatch<AppDispatch>();
 
-    // Загружаем данные о весе и жире
+    const [visibleLines, setVisibleLines] = useState({
+        Вес: true,
+        'Чистая масса': true,
+    });
+
     useEffect(() => {
         if (id) {
             dispatch(getAllWeightMeasuringAsync(id));
             dispatch(getAllFatMeasuringAsync(id));
         }
     }, [dispatch, id]);
+    // Вычисляем чистую массу тела
+    const pureData = useMemo(() => {
+        if (weightMeasuring.length === 0) return []; // Ждём загрузки веса
 
-    // Объединяем данные о весе и жире по дате
-    const chartData = weightMeasuring.map((weightItem) => {
-        const fatItem = fatMeasuring.find(
-            (fat) => fat.timestamp === weightItem.timestamp
-        );
+        const validFatMeasuring: FatMeasurement[] = fatMeasuring
+            .filter((entry) => entry.timestamp && entry.bodyFat !== null) // Убираем пустые данные
+            .map(({ timestamp, bodyFat }) => ({
+                timestamp: timestamp as string,
+                bodyFat: bodyFat as number,
+            }));
 
-        const bodyFatPercentage = fatItem?.bodyFat || 0; // Процент жира
-        const weight = weightItem.weight !== null ? weightItem.weight : 0;
+        const validWeightMeasuring: WeightMeasurement[] = weightMeasuring
+            .filter((entry) => entry.timestamp && entry.weight !== null) // Фильтруем пустые записи
+            .map(({ timestamp, weight }) => ({ timestamp: timestamp as string, weight: String(weight) })); // Преобразуем в string
 
-        const pureWeight = weight * (1 - bodyFatPercentage / 100); // Чистый вес
+        return calculatePureWeight(validFatMeasuring, validWeightMeasuring);
+    }, [weightMeasuring, fatMeasuring]);
 
-        return {
-            date: new Date(weightItem.timestamp || 0).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }), // Форматируем дату
-            weight: weightItem.weight, // Общий вес
-            pureWeight: pureWeight, // Чистый вес
-        };
-    });
+    const areaBaseline = useMemo(() => {
+        const values = pureData
+            .flatMap(({ weight, pureWeight }) =>
+                Object.keys(visibleLines)
+                    .filter((key) => visibleLines[key as keyof typeof visibleLines]) // Берем только активные линии
+                    .map((key) => (key === 'Вес' ? parseFloat(weight) : pureWeight))
+            )
+            .filter((val) => val !== undefined && val !== null); // Исключаем null/undefined
+
+        return values.length > 0 ? Math.min(...values) : 0;
+    }, [pureData, visibleLines]);
+
+    console.log(pureData, 'pureData');
+
+    // Подготовка данных для графика
+    const chartData = useMemo(() => {
+        return [
+            {
+                id: 'Вес',
+                data: pureData.map(({ timestamp, weight }) => ({
+                    x: new Date(timestamp).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }),
+                    y: weight,
+                })),
+            },
+            {
+                id: 'Чистая масса',
+                data: pureData.map(({ timestamp, pureWeight }) => ({
+                    x: new Date(timestamp).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }),
+                    y: pureWeight,
+                })),
+            },
+        ].filter((series) => visibleLines[series.id as keyof typeof visibleLines]);
+    }, [pureData, visibleLines]);
+    console.log(chartData, 'chartData');
 
     return (
         <div className={style.pureWeightChart}>
             <div>График изменения веса и чистой массы тела</div>
-            <div className={style.chartContainer}>
-                <ResponsiveContainer>
-                    <LineChart
-                        data={chartData}
-                        margin={{
-                            top: 20,
-                            right: 30,
-                            left: 20,
-                            bottom: 5,
-                        }}
+            <div className={style.controls}>
+                {(Object.keys(visibleLines) as Array<keyof typeof visibleLines>).map((key) => (
+                    <label
+                        key={key}
+                        className={style.checkboxLabel}
                     >
-                        <CartesianGrid strokeDasharray='3 3' />
-                        <XAxis dataKey='date' />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Line
-                            type='monotone'
-                            dataKey='weight'
-                            stroke='#8884d8'
-                            activeDot={{ r: 8 }}
-                            name='Вес'
+                        <input
+                            type='checkbox'
+                            checked={visibleLines[key]}
+                            onChange={() => setVisibleLines((prev) => ({ ...prev, [key]: !prev[key] }))}
                         />
-                        <Line
-                            type='monotone'
-                            dataKey='pureWeight'
-                            stroke='#82ca9d'
-                            activeDot={{ r: 8 }}
-                            name='Чистая масса'
-                        />
-                    </LineChart>
-                </ResponsiveContainer>
+                        {key === 'Вес' ? 'Вес' : 'Чистая масса'}
+                    </label>
+                ))}
+            </div>
+            <div className={style.chartContainer}>
+                <ResponsiveLine
+                    data={chartData}
+                    margin={{ top: 50, right: 20, bottom: 100, left: 60 }}
+                    xScale={{ type: 'point' }}
+                    yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false, reverse: false }}
+                    curve='monotoneX'
+                    axisBottom={{
+                        tickSize: 5,
+                        tickPadding: 5,
+                        tickRotation: -30,
+                        legend: 'Дата',
+                        legendOffset: 50,
+                        legendPosition: 'middle',
+                    }}
+                    axisLeft={{
+                        tickSize: 0,
+                        tickPadding: 15,
+                        tickRotation: 0,
+                        legend: 'Вес / Чистая масса',
+                        legendOffset: -45,
+                        legendPosition: 'middle',
+                    }}
+                    enableGridX={false}
+                    enableGridY={false}
+                    colors={{ scheme: 'nivo' }}
+                    lineWidth={4}
+                    pointSize={11}
+                    enablePoints={true}
+                    pointBorderWidth={2}
+                    enablePointLabel={true}
+                    pointLabel='data.yFormatted'
+                    pointBorderColor={{ from: 'serieColor' }}
+                    pointLabelYOffset={-10}
+                    enableArea={true}
+                    areaBlendMode='normal'
+                    areaBaselineValue={areaBaseline}
+                    areaOpacity={0.15}
+                    useMesh={true}
+                    enableSlices='x'
+                    motionConfig='wobbly'
+                    legends={[
+                        {
+                            anchor: 'bottom-left',
+                            direction: 'row',
+                            translateY: 90,
+                            translateX: -20,
+                            itemsSpacing: 40,
+                            itemWidth: 80,
+                            itemHeight: 20,
+                            itemOpacity: 0.75,
+                            symbolSize: 12,
+                            symbolShape: 'circle',
+                            symbolBorderColor: 'rgba(0, 0, 0, .5)',
+                            effects: [
+                                {
+                                    on: 'hover',
+                                    style: {
+                                        itemOpacity: 1,
+                                    },
+                                },
+                            ],
+                        },
+                    ]}
+                    theme={{
+                        axis: {
+                            ticks: {
+                                text: {
+                                    fill: '#000',
+                                    fontSize: 12,
+                                    fontWeight: 'bold',
+                                },
+                            },
+                        },
+                        grid: {
+                            line: {
+                                stroke: '#ddd',
+                                strokeWidth: 1,
+                                strokeDasharray: '4 4',
+                            },
+                        },
+                        legends: {
+                            text: {
+                                fontWeight: 'bold',
+                                fontSize: 13,
+                                fill: '#333',
+                            },
+                        },
+                    }}
+                />
             </div>
         </div>
     );

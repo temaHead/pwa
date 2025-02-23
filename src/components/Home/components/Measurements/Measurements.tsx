@@ -25,8 +25,7 @@ function Measurements() {
     const fatMeasuring = useSelector((state: RootState) => state.measurements.fatMeasuring);
     const weightMeasuring = useSelector((state: RootState) => state.measurements.weightMeasuring);
     const bodyMeasuring = useSelector((state: RootState) => state.measurements.bodyMeasuring);
-
-    const filter = useSelector((state: RootState) => state.filter);
+    const filters = useSelector((state: RootState) => state.filter.filters);
     const user = useSelector((state: RootState) => state.user);
 
     const [isModalOpen, setModalOpen] = useState(false);
@@ -51,49 +50,31 @@ function Measurements() {
         if (fatMeasuring.length === 0 && weightMeasuring.length === 0) return;
         const timeout = setTimeout(() => {
             const sortedFat = fatMeasuring
-                .filter((item) => item.timestamp) // Оставляем только элементы с датой
+                .filter((item) => item.timestamp)
                 .sort((a, b) => new Date(b.timestamp!).getTime() - new Date(a.timestamp!).getTime());
             if (sortedFat.length > 0) {
-                const latestFat = sortedFat[0]; // Берем самый новый элемент
+                const latestFat = sortedFat[0];
                 if (latestFat.bodyFat !== user.bodyFat) {
                     dispatch(updateUserProfileAsync({ ...user, bodyFat: latestFat.bodyFat }));
                 }
             }
             const sortedWeight = weightMeasuring
-                .filter((item) => item.timestamp) // Оставляем только элементы с датой
+                .filter((item) => item.timestamp)
                 .sort((a, b) => new Date(b.timestamp!).getTime() - new Date(a.timestamp!).getTime());
             if (sortedWeight.length > 0) {
-                const latestWeight = sortedWeight[0]; // Берем самый новый элемент
+                const latestWeight = sortedWeight[0];
                 if (latestWeight.weight !== user.currentWeight) {
                     dispatch(updateUserProfileAsync({ ...user, currentWeight: latestWeight.weight }));
                 }
             }
-        }, 200); // Ждем 200 мс, чтобы стейт обновился
+        }, 200);
         return () => clearTimeout(timeout);
     }, [dispatch, fatMeasuring, weightMeasuring, user]);
 
-    return (
-        <div className={style.measurements}>
-            <div className={style.header}>
-                <div
-                    className={style.icon}
-                    onClick={handleGoToRoom}
-                >
-                    <ArrowBackIosIcon />
-                </div>
-                <div className={style.title}>Мои замеры</div>
-                <div
-                    className={style.icon}
-                    onClick={handleAddMeasurement}
-                >
-                    <AddIcon />
-                </div>
-            </div>
-            <div className={style.filter}>
-                <Filter />
-            </div>
-            <div className={style.measurementsList}>
-                {filter.showFat && fatMeasuring.length > 0 && (
+    const getComponentById = (id: string) => {
+        switch (id) {
+            case 'fat':
+                return fatMeasuring.length > 0 ? (
                     <CollapsibleSection title='Измерения % жира в теле' defaultExpanded>
                         {fatMeasuring.map((item) => (
                             <div key={item.id}>
@@ -101,8 +82,9 @@ function Measurements() {
                             </div>
                         ))}
                     </CollapsibleSection>
-                )}
-                {filter.showWeight && weightMeasuring.length > 0 && (
+                ) : null;
+            case 'weight':
+                return weightMeasuring.length > 0 ? (
                     <CollapsibleSection title='Измерения веса' defaultExpanded>
                         {weightMeasuring.map((item) => (
                             <div key={item.id}>
@@ -110,8 +92,9 @@ function Measurements() {
                             </div>
                         ))}
                     </CollapsibleSection>
-                )}
-                {filter.showBody && bodyMeasuring.length > 0 && (
+                ) : null;
+            case 'body':
+                return bodyMeasuring.length > 0 ? (
                     <CollapsibleSection title='Измерения тела' defaultExpanded>
                         {bodyMeasuring.map((item) => (
                             <div key={item.id}>
@@ -119,7 +102,32 @@ function Measurements() {
                             </div>
                         ))}
                     </CollapsibleSection>
-                )}
+                ) : null;
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <div className={style.measurements}>
+            <div className={style.header}>
+                <div className={style.icon} onClick={handleGoToRoom}>
+                    <ArrowBackIosIcon />
+                </div>
+                <div className={style.title}>Мои замеры</div>
+                <div className={style.icon} onClick={handleAddMeasurement}>
+                    <AddIcon />
+                </div>
+            </div>
+            <div className={style.filter}>
+                <Filter />
+            </div>
+            <div className={style.measurementsList}>
+                {filters
+                    .filter(f => f.visible) // Отображаем только включенные фильтры
+                    .map(f => (
+                        <div key={f.id}>{getComponentById(f.id)}</div>
+                    ))}
             </div>
             <AddMeasurement
                 isOpen={isModalOpen}

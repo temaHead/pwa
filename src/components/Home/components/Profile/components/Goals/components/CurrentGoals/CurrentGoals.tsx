@@ -19,14 +19,14 @@ function CurrentGoals() {
                 {currentGoalsWeight.map((goal) => (
                     <CurrentGoalWeight
                         key={goal.id}
-                        goal={goal.goal}
+                        goal={goal}
                         currentWeight={user.currentWeight || 0}
                     />
                 ))}
                 {currentGoalsFat.map((goal) => (
                     <CurrentGoalFat
                         key={goal.id}
-                        goal={goal.goal}
+                        goal={goal}
                         bodyFat={user.bodyFat || 0}
                     />
                 ))}

@@ -1,20 +1,26 @@
-import { Goal } from '../../../../../../../../../../types';
+import { useNavigate } from 'react-router-dom';
+import { GoalData } from '../../../../../../../../../../types';
 import style from './CurrentGoalWeight.module.scss';
 
 interface CurrentGoalWeightProps {
-    goal: Goal;
+    goal: GoalData;
     currentWeight: number;
 }
 
 function CurrentGoalWeight(props: CurrentGoalWeightProps) {
-    const { goal, currentWeight } = props;
+    const { currentWeight, goal } = props;
+    const navigate = useNavigate(); // Хук для навигации
 
-    const initialWeight = Number(goal.initialWeight);
-    const targetWeight = Number(goal.desiredWeight);
-    
-    console.log("Начальный вес:", initialWeight);
-    console.log("Целевой вес:", targetWeight);
-    console.log("Текущий вес:", currentWeight);
+    const handleGoalClick = () => {
+        navigate(`/goalEditing/${goal.id}`);
+    };
+
+    const initialWeight = Number(goal.goal.initialWeight);
+    const targetWeight = Number(goal.goal.desiredWeight);
+
+    console.log('Начальный вес:', initialWeight);
+    console.log('Целевой вес:', targetWeight);
+    console.log('Текущий вес:', currentWeight);
 
     const totalDifference = Math.abs(targetWeight - initialWeight);
     let currentDifference = Math.abs(currentWeight - initialWeight);
@@ -23,13 +29,17 @@ function CurrentGoalWeight(props: CurrentGoalWeightProps) {
     const isLosingWeight = initialWeight > targetWeight;
 
     // Если вес вышел за границы цели, корректируем прогресс
-    if ((isLosingWeight && currentWeight > initialWeight) || 
-        (!isLosingWeight && currentWeight < initialWeight)) {
+    if (
+        (isLosingWeight && currentWeight > initialWeight) ||
+        (!isLosingWeight && currentWeight < initialWeight)
+    ) {
         currentDifference = 0; // Если ушли в другую сторону, прогресс = 0%
     }
 
-    if ((isLosingWeight && currentWeight < targetWeight) || 
-        (!isLosingWeight && currentWeight > targetWeight)) {
+    if (
+        (isLosingWeight && currentWeight < targetWeight) ||
+        (!isLosingWeight && currentWeight > targetWeight)
+    ) {
         currentDifference = totalDifference; // Если достигли цели или перешли её, 100%
     }
 
@@ -37,7 +47,10 @@ function CurrentGoalWeight(props: CurrentGoalWeightProps) {
     progress = Math.min(progress, 100); // Ограничиваем 100%
 
     return (
-        <div className={style.goalWeight}>
+        <div
+            className={style.goalWeight}
+            onClick={handleGoalClick}
+        >
             <div className={style.title}>Прогресс цели</div>
             <div className={style.progress}>
                 <div className={style.initialWeight}>{initialWeight} кг</div>

@@ -1,17 +1,23 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { getDoc, doc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
+interface FilterItem {
+    id: string;
+    label: string;
+    visible: boolean;
+}
+
 interface FilterState {
-    showFat: boolean;
-    showWeight: boolean;
-    showBody: boolean;
+    filters: FilterItem[];
 }
 
 const initialState: FilterState = {
-    showFat: true,
-    showWeight: true,
-    showBody: true,
+    filters: [
+        { id: 'fat', label: 'Показать жировые измерения', visible: true },
+        { id: 'weight', label: 'Показать измерения веса', visible: true },
+        { id: 'body', label: 'Показать измерения лентой', visible: true },
+    ],
 };
 
 // Загрузка фильтра из Firestore
@@ -30,39 +36,48 @@ export const fetchFilterAsync = createAsyncThunk(
 // Сохранение фильтра в Firestore
 export const saveFilterAsync = createAsyncThunk(
     'filter/saveFilter',
-    async ({ userId, filters }: { userId: string; filters: FilterState }) => {
+    async ({ userId, filters }: { userId: string; filters: FilterItem[] }) => {
         const filterRef = doc(db, 'filters', userId);
-        await setDoc(filterRef, filters);
-        return filters;
+        await setDoc(filterRef, { filters });
+        return { filters };
     }
 );
 
-// Сброс фильтра
+// Сброс фильтра к начальному состоянию
 export const resetFilterAsync = createAsyncThunk(
     'filter/resetFilter',
     async (userId: string) => {
         const filterRef = doc(db, 'filters', userId);
-        await setDoc(filterRef, initialState);
-        return initialState;
+        await setDoc(filterRef, { filters: initialState.filters });
+        return { filters: initialState.filters };
     }
 );
 
 const filterSlice = createSlice({
     name: 'filter',
     initialState,
-    reducers: {},
+    reducers: {
+        toggleFilterVisibility: (state, action: PayloadAction<string>) => {
+            state.filters = state.filters.map(filter =>
+                filter.id === action.payload ? { ...filter, visible: !filter.visible } : filter
+            );
+        },
+        reorderFilters: (state, action: PayloadAction<{ from: number; to: number }>) => {
+            const { from, to } = action.payload;
+            const updatedFilters = Array.from(state.filters);
+            const [movedFilter] = updatedFilters.splice(from, 1);
+            updatedFilters.splice(to, 0, movedFilter);
+            state.filters = updatedFilters;
+        },
+    },
     extraReducers: (builder) => {
         builder
-            .addCase(fetchFilterAsync.fulfilled, (_state, action) => {
-                return action.payload;
-            })
-            .addCase(saveFilterAsync.fulfilled, (_state, action) => {
-                return action.payload;
-            })
-            .addCase(resetFilterAsync.fulfilled, (_state, action) => {
-                return action.payload;
-            });
+            .addCase(fetchFilterAsync.fulfilled, (_state, action) => action.payload)
+            .addCase(saveFilterAsync.fulfilled, (_state, action) => action.payload)
+            .addCase(resetFilterAsync.fulfilled, (_state, action) => action.payload);
     },
 });
+
+export const { toggleFilterVisibility, reorderFilters } = filterSlice.actions;
 
 export default filterSlice.reducer;

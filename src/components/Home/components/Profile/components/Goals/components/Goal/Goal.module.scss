@@ -3,90 +3,57 @@
     width: 100px;
     position: relative;
 
-    .circle {
-        height: 100px;
-        width: 100px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .progressCircle {
         position: relative;
+        width: 100px;
+        height: 100px;
 
-        .statusLine {
-            height: 90px; // Немного меньше, чтобы бордер был виден
-            width: 90px;
-            border-radius: 50%;
+        svg {
+            width: 100%;
+            height: 100%;
+
+            .background {
+                fill: none;
+                stroke: rgba(0, 0, 0, 0.1);
+                stroke-width: 6px;
+            }
+
+            .progress {
+                fill: none;
+                stroke-width: 6px;
+                stroke-linecap: round;
+            }
+        }
+
+        .progressText {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
-
-            // &.active {
-            //     border: 3px solid #38b42d; // Зеленый бордер для активного статуса
-            // }
-
-            // &.done {
-            //     border: 3px solid #a08fed; // Синий бордер для завершенного статуса
-            // }
-            // &.pending {
-            //     border: 3px solid #2e1aa1; // Синий бордер для завершенного статуса
-            // }
-
-            // &.failed {
-            //     border: 3px solid #ccdc1f; // Синий бордер для завершенного статуса
-            // }
-
-            .content {
-                text-align: center;
-
-                .title {
-                    font-size: 14px;
-                    font-weight: bold;
+            text-align: center;
+            .title {
+                font-size: 14px;
+                font-weight: bold;
+                &.active {
+                    color: #2196f3;
+                }
+                &.done {
+                    color: #ff9800;
+                }
+                &.pending {
+                    color: #9e9e9e;
+                }
+                &.failed {
+                    color: #d32f2f;
+                }
+                &.success {
+                    color: #388e3c;
                 }
             }
         }
     }
-}
-.progressCircle {
-    position: relative;
-    display: inline-block;
-    width: 100px;
-    height: 100px;
-}
-
-.progressCircle svg {
-    width: 100%;
-    height: 100%;
-    transform: rotate(-90deg); /* Начало отсчета с 12 часов */
-}
-
-.progressCircle circle {
-    fill: none;
-    stroke-linecap: round;
-}
-
-.background {
-    stroke: #d1e4fd;
-    stroke-dasharray: none;
-}
-
-.progress {
-    transition: stroke-dashoffset 0.3s ease;
-}
-
-.progressText {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: center;
-    font-family: 'Open Sans', sans-serif;
-}
-
-.progressValue {
-    font-size: 25px;
-    color: #3e3e3e;
 }

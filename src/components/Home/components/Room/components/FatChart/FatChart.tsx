@@ -1,37 +1,22 @@
-import React, { useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { FatMeasuringData } from '../../../../../../types';
+import React, { useEffect, useState, useMemo } from 'react';
+import { ResponsiveLine } from '@nivo/line';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../../../store';
 import { getAllFatMeasuringAsync } from '../../../../../../store/slices/measurementSlice';
 import style from './FatChart.module.scss';
+import { FatMeasuringData } from '../../../../../../types';
 
-interface FatChartProps {
-    data?: FatMeasuringData[]; // Данные с замерами жира
-}
-
-const FatChart: React.FC<FatChartProps> = () => {
+const FatChart: React.FC = () => {
     const fatMeasuring = useSelector((state: RootState) => state.measurements.fatMeasuring);
     const dispatch = useDispatch<AppDispatch>();
     const { id, gender } = useSelector((state: RootState) => state.user);
 
-    // Определяем, какие линии отображать в зависимости от пола
-    const defaultVisibleLines = gender === 'male'
-        ? { chest: true, abdomen: true, thigh: true, bodyFat: true } // Для мужчин
-        : { thigh: true, tricep: true, waist: true, bodyFat: true }; // Для женщин
+    const defaultVisibleLines =
+        gender === 'male'
+            ? { chest: true, abdomen: true, thigh: true, bodyFat: true }
+            : { thigh: true, tricep: true, waist: true, bodyFat: true };
 
-    const [visibleLines, setVisibleLines] = React.useState(defaultVisibleLines);
-
-    // Преобразуем данные для графика
-    const chartData = fatMeasuring.map((item) => ({
-        date: new Date(item.timestamp || 0).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }), // Форматируем дату
-        chest: item.measurements.chest, // Грудь
-        abdomen: item.measurements.abdomen, // Живот
-        thigh: item.measurements.thigh, // Бедро
-        tricep: item.measurements.tricep, // Трицепс
-        waist: item.measurements.waist, // Талия
-        bodyFat: item.bodyFat, // Процент жира
-    }));
+    const [visibleLines, setVisibleLines] = useState(defaultVisibleLines);
 
     useEffect(() => {
         if (id) {
@@ -39,109 +24,171 @@ const FatChart: React.FC<FatChartProps> = () => {
         }
     }, [dispatch, id]);
 
+    // Вычисление минимального значения среди видимых серий
+    const areaBaseline = useMemo(() => {
+        const values = fatMeasuring
+            .flatMap((item) =>
+                Object.keys(visibleLines)
+                    .filter((key) => visibleLines[key as keyof typeof visibleLines]) // Берем только активные линии
+                    .map((key) =>
+                        key === 'bodyFat'
+                            ? item.bodyFat
+                            : item.measurements[key as keyof FatMeasuringData['measurements']]
+                    )
+            )
+            .filter((val) => val !== undefined && val !== null); // Исключаем null/undefined
+
+        return values.length > 0 ? Math.min(...values) : 0;
+    }, [fatMeasuring, visibleLines]);
+
+    const chartData = useMemo(
+        () =>
+            (Object.keys(visibleLines) as Array<keyof FatMeasuringData['measurements'] | 'bodyFat'>)
+                .map((key) => ({
+                    id: key,
+                    data: fatMeasuring.map((item) => ({
+                        x: new Date(item.timestamp || 0).toLocaleDateString('ru-RU', {
+                            day: 'numeric',
+                            month: 'short',
+                        }),
+                        y:
+                            key === 'bodyFat'
+                                ? item.bodyFat
+                                : item.measurements[key as keyof FatMeasuringData['measurements']],
+                    })),
+                }))
+                .filter((series) => visibleLines[series.id as keyof typeof visibleLines]),
+        [fatMeasuring, visibleLines]
+    );
+    console.log(chartData, 'fat');
+
     const handleToggleLine = (key: keyof typeof visibleLines) => {
         setVisibleLines((prev) => ({
             ...prev,
             [key]: !prev[key],
         }));
     };
+    
 
     return (
         <div className={style.chart}>
-            <div>График замеров жира и калипера</div>
-            <div style={{ marginBottom: '20px' }}>
+            <div className={style.chartTitle}>📊 График замеров жира</div>
+            <div className={style.controls}>
                 {Object.keys(visibleLines).map((key) => (
                     <label
-                    key={key}
-                    style={{ marginRight: '10px' }}
-                >
-                    <input
-                        type='checkbox'
-                        checked={visibleLines[key as keyof typeof visibleLines]}
-                        onChange={() => handleToggleLine(key as keyof typeof visibleLines)}
-                    />
-                    {key === 'chest' && 'Грудь'}
-                    {key === 'abdomen' && 'Живот'}
-                    {key === 'thigh' && 'Бедро'}
-                    {key === 'tricep' && 'Трицепс'}
-                    {key === 'waist' && 'Талия'}
-                    {key === 'bodyFat' && '% жира'}
-                </label>
+                        key={key}
+                        className={style.checkboxLabel}
+                    >
+                        <input
+                            type='checkbox'
+                            checked={visibleLines[key as keyof typeof visibleLines]}
+                            onChange={() => handleToggleLine(key as keyof typeof visibleLines)}
+                        />
+                        {key === 'chest' && 'Грудь'}
+                        {key === 'abdomen' && 'Живот'}
+                        {key === 'thigh' && 'Бедро'}
+                        {key === 'tricep' && 'Трицепс'}
+                        {key === 'waist' && 'Талия'}
+                        {key === 'bodyFat' && '% жира'}
+                    </label>
                 ))}
             </div>
             <div className={style.chartContainer}>
-                <ResponsiveContainer>
-                    <LineChart
-                        data={chartData}
-                        margin={{
-                            top: 20,
-                            right: 30,
-                            left: 20,
-                            bottom: 5,
-                        }}
-                    >
-                        <CartesianGrid strokeDasharray='3 3' />
-                        <XAxis dataKey='date' />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        {visibleLines.chest && (
-                            <Line
-                                type='monotone'
-                                dataKey='chest'
-                                stroke='#8884d8'
-                                activeDot={{ r: 8 }}
-                                name='Грудь'
-                            />
-                        )}
-                        {visibleLines.abdomen && (
-                            <Line
-                                type='monotone'
-                                dataKey='abdomen'
-                                stroke='#82ca9d'
-                                activeDot={{ r: 8 }}
-                                name='Живот'
-                            />
-                        )}
-                        {visibleLines.thigh && (
-                            <Line
-                                type='monotone'
-                                dataKey='thigh'
-                                stroke='#ffc658'
-                                activeDot={{ r: 8 }}
-                                name='Бедро'
-                            />
-                        )}
-                        {visibleLines.tricep && (
-                            <Line
-                                type='monotone'
-                                dataKey='tricep'
-                                stroke='#ff7300'
-                                activeDot={{ r: 8 }}
-                                name='Трицепс'
-                            />
-                        )}
-                        {visibleLines.waist && (
-                            <Line
-                                type='monotone'
-                                dataKey='waist'
-                                stroke='#413ea0'
-                                activeDot={{ r: 8 }}
-                                name='Талия'
-                            />
-                        )}
-                        {visibleLines.bodyFat && (
-                            <Line
-                                type='monotone'
-                                dataKey='bodyFat'
-                                stroke='#ff0000'
-                                strokeDasharray='5 5'
-                                activeDot={{ r: 8 }}
-                                name='% жира'
-                            />
-                        )}
-                    </LineChart>
-                </ResponsiveContainer>
+                <ResponsiveLine
+                    data={chartData}
+                    margin={{ top: 50, right: 20, bottom: 100, left: 60 }}
+                    xScale={{ type: 'point' }}
+                    yScale={{
+                        type: 'linear',
+                        min: 'auto',
+                        max: 'auto',
+                        stacked: false,
+                        reverse: false,
+                    }}
+                    curve='monotoneX'
+                    axisBottom={{
+                        tickSize: 5,
+                        tickPadding: 5,
+                        tickRotation: -30,
+                        legend: 'Дата',
+                        legendOffset: 50,
+                        legendPosition: 'middle',
+                    }}
+                    axisLeft={{
+                        tickSize: 0,
+                        tickPadding: 15,
+                        tickRotation: 0,
+                        legend: 'мм / % жира',
+                        legendOffset: -45,
+                        legendPosition: 'middle',
+                    }}
+                    enableGridX={false}
+                    enableGridY={false}
+                    colors={{ scheme: 'nivo' }}
+                    lineWidth={4}
+                    pointSize={11}
+                    enablePoints={true}
+                    pointBorderWidth={2}
+                    enablePointLabel={true}
+                    pointLabel='data.yFormatted'
+                    pointBorderColor={{ from: 'serieColor' }}
+                    pointLabelYOffset={-10}
+                    enableArea={true}
+                    areaBlendMode='normal'
+                    areaBaselineValue={areaBaseline}
+                    areaOpacity={0.15}
+                    useMesh={true}
+                    enableSlices='x'
+                    motionConfig='wobbly'
+                    legends={[
+                        {
+                            anchor: 'bottom-left',
+                            direction: 'row',
+                            translateY: 90,
+                            translateX: -20,
+                            itemsSpacing: 0,
+                            itemWidth: 80,
+                            itemHeight: 20,
+                            itemOpacity: 0.75,
+                            symbolSize: 12,
+                            symbolShape: 'circle',
+                            symbolBorderColor: 'rgba(0, 0, 0, .5)',
+                            effects: [
+                                {
+                                    on: 'hover',
+                                    style: {
+                                        itemOpacity: 1,
+                                    },
+                                },
+                            ],
+                        },
+                    ]}
+                    theme={{
+                        axis: {
+                            ticks: {
+                                text: {
+                                    fill: '#000',
+                                    fontSize: 12,
+                                    fontWeight: 'bold',
+                                },
+                            },
+                        },
+                        grid: {
+                            line: {
+                                stroke: '#ddd',
+                                strokeWidth: 1,
+                                strokeDasharray: '4 4',
+                            },
+                        },
+                        legends: {
+                            text: {
+                                fontWeight: 'bold',
+                                fontSize: 13,
+                                fill: '#333',
+                            },
+                        },
+                    }}
+                />
             </div>
         </div>
     );

@@ -13,7 +13,7 @@ function Goals() {
     const statusOrder = ['initial', 'done', 'pending', 'success', 'failed'];
 
     const sortedGoals = goals
-        .filter((goal) => goal.goal.status) 
+        .filter((goal) => goal.goal.status)
         .sort((a, b) => {
             // Сортируем по порядку, определенному в statusOrder
             return statusOrder.indexOf(a.goal.status) - statusOrder.indexOf(b.goal.status);
@@ -28,9 +28,7 @@ function Goals() {
                 <div className={style.circle}>
                     <div className={style.statusLine}>
                         <div className={style.content}>
-                            <div className={style.icon}>
-                                <AddIcon />
-                            </div>
+                            <AddIcon />
                         </div>
                     </div>
                 </div>

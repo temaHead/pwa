@@ -29,18 +29,21 @@ interface WidgetSettings {
 // Стили для перетаскиваемого элемента
 const getItemStyle = (
     isDragging: boolean,
-    draggableStyle: DraggableProvidedDraggableProps['style'] | undefined // Разрешаем undefined
+    draggableStyle: DraggableProvidedDraggableProps['style'] | undefined
 ): CSSProperties => ({
-    userSelect: 'none', // Допустимое значение для userSelect
+    userSelect: 'none',
     padding: '8px',
     margin: '0 0 8px 0',
-    background: isDragging ? '#2196F3' : '#fff', // Синий фон при перетаскивании
-    color: isDragging ? '#fff' : '#000', // Белый текст при перетаскивании
-    borderRadius: '4px',
-    boxShadow: isDragging ? '0 4px 8px rgba(0, 0, 0, 0.2)' : 'none', // Тень при перетаскивании
-    transition: 'background 0.2s, color 0.2s, box-shadow 0.2s', // Плавные переходы
-    ...(draggableStyle || {}), // Если draggableStyle undefined, используем пустой объект
+    background: isDragging ? 'rgba(200, 200, 200, 0.5)' : '#fff', // Серый полупрозрачный фон
+    color: '#000',
+    borderRadius: '8px',
+    boxShadow: isDragging ? '0 4px 12px rgba(0, 0, 0, 0.2)' : 'none',
+    transition: 'background 0.2s, box-shadow 0.2s, transform 0.2s',
+    opacity: isDragging ? 0.6 : 1, // Полупрозрачность при перетаскивании
+    backdropFilter: isDragging ? 'blur(4px)' : 'none', // Размытие фона
+    ...(draggableStyle || {}),
 });
+
 const GraphFilter: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const userId = useSelector((state: RootState) => state.user.id);

@@ -4,9 +4,14 @@
     overflow: auto;
     height: 100%;
     align-items: center;
+    scrollbar-width: none; // Для Firefox (скрывает полосу прокрутки)
+
+    &::-webkit-scrollbar {
+        display: none; // Для Chrome, Safari
+    }
     .addGoal {
-        height: 100px;
-        width: 100px;
+        height: 95px;
+        width: 95px;
         border-radius: 50%;
     
         .circle {
@@ -16,6 +21,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
     
             .statusLine {
                 height: 90px; // Немного меньше, чтобы бордер был виден
@@ -24,15 +30,20 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border: 5px solid #818181; // Зеленый бордер для активного статуса
+                border: 6px solid #818181; // Зеленый бордер для активного статуса
     
     
                 .content {
-                    text-align: center;
+                    height: 100%;
+                    width: 100%;
+                    background-color: rgb(233, 233, 232);
+                    z-index: -1;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: hidden;
     
-                    .icon {                    
-                      
-                    }
                 }
             }
         }

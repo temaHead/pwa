@@ -64,10 +64,16 @@ function Goal({ goal, currentWeight, bodyFat }: GoalProps) {
     let currentDifferenceFat = Math.abs(bodyFat - initialFat);
 
     // Коррекция, если цель "провалена" или текущий вес ушел в обратную сторону
-    if ((isLosingWeight && currentWeight > initialWeight) || (!isLosingWeight && currentWeight < initialWeight)) {
+    if (
+        (isLosingWeight && currentWeight > initialWeight) ||
+        (!isLosingWeight && currentWeight < initialWeight)
+    ) {
         currentDifferenceWeight = 0;
     }
-    if ((isLosingWeight && currentWeight < targetWeight) || (!isLosingWeight && currentWeight > targetWeight)) {
+    if (
+        (isLosingWeight && currentWeight < targetWeight) ||
+        (!isLosingWeight && currentWeight > targetWeight)
+    ) {
         currentDifferenceWeight = totalDifferenceWeight;
     }
 
@@ -89,7 +95,7 @@ function Goal({ goal, currentWeight, bodyFat }: GoalProps) {
     const r = 40;
     const cx = 50;
     const cy = 50;
-    const strokeWidth = 5;
+    const strokeWidth = 6;
     const circumference = 2 * Math.PI * r;
     const offset = circumference * ((100 - progress) / 100);
 
@@ -103,26 +109,41 @@ function Goal({ goal, currentWeight, bodyFat }: GoalProps) {
     };
 
     return (
-        <div className={style.goal} onClick={handleGoalClick}>
+        <div
+            className={style.goal}
+            onClick={handleGoalClick}
+        >
             <Badge
-                color="secondary"
+                color='secondary'
                 badgeContent={goalData.status === 'done' ? '!' : 0}
-                overlap="circular"
+                overlap='circular'
             >
                 <div className={style.progressCircle}>
-                    <svg viewBox="0 0 100 100" data-status={status}>
-                        {/* Серый фон */}
+                    <svg
+                        viewBox='0 0 100 100'
+                        data-status={status}
+                    >
+                        {/* Светлый фон круга */}
+                        <circle
+                            className={style.innerBackground}
+                            cx={cx}
+                            cy={cy}
+                            r={r}
+                            fill={progressColors[status] + '20'} // Полупрозрачный фон
+                        />
+
+                        {/* Серый фон обводки */}
                         <circle
                             className={style.background}
                             cx={cx}
                             cy={cy}
                             r={r}
                             strokeWidth={strokeWidth}
+                            stroke={progressColors[status] + '50'} // Светлый серый оттенок
                         />
 
                         {/* Прогресс */}
                         <circle
-                            data-status={status}
                             className={style.progress}
                             cx={cx}
                             cy={cy}
@@ -134,7 +155,7 @@ function Goal({ goal, currentWeight, bodyFat }: GoalProps) {
                         />
                     </svg>
                     <div className={style.progressText}>
-                        <div className={style.title}>
+                        <div className={`${style.title} ${style[status]}`}>
                             {goalData.type === 'weight'
                                 ? ` ${goalData.desiredWeight} кг`
                                 : ` ${goalData.desiredFat} %`}
