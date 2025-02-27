@@ -6,14 +6,10 @@ import {
     updateWeightMeasuringAsync,
     deleteWeightMeasuringAsync,
 } from '../../../../../../store/slices/measurementSlice';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditRoundedIcon from '@mui/icons-material/EditRounded';
-import Check from '@mui/icons-material/Check';
-import Close from '@mui/icons-material/Close';
-import Button from '@mui/material/Button';
-import style from './WeightMeasurement.module.scss';
-import Input from '../../../../../../shared/components/Input/Input';
+import { Button, Input, Popconfirm, theme } from 'antd';
+import { DeleteOutlined, EditOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { format, parseISO } from 'date-fns';
+import style from './WeightMeasurement.module.scss';
 
 interface WeightMeasurementProps {
     item: WeightMeasuringData;
@@ -21,30 +17,26 @@ interface WeightMeasurementProps {
 
 const WeightMeasurement: React.FC<WeightMeasurementProps> = ({ item }) => {
     const dispatch = useDispatch<AppDispatch>();
-
     const [isEditing, setIsEditing] = useState(false);
     const [editedWeight, setEditedWeight] = useState(item.weight);
     const [editedTimestamp, setEditedTimestamp] = useState(item.timestamp);
-
     const [translateX, setTranslateX] = useState(0);
     const startX = useRef(0);
-
+    const { token } = theme.useToken(); // Получаем цвета текущей темы
+    const backgroundColor = token.colorBgLayout; // Автоматически подстраивается
+    const textColor = token.colorTextBase;
+    const colorBgContainer = token.colorBgContainer;
     const handleTouchStart = (e: React.TouchEvent) => {
         startX.current = e.touches[0].clientX;
     };
 
     const handleTouchMove = (e: React.TouchEvent) => {
         const deltaX = e.touches[0].clientX - startX.current;
-        const newTranslateX = Math.min(0, Math.max(-75, deltaX));
-        setTranslateX(newTranslateX);
+        setTranslateX(Math.min(0, Math.max(-75, deltaX)));
     };
 
     const handleTouchEnd = () => {
-        if (translateX < -40) {
-            setTranslateX(-75); // Закрываем
-        } else {
-            setTranslateX(0); // Возвращаем назад
-        }
+        setTranslateX(translateX < -40 ? -75 : 0);
     };
 
     const handleSave = async () => {
@@ -52,15 +44,12 @@ const WeightMeasurement: React.FC<WeightMeasurementProps> = ({ item }) => {
             console.error('ID отсутствует, невозможно сохранить изменения');
             return;
         }
-
         try {
-            await dispatch(
-                updateWeightMeasuringAsync({
-                    id: item.id,
-                    weight: editedWeight,
-                    timestamp: editedTimestamp,
-                })
-            );
+            await dispatch(updateWeightMeasuringAsync({
+                id: item.id,
+                weight: editedWeight,
+                timestamp: editedTimestamp,
+            }));
             setIsEditing(false);
         } catch (error) {
             console.error('Ошибка при сохранении данных:', error);
@@ -72,7 +61,6 @@ const WeightMeasurement: React.FC<WeightMeasurementProps> = ({ item }) => {
             console.error('ID отсутствует, невозможно удалить замер');
             return;
         }
-
         try {
             await dispatch(deleteWeightMeasuringAsync(item.id));
         } catch (error) {
@@ -80,24 +68,22 @@ const WeightMeasurement: React.FC<WeightMeasurementProps> = ({ item }) => {
         }
     };
 
-    const handleCancel = () => {
-        setEditedWeight(item.weight);
-        setEditedTimestamp(item.timestamp);
-        setIsEditing(false);
-    };
-
     return (
-        <div className={style.container}>
+        <div className={style.container} style={{ backgroundColor: colorBgContainer, color: textColor }}>
             <div className={style.deleteArea}>
-                <DeleteIcon
-                    className={style.deleteIcon}
-                    onClick={handleDelete}
-                />
+                <Popconfirm
+                    title="Удалить замер?"
+                    onConfirm={handleDelete}
+                    okText="Да"
+                    cancelText="Нет"
+                >
+                    <DeleteOutlined className={style.deleteIcon} />
+                </Popconfirm>
             </div>
 
             <div
                 className={style.measurement}
-                style={{ transform: `translateX(${translateX}px)` }}
+                style={{ transform: `translateX(${translateX}px)`, backgroundColor }}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
@@ -109,14 +95,9 @@ const WeightMeasurement: React.FC<WeightMeasurementProps> = ({ item }) => {
                             <div className={style.value}>
                                 {isEditing ? (
                                     <Input
-                                        name='weight'
                                         type='number'
                                         value={editedWeight ?? ''}
-                                        onChange={(e) => {
-                                            const value = e.target.value;
-                                            setEditedWeight(value === '' ? null : parseFloat(value));
-                                        }}
-                                        variant='standard'
+                                        onChange={(e) => setEditedWeight(e.target.value ? parseFloat(e.target.value) : null)}
                                     />
                                 ) : (
                                     <div>{item.weight} кг</div>
@@ -128,11 +109,9 @@ const WeightMeasurement: React.FC<WeightMeasurementProps> = ({ item }) => {
                             <div className={style.date}>
                                 {isEditing ? (
                                     <Input
-                                        name='timestamp'
                                         type='date'
                                         value={editedTimestamp ?? ''}
                                         onChange={(e) => setEditedTimestamp(e.target.value)}
-                                        variant='standard'
                                     />
                                 ) : (
                                     <div>{format(parseISO(item.timestamp || ''), 'dd.MM.yyyy')}</div>
@@ -140,9 +119,7 @@ const WeightMeasurement: React.FC<WeightMeasurementProps> = ({ item }) => {
                             </div>
                             <div className={style.icon}>
                                 {!isEditing && (
-                                    <div onClick={() => setIsEditing(true)}>
-                                        <EditRoundedIcon />
-                                    </div>
+                                    <EditOutlined onClick={() => setIsEditing(true)} />
                                 )}
                             </div>
                         </div>
@@ -150,20 +127,10 @@ const WeightMeasurement: React.FC<WeightMeasurementProps> = ({ item }) => {
 
                     {isEditing && (
                         <div className={style.actions}>
-                            <Button
-                                variant='contained'
-                                color='error'
-                                startIcon={<Close />}
-                                onClick={handleCancel}
-                            >
+                            <Button icon={<CloseOutlined />} onClick={() => setIsEditing(false)}>
                                 Отменить
                             </Button>
-                            <Button
-                                variant='contained'
-                                color='success'
-                                startIcon={<Check />}
-                                onClick={handleSave}
-                            >
+                            <Button type='primary' icon={<CheckOutlined />} onClick={handleSave}>
                                 Сохранить
                             </Button>
                         </div>

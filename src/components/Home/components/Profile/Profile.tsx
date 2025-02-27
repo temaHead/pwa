@@ -1,88 +1,131 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
 import Logout from '../../../Auth/Logout/Logout';
-import style from './Profile.module.scss';
 import { useNavigate } from 'react-router-dom';
-import EditRoundedIcon from '@mui/icons-material/EditRounded';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
+import { EditOutlined, UserOutlined, BulbOutlined, LeftOutlined } from '@ant-design/icons';
+import { Button, Typography, Flex, Avatar, Switch, theme } from 'antd';
 import Goals from './components/Goals/Goals';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { getAllGoalsAsync } from '../../../../store/slices/goalsSlice';
 import CurrentGoals from './components/Goals/components/CurrentGoals/CurrentGoals';
+import style from './Profile.module.scss';
+import { updateUserProfileAsync } from '../../../../store/slices/userSlice';
+
+const { Title, Text } = Typography;
 
 function Profile() {
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
 
-
     // Извлечение данных из Redux Store
     const user = useSelector((state: RootState) => state.user);
-
-    const handleGoToRoom = () => {
-        navigate('/room');
-    };
-    const handleGoToEditProfile = () => {
-        navigate('/editProfile');
-    };
+    const [userTheme, setUserTheme] = useState<'light' | 'dark'>(user.theme || 'light');
+    const { token } = theme.useToken(); // Получаем цвета текущей темы
+    const backgroundColor = token.colorBgLayout; // Автоматически подстраивается
+    const textColor = token.colorTextBase;
+    const colorIcon = token.colorIcon;
     useEffect(() => {
         if (user.id) dispatch(getAllGoalsAsync(user.id));
     }, [dispatch, user.id]);
 
-    return (
-        <div className={style.profile}>
-            <div className={style.header}>
-                <div
-                    className={style.icon}
-                    onClick={handleGoToRoom}
-                >
-                    {' '}
-                    <ArrowBackIosIcon />
-                </div>
-                <div className={style.title}>Профиль</div>
-                <div
-                    className={style.icon}
-                    onClick={handleGoToEditProfile}
-                >
-                    <EditRoundedIcon />
-                </div>
-            </div>
-            <div className={style.avatar}>
-                <div className={style.icon}>
-                    <AccountCircleRoundedIcon fontSize='large' />
-                </div>
-                <div></div>
-            </div>
+    const toggleTheme = async () => {
+        const newTheme: 'light' | 'dark' = userTheme === 'light' ? 'dark' : 'light';
+        setUserTheme(newTheme);
+        const updatedProfile = { ...user, theme: newTheme };
+        await dispatch(updateUserProfileAsync(updatedProfile));
+    };
 
+    return (
+        <div className={style.profile} style={{ backgroundColor, color: textColor }}>
+            {/* Шапка профиля */}
+            <Flex
+                justify='space-between'
+                align='center'
+                className={style.header}
+            >
+                <Button
+                    type='text'
+                    icon={<LeftOutlined style={{ color: colorIcon }} />}
+                    onClick={() => navigate('/room')}
+                />
+                <Title
+                    level={4}
+                    style={{ margin: 0 }}
+                >
+                    Профиль
+                </Title>
+                <Flex
+                    align='center'
+                    gap={8}
+                >
+                    <Button
+                        type='text'
+                        icon={<EditOutlined style={{ color: colorIcon }} />}
+                        onClick={() => navigate('/editProfile')}
+                    />
+                </Flex>
+            </Flex>
+
+            {/* Аватар */}
+            <Flex
+                justify='center'
+                className={style.avatar}
+            >
+                <Avatar
+                    size={64}
+                    icon={<UserOutlined />}
+                />
+            </Flex>
+
+            {/* Информация о пользователе */}
             <div className={style.container}>
-                <div className={style.userInfo}>
-                    <div className={` ${style.item}`}>
-                        <div className={style.value}>{`${user.currentWeight || 0} кг`}</div>
-                        <div className={style.label}>Вес</div>
+                <Flex
+                    justify='space-around'
+                    className={style.userInfo}
+                >
+                    <div className={style.item}>
+                        <Text strong>{`${user.currentWeight || 0} кг`}</Text>
+                        <Text type='secondary'>Вес</Text>
                     </div>
-                    <div className={`${style.height} ${style.item}`}>
-                        <div className={style.value}>{`${user.height || 0} см`}</div>
-                        <div className={style.label}>Рост</div>
+                    <div className={style.item}>
+                        <Text strong>{`${user.height || 0} см`}</Text>
+                        <Text type='secondary'>Рост</Text>
                     </div>
-                    <div className={`${style.item}`}>
-                        <div className={style.value}>{`${user.bodyFat || 0}` } </div>
-                        <div className={style.label}>% жира</div>
+                    <div className={style.item}>
+                        <Text strong>{`${user.bodyFat || 0}%`}</Text>
+                        <Text type='secondary'>% жира</Text>
                     </div>
-                </div>
+                </Flex>
+
+                {/* Текущие цели */}
                 <div className={style.currentGoals}>
                     <CurrentGoals />
                 </div>
+
+                {/* Список целей */}
                 <div className={style.goals}>
-                    <div className={style.title}>Цели</div>
-                    <div className={style.goalsList}>
+                    <Title level={5}>Цели</Title>
                     <Goals />
-                    </div>
                 </div>
             </div>
-            <div className={style.logout}>
-                <Logout />
+            <div>
+                <Switch
+                    checked={userTheme === 'dark'}
+                    onChange={toggleTheme}
+                    checkedChildren={<BulbOutlined />}
+                    unCheckedChildren={<BulbOutlined />}
+                />
             </div>
+
+            {/* Кнопка выхода */}
+            <Flex
+                justify='center'
+                className={style.logout}
+            >
+                <Logout />
+            </Flex>
         </div>
     );
 }
+
 export default Profile;

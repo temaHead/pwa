@@ -1,7 +1,6 @@
-import React, { useState, useCallback } from 'react';
-import { Collapse, IconButton } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import React from 'react';
+import { Collapse, theme } from 'antd';
+import { CaretRightOutlined } from '@ant-design/icons';
 import style from './CollapsibleSection.module.scss';
 
 interface CollapsibleSectionProps {
@@ -10,25 +9,27 @@ interface CollapsibleSectionProps {
     defaultExpanded?: boolean;
 }
 
-const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children, defaultExpanded = false }) => {
-    const [isExpanded, setIsExpanded] = useState(defaultExpanded);
-
-    const toggleExpand = useCallback(() => {
-        setIsExpanded((prev) => !prev);
-    }, []);
-
+const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
+    title,
+    children,
+    defaultExpanded = false,
+}) => {
+    const { token } = theme.useToken(); // Получаем цвета текущей темы
+    const backgroundColor = token.colorBgContainer; // Автоматически подстраивается
     return (
-        <div className={style.collapsibleSection}>
-            <div className={style.header} onClick={toggleExpand}>
-                <div className={style.title}>{title}</div>
-                <IconButton size="medium">
-                    {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                </IconButton>
-            </div>
-            <Collapse in={isExpanded}>
+        <Collapse
+            style={{ backgroundColor, marginTop: 0 }}
+            defaultActiveKey={defaultExpanded ? ['1'] : []}
+            expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
+            className={style.collapsibleSection}
+        >
+            <Collapse.Panel
+                header={title}
+                key='1'
+            >
                 <div className={style.content}>{children}</div>
-            </Collapse>
-        </div>
+            </Collapse.Panel>
+        </Collapse>
     );
 };
 

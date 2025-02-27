@@ -1,4 +1,3 @@
-import { Badge } from '@mui/material';
 import { GoalData } from '../../../../../../../../types';
 import style from './Goal.module.scss';
 import { updateGoalAsync } from '../../../../../../../../store/slices/goalsSlice';
@@ -6,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { AppDispatch } from '../../../../../../../../store';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { Badge } from 'antd';
 
 interface GoalProps {
     goal: GoalData;
@@ -114,9 +114,9 @@ function Goal({ goal, currentWeight, bodyFat }: GoalProps) {
             onClick={handleGoalClick}
         >
             <Badge
-                color='secondary'
-                badgeContent={goalData.status === 'done' ? '!' : 0}
-                overlap='circular'
+                color='red'
+                count={goalData.status === 'done' ? '!' : 0}
+                offset={[-15, 13]}
             >
                 <div className={style.progressCircle}>
                     <svg

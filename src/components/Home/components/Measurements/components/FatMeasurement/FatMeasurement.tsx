@@ -6,15 +6,16 @@ import {
     updateFatMeasuringAsync,
     deleteFatMeasuringAsync,
 } from '../../../../../../store/slices/measurementSlice';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditRoundedIcon from '@mui/icons-material/EditRounded';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import Check from '@mui/icons-material/Check';
-import Close from '@mui/icons-material/Close';
-import Button from '@mui/material/Button';
+import {
+    DeleteOutlined,
+    EditOutlined,
+    ArrowDownOutlined,
+    ArrowUpOutlined,
+    CheckOutlined,
+    CloseOutlined,
+} from '@ant-design/icons';
+import { Button, Input, Popconfirm, theme } from 'antd';
 import style from './FatMeasurement.module.scss';
-import Input from '../../../../../../shared/components/Input/Input';
 import { format, parseISO } from 'date-fns';
 
 interface FatMeasurementProps {
@@ -32,10 +33,12 @@ const FatMeasurement: React.FC<FatMeasurementProps> = ({ item }) => {
     const [editedTimestamp, setEditedTimestamp] = useState(item.timestamp);
     const [translateX, setTranslateX] = useState(0);
     const startX = useRef(0);
-
     const filteredMeasurements =
         gender === 'male' ? ['chest', 'abdomen', 'thigh'] : ['thigh', 'tricep', 'waist'];
-
+    const { token } = theme.useToken(); // Получаем цвета текущей темы
+    const backgroundColor = token.colorBgLayout; // Автоматически подстраивается
+    const textColor = token.colorTextBase;
+    const colorBgContainer = token.colorBgContainer;
     const measurementLabels = {
         chest: 'Грудь',
         abdomen: 'Живот',
@@ -44,23 +47,18 @@ const FatMeasurement: React.FC<FatMeasurementProps> = ({ item }) => {
         waist: 'Талия',
     };
 
-    const handleTouchStart = (e: React.TouchEvent) => {
-        startX.current = e.touches[0].clientX;
-    };
-
-    const handleTouchMove = (e: React.TouchEvent) => {
-        const deltaX = e.touches[0].clientX - startX.current;
-        const newTranslateX = Math.min(0, Math.max(-75, deltaX));
-        setTranslateX(newTranslateX);
-    };
-
-    const handleTouchEnd = () => {
-        if (translateX < -40) {
-            setTranslateX(-75); // Закрываем
-        } else {
-            setTranslateX(0); // Возвращаем назад
-        }
-    };
+        const handleTouchStart = (e: React.TouchEvent) => {
+            startX.current = e.touches[0].clientX;
+        };
+    
+        const handleTouchMove = (e: React.TouchEvent) => {
+            const deltaX = e.touches[0].clientX - startX.current;
+            setTranslateX(Math.min(0, Math.max(-75, deltaX)));
+        };
+    
+        const handleTouchEnd = () => {
+            setTranslateX(translateX < -40 ? -75 : 0);
+        };
 
     const handleInputChange = (field: keyof FatMeasuringData['measurements'], value: string) => {
         setEditedMeasurements((prev) => ({
@@ -70,127 +68,95 @@ const FatMeasurement: React.FC<FatMeasurementProps> = ({ item }) => {
     };
 
     const handleSave = async () => {
-        if (!item.id) {
-            console.error('ID отсутствует, невозможно сохранить изменения');
-            return;
-        }
-
-        try {
-            await dispatch(
-                updateFatMeasuringAsync({
-                    id: item.id,
-                    measurements: editedMeasurements,
-                    bodyFat: editedBodyFat,
-                    timestamp: editedTimestamp,
-                })
-            );
-            setIsEditing(false);
-        } catch (error) {
-            console.error('Ошибка при сохранении данных:', error);
-        }
+        if (!item.id) return;
+        await dispatch(
+            updateFatMeasuringAsync({
+                id: item.id,
+                measurements: editedMeasurements,
+                bodyFat: editedBodyFat,
+                timestamp: editedTimestamp,
+            })
+        );
+        setIsEditing(false);
     };
 
     const handleDelete = async () => {
-        if (!item.id) {
-            console.error('ID отсутствует, невозможно удалить замер');
-            return;
-        }
-
-        try {
-            await dispatch(deleteFatMeasuringAsync(item.id));
-        } catch (error) {
-            console.error('Ошибка при удалении замера:', error);
-        }
+        if (!item.id) return;
+        await dispatch(deleteFatMeasuringAsync(item.id));
     };
 
-    const toggleCollapse = () => {
-        setIsCollapsed((prev) => !prev);
-    };
+    const toggleCollapse = () => setIsCollapsed((prev) => !prev);
 
     return (
-        <div className={style.container}>
-            <div className={style.deleteArea}>
-                <DeleteIcon
-                    className={style.deleteIcon}
-                    onClick={handleDelete}
-                />
+        <div
+            className={style.container}
+            style={{ backgroundColor: colorBgContainer, color: textColor }}
+        >
+             <div className={style.deleteArea}>
+                <Popconfirm
+                    title="Удалить замер?"
+                    onConfirm={handleDelete}
+                    okText="Да"
+                    cancelText="Нет"
+                >
+                    <DeleteOutlined className={style.deleteIcon} />
+                </Popconfirm>
             </div>
-            <div
-                className={style.fatMeasurement}
-                style={{ transform: `translateX(${translateX}px)` }}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-            >
+            <div className={style.fatMeasurement}
+             style={{ transform: `translateX(${translateX}px)`, backgroundColor}}
+             onTouchStart={handleTouchStart}
+             onTouchMove={handleTouchMove}
+             onTouchEnd={handleTouchEnd}
+             >
                 <div className={style.content}>
                     <div className={style.header}>
                         <div className={style.leftRow}>
-                            <div className={style.title}>% жира в теле:</div>
-                            <div className={style.value}>
-                                {isEditing ? (
-                                    <Input
-                                        name='bodyFat'
-                                        type='number'
-                                        value={editedBodyFat ?? ''}
-                                        onChange={(e) => {
-                                            const value = e.target.value;
-                                            setEditedBodyFat(value === '' ? null : parseFloat(value));
-                                        }}
-                                        variant='standard'
-                                    />
-                                ) : (
-                                    <div>{item.bodyFat} %</div>
-                                )}
-                            </div>
+                            <span className={style.title}>% жира в теле:</span>
+                            {isEditing ? (
+                                <Input
+                                    type='number'
+                                    value={editedBodyFat ?? ''}
+                                    onChange={(e) =>
+                                        setEditedBodyFat(
+                                            e.target.value === '' ? null : parseFloat(e.target.value)
+                                        )
+                                    }
+                                />
+                            ) : (
+                                <span>{item.bodyFat} %</span>
+                            )}
                         </div>
-
                         <div className={style.rightRow}>
-                            <div className={style.date}>
-                                {isEditing ? (
-                                    <Input
-                                        name='timestamp'
-                                        type='date'
-                                        value={editedTimestamp ?? ''}
-                                        onChange={(e) => setEditedTimestamp(e.target.value)}
-                                        variant='standard'
-                                    />
-                                ) : (
-                                    <div>{format(parseISO(item.timestamp || ''), 'dd.MM.yyyy')}</div>
-                                )}
-                            </div>
-                            <div className={style.icon}>
-                                {!isEditing && (
-                                    <div onClick={() => setIsEditing(true)}>
-                                        <EditRoundedIcon />
-                                    </div>
-                                )}
-                            </div>
+                            {isEditing ? (
+                                <Input
+                                    type='date'
+                                    value={editedTimestamp ?? ''}
+                                    onChange={(e) => setEditedTimestamp(e.target.value)}
+                                />
+                            ) : (
+                                <span>{format(parseISO(item.timestamp || ''), 'dd.MM.yyyy')}</span>
+                            )}
+                            {!isEditing && <EditOutlined onClick={() => setIsEditing(true)} />}
                         </div>
                     </div>
-
                     <div
                         className={style.toggleCollapse}
                         onClick={toggleCollapse}
                     >
-                        <div className={style.title}>Замеры калипером: </div>
-                        <div className={style.icon}>
-                            {isCollapsed ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
-                        </div>
+                        <span className={style.title}>Замеры калипером: </span>
+                        {isCollapsed ? <ArrowDownOutlined /> : <ArrowUpOutlined />}
                     </div>
-
-                    {/* Убрали условный рендеринг и добавили класс для анимации */}
                     <div className={`${style.measurements} ${!isCollapsed ? style.open : ''}`}>
                         {filteredMeasurements.map((key) => (
                             <div
                                 key={key}
                                 className={style.measurement}
                             >
-                                <div className={style.title}>
-                                    {measurementLabels[key as keyof typeof measurementLabels]}:{' '}
-                                </div>
+                                <span className={style.title}>
+                                    {measurementLabels[key as keyof typeof measurementLabels]}:
+                                </span>
                                 {isEditing ? (
                                     <Input
-                                        name={key}
                                         type='number'
                                         value={
                                             editedMeasurements[
@@ -203,34 +169,30 @@ const FatMeasurement: React.FC<FatMeasurementProps> = ({ item }) => {
                                                 e.target.value
                                             )
                                         }
-                                        variant='standard'
                                     />
                                 ) : (
-                                    <div className={style.value}>
+                                    <span className={style.value}>
                                         {item.measurements[key as keyof FatMeasuringData['measurements']] ??
                                             'Не указано'}{' '}
                                         см
-                                    </div>
+                                    </span>
                                 )}
                             </div>
                         ))}
                     </div>
-
                     {isEditing && (
                         <div className={style.actions}>
                             <Button
-                                variant='contained'
-                                color='error'
-                                startIcon={<Close />}
+                                icon={<CloseOutlined />}
                                 onClick={() => setIsEditing(false)}
+                                danger
                             >
                                 Отменить
                             </Button>
                             <Button
-                                variant='contained'
-                                color='success'
-                                startIcon={<Check />}
+                                icon={<CheckOutlined />}
                                 onClick={handleSave}
+                                type='primary'
                             >
                                 Сохранить
                             </Button>

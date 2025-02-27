@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { GoalData } from '../../../../../../../../../../types';
 import style from './CurrentGoalWeight.module.scss';
+import { theme } from 'antd';
 
 interface CurrentGoalWeightProps {
     goal: GoalData;
@@ -14,6 +15,10 @@ function CurrentGoalWeight(props: CurrentGoalWeightProps) {
     const handleGoalClick = () => {
         navigate(`/goalEditing/${goal.id}`);
     };
+
+    const { token } = theme.useToken(); // Получаем цвета текущей темы
+    const backgroundColor = token.colorBgContainer; // Автоматически подстраивается
+    const colorText = token.colorText;
 
     const initialWeight = Number(goal.goal.initialWeight);
     const targetWeight = Number(goal.goal.desiredWeight);
@@ -50,8 +55,9 @@ function CurrentGoalWeight(props: CurrentGoalWeightProps) {
         <div
             className={style.goalWeight}
             onClick={handleGoalClick}
+            style={{ backgroundColor, color: colorText }}
         >
-            <div className={style.title}>Прогресс цели</div>
+            <div className={style.title} >Прогресс цели</div>
             <div className={style.progress}>
                 <div className={style.initialWeight}>{initialWeight} кг</div>
                 <progress

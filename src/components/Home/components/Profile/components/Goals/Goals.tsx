@@ -2,8 +2,9 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../../../../store';
 import Goal from './components/Goal/Goal';
 import style from './Goals.module.scss';
-import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
+import { PlusOutlined } from '@ant-design/icons';
+import { theme } from 'antd';
 
 function Goals() {
     const navigate = useNavigate();
@@ -11,6 +12,9 @@ function Goals() {
     const user = useSelector((state: RootState) => state.user);
 
     const statusOrder = ['initial', 'done', 'pending', 'success', 'failed'];
+
+    const { token } = theme.useToken(); // Получаем цвета текущей темы
+    const backgroundColor = token.colorBgContainer; // Автоматически подстраивается
 
     const sortedGoals = goals
         .filter((goal) => goal.goal.status)
@@ -20,15 +24,15 @@ function Goals() {
         });
 
     return (
-        <div className={style.goals}>
+        <div className={style.goals} style={{ backgroundColor }}>
             <div
                 className={style.addGoal}
                 onClick={() => navigate('/addGoal')}
             >
-                <div className={style.circle}>
+                <div className={style.circle} onClick={() => navigate('/addGoal')}>
                     <div className={style.statusLine}>
                         <div className={style.content}>
-                            <AddIcon />
+                            <PlusOutlined style={{ fontSize: 32 }} />
                         </div>
                     </div>
                 </div>

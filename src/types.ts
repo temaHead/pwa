@@ -7,6 +7,7 @@ export type UserProfile = {
     email: string | null;
     id: string | null;
     bodyFat: number | null;
+    theme: "light" | "dark";
 };
 
 export type FatMeasuring = {
@@ -60,6 +61,7 @@ export type Goal = {
     desiredFat?: number | null;
     initialFat?: number | null;
     status: 'active' | 'done' | 'failed' | 'pending'| 'success'| 'initial';
+    daysToComplete: number;
 };
 
 

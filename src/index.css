@@ -8,6 +8,8 @@ html {
     -ms-text-size-adjust: 100%;
     text-size-adjust: 100%;
     user-select: none; /* Разрешает выбор текста */
+    -webkit-tap-highlight-color: transparent;
+
 }
 
 *,
@@ -32,6 +34,7 @@ a {
     text-decoration: none;
     color: #1a1a1a;
 }
+
 
 body {
     margin: 0;
@@ -58,4 +61,7 @@ button {
     font-family: inherit;
     cursor: pointer;
     transition: border-color 0.25s;
+}
+.ant-btn {
+    box-shadow: none !important;
 }

@@ -4,10 +4,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../../../store';
 import { getAllWeightMeasuringAsync } from '../../../../../../store/slices/measurementSlice';
 import style from './WeightChart.module.scss';
+import { theme } from 'antd';
 
 const WeightChart: React.FC = () => {
     const weightMeasuring = useSelector((state: RootState) => state.measurements.weightMeasuring);
     const { id } = useSelector((state: RootState) => state.user);
+    const { token } = theme.useToken(); // Получаем цвета текущей темы
+    const colorText = token.colorTextBase; // Автоматически подстраивается
     const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
@@ -16,7 +19,7 @@ const WeightChart: React.FC = () => {
         }
     }, [dispatch, id]);
 
-    const areaBaseline= Math.min(...weightMeasuring.map((item) => item.weight || 0));
+    const areaBaseline = Math.min(...weightMeasuring.map((item) => item.weight || 0));
 
     const chartData = [
         {
@@ -77,7 +80,6 @@ const WeightChart: React.FC = () => {
                     pointLabel='data.yFormatted'
                     pointBorderColor={{ from: 'serieColor' }}
                     pointLabelYOffset={-10}
-                
                     enableArea={true} // Заливка под графиком
                     areaBlendMode='normal'
                     areaOpacity={0.18}
@@ -89,26 +91,41 @@ const WeightChart: React.FC = () => {
                         axis: {
                             ticks: {
                                 text: {
-                                    fill: '#000',
+                                    fill: colorText,
                                     fontSize: 12,
-                                    fontWeight: 'bold',
                                 },
                             },
+                            legend: {
+                                text: {
+                                    fill: colorText, // Белый цвет текста для легенды оси
+                                    fontSize: 14,
+                                },
+                            },
+
+
                         },
                         grid: {
                             line: {
-                                stroke: '#ddd',
+                                stroke: colorText,
                                 strokeWidth: 1,
                                 strokeDasharray: '4 4',
                             },
+
                         },
                         legends: {
                             text: {
                                 fontWeight: 'bold',
                                 fontSize: 13,
-                                fill: '#333',
+                                fill: colorText,
                             },
+
                         },
+                        dots: {
+                            text: {
+                                fontSize: 13,
+                                fill: colorText,
+                            },
+                        }
                     }}
                     motionConfig='wobbly'
                     legends={[
@@ -136,7 +153,6 @@ const WeightChart: React.FC = () => {
                             ],
                         },
                     ]}
-                   
                 />
             </div>
         </div>

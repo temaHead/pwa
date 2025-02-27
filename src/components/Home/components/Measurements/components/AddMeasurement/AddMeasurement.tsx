@@ -2,8 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import style from './AddMeasurement.module.scss';
 import { useSpring, animated } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
-import { Button } from '@mui/material';
-import Input from '../../../../../../shared/components/Input/Input';
 import dayjs from 'dayjs';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../../../../store';
@@ -13,6 +11,7 @@ import {
     addWeightMeasuringAsync,
 } from '../../../../../../store/slices/measurementSlice';
 import { calculateBodyFat } from '../../../../../Auth/SignUp/components/AddUser/utils';
+import { Button, Input } from 'antd';
 
 interface AddMeasurementProps {
     isOpen: boolean;
@@ -231,14 +230,13 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
                 style={{
                     transform: y.to((v) => `translateY(${v}%)`),
                 }}
-                // {...bind()}
             >
                 <div className={style.header}  {...bind()}>
                     <h2>Добавить замер</h2>
                     <Button
                         onClick={close}
-                        variant='contained'
-                        color='secondary'
+                        type='primary'
+                        danger
                     >
                         Закрыть
                     </Button>
@@ -258,7 +256,7 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
                             <div>Замер веса</div>
                             <Input
                                 name='weight'
-                                value={formData.weight}
+                                value={formData.weight || undefined}
                                 onChange={handleSubFormInputChange}
                                 type='number'
                                 placeholder='Введите вес (кг)'
@@ -272,7 +270,7 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
                             >
                                 <Input
                                     name={area}
-                                    value={formData[area as keyof typeof formData]}
+                                    value={formData[area as keyof typeof formData] || undefined}
                                     onChange={handleSubFormInputChange}
                                     type='number'
                                     placeholder={`Введите замер (${measurementLabels[area as keyof typeof measurementLabels]})`}
@@ -290,7 +288,7 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
                             >
                                 <Input
                                     name={area}
-                                    value={formData[area as keyof typeof formData]}
+                                    value={formData[area as keyof typeof formData] || undefined}
                                     onChange={handleCaliperInputChange}
                                     type='number'
                                     placeholder={`Введите замер (${measurementLabels[area as keyof typeof measurementLabels]})`}
@@ -302,7 +300,7 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
                         <div className={style.fieldGroup}>
                             <Input
                                 name='bodyFat'
-                                value={formData.bodyFat}
+                                value={formData.bodyFat || undefined}
                                 onChange={handleSubFormInputChange}
                                 type='number'
                                 placeholder='Введите процент жира'
@@ -311,9 +309,7 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
                        
 
                         <Button
-                            type='button'
-                            variant='contained'
-                            color='primary'
+                            type='primary'
                             className={style.saveButton}
                             onClick={handleAddMeasurement}
                         >

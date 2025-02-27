@@ -6,15 +6,16 @@ import {
     updateBodyMeasuringAsync,
     deleteBodyMeasuringAsync,
 } from '../../../../../../store/slices/measurementSlice';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditRoundedIcon from '@mui/icons-material/EditRounded';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import Check from '@mui/icons-material/Check';
-import Close from '@mui/icons-material/Close';
-import Button from '@mui/material/Button';
+import {
+    DeleteOutlined,
+    EditOutlined,
+    ArrowDownOutlined,
+    ArrowUpOutlined,
+    CheckOutlined,
+    CloseOutlined
+} from '@ant-design/icons';
+import { Button, Input, theme } from 'antd';
 import style from './BodyMeasurement.module.scss';
-import Input from '../../../../../../shared/components/Input/Input';
 import { format, parseISO } from 'date-fns';
 
 interface BodyMeasurementProps {
@@ -33,10 +34,13 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
         arms: item.bodyMeasuring?.arms || null,
         waist: item.bodyMeasuring?.waist || null,
     });
-    const [editedTimestamp, setEditedTimestamp] = useState(item.timestamp);
+    const [editedTimestamp, setEditedTimestamp] = useState(item.timestamp || '');
     const [translateX, setTranslateX] = useState(0);
     const startX = useRef(0);
-
+    const { token } = theme.useToken(); // Получаем цвета текущей темы
+    const backgroundColor = token.colorBgLayout; // Автоматически подстраивается
+    const textColor = token.colorTextBase;
+    const colorBgContainer = token.colorBgContainer;
     const handleTouchStart = (e: React.TouchEvent) => {
         startX.current = e.touches[0].clientX;
     };
@@ -48,11 +52,7 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
     };
 
     const handleTouchEnd = () => {
-        if (translateX < -40) {
-            setTranslateX(-75); // Закрываем
-        } else {
-            setTranslateX(0); // Возвращаем назад
-        }
+        setTranslateX(translateX < -40 ? -75 : 0);
     };
 
     const handleInputChange = (field: keyof BodyMeasuringData['bodyMeasuring'], value: string) => {
@@ -103,7 +103,7 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
             arms: item.bodyMeasuring?.arms || null,
             waist: item.bodyMeasuring?.waist || null,
         });
-        setEditedTimestamp(item.timestamp);
+        setEditedTimestamp(item.timestamp || '');
         setIsEditing(false);
     };
 
@@ -111,7 +111,7 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
         setIsCollapsed((prev) => !prev);
     };
 
-    const measurementLabels = {
+    const measurementLabels: Record<string, string> = {
         chest: 'Грудь',
         hips: 'Ягодицы',
         thigh: 'Бедро',
@@ -120,17 +120,14 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
     };
 
     return (
-        <div className={style.container}>
+        <div className={style.container} style={{ backgroundColor: colorBgContainer, color: textColor }}>
             <div className={style.deleteArea}>
-                <DeleteIcon
-                    className={style.deleteIcon}
-                    onClick={handleDelete}
-                />
+                <DeleteOutlined className={style.deleteIcon} onClick={handleDelete} />
             </div>
 
             <div
                 className={style.bodyMeasurement}
-                style={{ transform: `translateX(${translateX}px)` }}
+                style={{ transform: `translateX(${translateX}px)`, backgroundColor }}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
@@ -144,64 +141,48 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
                             <div className={style.date}>
                                 {isEditing ? (
                                     <Input
-                                        name='timestamp'
-                                        type='date'
-                                        value={editedTimestamp ?? ''}
+                                        name="timestamp"
+                                        type="date"
+                                        value={editedTimestamp}
                                         onChange={(e) => setEditedTimestamp(e.target.value)}
-                                        variant='standard'
                                     />
                                 ) : (
-                                    <div>{format(parseISO(item.timestamp || ''), 'dd.MM.yyyy')}</div>
+                                    <div>{item.timestamp ? format(parseISO(item.timestamp), 'dd.MM.yyyy') : '-'}</div>
                                 )}
                             </div>
                             <div className={style.icon}>
                                 {!isEditing && (
                                     <div onClick={() => setIsEditing(true)}>
-                                        <EditRoundedIcon />
+                                        <EditOutlined />
                                     </div>
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    <div
-                        className={style.toggleCollapse}
-                        onClick={toggleCollapse}
-                    >
+                    <div className={style.toggleCollapse} onClick={toggleCollapse}>
                         <div className={style.title}>Показать замеры</div>
                         <div className={style.icon}>
-                            {isCollapsed ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
+                            {isCollapsed ? <ArrowDownOutlined /> : <ArrowUpOutlined />}
                         </div>
                     </div>
 
                     <div className={`${style.measurements} ${!isCollapsed ? style.open : ''}`}>
                         {Object.entries(measurementLabels).map(([key, label]) => (
-                            <div
-                                key={key}
-                                className={style.measurement}
-                            >
+                            <div key={key} className={style.measurement}>
                                 <div className={style.title}>{label}: </div>
                                 {isEditing ? (
                                     <Input
                                         name={key}
-                                        type='number'
-                                        value={
-                                            editedBody[key as keyof BodyMeasuringData['bodyMeasuring']] ?? ''
-                                        }
+                                        type="number"
+                                        value={editedBody[key as keyof BodyMeasuringData['bodyMeasuring']] ?? ''}
                                         onChange={(e) =>
-                                            handleInputChange(
-                                                key as keyof BodyMeasuringData['bodyMeasuring'],
-                                                e.target.value
-                                            )
+                                            handleInputChange(key as keyof BodyMeasuringData['bodyMeasuring'], e.target.value)
                                         }
-                                        variant='standard'
                                     />
                                 ) : (
                                     <div className={style.value}>
-                                        {item.bodyMeasuring?.[
-                                            key as keyof BodyMeasuringData['bodyMeasuring']
-                                        ] ?? '-'}{' '}
-                                        см
+                                        {item.bodyMeasuring?.[key as keyof BodyMeasuringData['bodyMeasuring']] ?? '-'} см
                                     </div>
                                 )}
                             </div>
@@ -210,20 +191,10 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
 
                     {isEditing && (
                         <div className={style.actions}>
-                            <Button
-                                variant='contained'
-                                color='error'
-                                startIcon={<Close />}
-                                onClick={handleCancel}
-                            >
+                            <Button danger icon={<CloseOutlined />} onClick={handleCancel}>
                                 Отменить
                             </Button>
-                            <Button
-                                variant='contained'
-                                color='success'
-                                startIcon={<Check />}
-                                onClick={handleSave}
-                            >
+                            <Button type="primary" icon={<CheckOutlined />} onClick={handleSave}>
                                 Сохранить
                             </Button>
                         </div>

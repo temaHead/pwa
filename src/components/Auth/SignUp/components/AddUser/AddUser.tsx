@@ -1,14 +1,12 @@
-import React, { useState } from 'react';
-import Input from '../../../../../shared/components/Input/Input';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import Selector from '../../../../../shared/components/Selector/Selector';
+import React, { useCallback, useMemo, useState } from 'react';
 import style from './AddUser.module.scss';
-import { Button } from '@mui/material';
 import { calculateBodyFat } from './utils';
 import { addUserProfileAsync } from '../../../../../store/slices/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../../store';
 import { useNavigate } from 'react-router-dom';
+import { LeftOutlined } from '@ant-design/icons';
+import { Button, Input, Select } from 'antd';
 
 interface Step {
     id: string;
@@ -79,49 +77,53 @@ const AddUser: React.FC = () => {
         },
     ];
 
-    const maleSubForm: SubFormField[] = [
-        // Изменение: добавлены поля для мужчин
-        {
-            id: 'chest',
-            label: 'Измерьте складку между подмышкой и соском.',
-            placeholder: 'Введите толщину складки на груди (мм)',
-            imageUrl: '/calipers-chest.jpg',
-        },
-        {
-            id: 'abdomen',
-            label: 'Измерьте складку вертикально на 3 сантиметра в сторону от пупка.',
-            placeholder: 'Введите толщину складки на животе (мм)',
-            imageUrl: '/calipers-abdomen.jpg',
-        },
-        {
-            id: 'thigh',
-            label: 'Измерьте складку между коленом и бедром.',
-            placeholder: 'Введите толщину складки на бедре (мм)',
-            imageUrl: '/calipers-thigh.jpg',
-        },
-    ];
+    const maleSubForm = useMemo<SubFormField[]>(
+        () => [
+            {
+                id: 'chest',
+                label: 'Измерьте складку между подмышкой и соском.',
+                placeholder: 'Введите толщину складки на груди (мм)',
+                imageUrl: '/calipers-chest.jpg',
+            },
+            {
+                id: 'abdomen',
+                label: 'Измерьте складку вертикально на 3 сантиметра в сторону от пупка.',
+                placeholder: 'Введите толщину складки на животе (мм)',
+                imageUrl: '/calipers-abdomen.jpg',
+            },
+            {
+                id: 'thigh',
+                label: 'Измерьте складку между коленом и бедром.',
+                placeholder: 'Введите толщину складки на бедре (мм)',
+                imageUrl: '/calipers-thigh.jpg',
+            },
+        ],
+        []
+    );
 
-    const femaleSubForm: SubFormField[] = [
-        // Изменение: добавлены поля для женщин
-        {
-            id: 'thigh',
-            label: 'Измерьте складку между коленом и бедром.',
-            placeholder: 'Введите толщину складки на бедре (мм)',
-            imageUrl: '/public/calipers-thigh.jpg',
-        },
-        {
-            id: 'tricep',
-            label: 'Измерьте складку между локтем и плечом.',
-            placeholder: 'Введите толщину складки на трицепсе (мм)',
-            imageUrl: '/calipers-tricep.jpg',
-        },
-        {
-            id: 'waist',
-            label: 'Измерьте складку на 2 сантиметра выше подвздошной кости.',
-            placeholder: 'Введите толщину складки на талии (мм)',
-            imageUrl: '/calipers-waist.jpg',
-        },
-    ];
+    const femaleSubForm = useMemo<SubFormField[]>(
+        () => [
+            {
+                id: 'thigh',
+                label: 'Измерьте складку между коленом и бедром.',
+                placeholder: 'Введите толщину складки на бедре (мм)',
+                imageUrl: '/public/calipers-thigh.jpg',
+            },
+            {
+                id: 'tricep',
+                label: 'Измерьте складку между локтем и плечом.',
+                placeholder: 'Введите толщину складки на трицепсе (мм)',
+                imageUrl: '/calipers-tricep.jpg',
+            },
+            {
+                id: 'waist',
+                label: 'Измерьте складку на 2 сантиметра выше подвздошной кости.',
+                placeholder: 'Введите толщину складки на талии (мм)',
+                imageUrl: '/calipers-waist.jpg',
+            },
+        ],
+        []
+    );
 
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [formData, setFormData] = useState<Record<string, string>>({});
@@ -136,16 +138,18 @@ const AddUser: React.FC = () => {
     const currentStep = steps[currentStepIndex];
     const isLastStep = currentStepIndex === steps.length - 1;
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value || '' }));
-        setErrors('');
-    };
+    const handleInputChange = useCallback(
+        (name: string, value: string) => {
+            setFormData((prev) => ({ ...prev, [name]: value }));
+            setErrors('');
+        },
+        []
+    );
 
-    const handleSubFormInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSubFormInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setSubFormData((prev) => ({ ...prev, [name]: parseFloat(value) || 0 }));
-    };
+    }, []);
 
     const validateStep = () => {
         if (currentStep.required && !formData[currentStep.id]) {
@@ -175,6 +179,7 @@ const AddUser: React.FC = () => {
                     email: user.email,
                     id: user.id,
                     bodyFat: formData['bodyFat'] ? parseFloat(formData['bodyFat']) : null,
+                    theme: user.theme,
                 },
                 fatMeasuring: {
                     chest: subFormData['chest'] || null,
@@ -208,32 +213,25 @@ const AddUser: React.FC = () => {
         setErrors('');
     };
 
-    const handleCalculateBodyFat = () => {
-        const gender = formData.gender;
-        const birthDate = formData.birthDate;
+    const handleCalculateBodyFat = useCallback(() => {
         try {
-            // Проверка и расчет процента жира
-            const bodyFat = calculateBodyFat(gender, subFormData, birthDate);
-            console.log(`Процент жира: ${bodyFat}%`);
-
-            // Обновление состояния с результатом
+            const bodyFat = calculateBodyFat(formData.gender, subFormData, formData.birthDate);
             setFormData((prev) => ({ ...prev, bodyFat: bodyFat.toString() }));
-
-            // Скрытие формы ввода
             setShowSubForm(false);
         } catch (error) {
-            // Обработка ошибок (например, если данные некорректны)
-            console.error((error as Error).message);
             alert(`Ошибка: ${(error as Error).message}`);
         }
-    };
+    }, [formData.gender, subFormData, formData.birthDate]);
 
-    const startSubForm = () => {
+    const startSubForm = useCallback(() => {
         setShowSubForm(true);
         setErrors('');
-    };
+    }, []);
 
-    const subFormFields = formData.gender === 'male' ? maleSubForm : femaleSubForm; // Изменение: выбор полей субформы в зависимости от пола
+    const subFormFields = useMemo(
+        () => (formData.gender === 'male' ? maleSubForm : femaleSubForm),
+        [formData.gender, maleSubForm, femaleSubForm]
+    );
 
     return (
         <div className={style.addUser}>
@@ -241,7 +239,7 @@ const AddUser: React.FC = () => {
                 <div className={style.buttonBack}>
                     {currentStepIndex > 0 && (
                         <div onClick={handleBack}>
-                            <ArrowBackIosIcon />
+                            <LeftOutlined />
                         </div>
                     )}
                 </div>
@@ -281,35 +279,34 @@ const AddUser: React.FC = () => {
                     <Button
                         className={style.buttonCalculate}
                         onClick={handleCalculateBodyFat}
-                        variant='contained'
-                        color='info'
+                        type='primary'
                     >
                         Рассчитать
                     </Button>
                 </div>
             ) : currentStep.type === 'select' ? (
-                <Selector
-                    name={currentStep.id}
-                    value={formData[currentStep.id] || ''}
-                    onChange={handleInputChange}
-                    options={currentStep.options || []}
-                />
+                <Select
+                value={formData[currentStep.id] ?? undefined}
+                onChange={(value) => handleInputChange(currentStep.id, value)}
+                options={currentStep.options || []}
+            />
+            
+            
             ) : (
                 <Input
-                    name={currentStep.id}
-                    type={currentStep.type || 'text'}
-                    value={formData[currentStep.id] || ''}
-                    onChange={handleInputChange}
-                    placeholder={currentStep.placeholder}
-                />
+                name={currentStep.id}
+                type={currentStep.type || 'text'}
+                value={formData[currentStep.id] || ''}
+                onChange={(e) => handleInputChange(e.target.name, e.target.value)}
+                placeholder={currentStep.placeholder}
+            />
             )}
             {errors && <p style={{ color: 'red' }}>{errors}</p>}
             <div className={style.buttons}>
                 {currentStep.id === 'bodyFat' && !showSubForm ? (
                     <Button
                         onClick={startSubForm}
-                        variant='contained'
-                        color='info'
+                        type='primary'
                     >
                         Рассчитать самостоятельно
                     </Button>
@@ -318,10 +315,7 @@ const AddUser: React.FC = () => {
                     <Button
                         onClick={handleNext}
                         disabled={currentStep.required && !formData[currentStep.id]}
-                        variant='contained'
-                        color='success'
-                        fullWidth
-                        size='large'
+                        type='primary'
                     >
                         {isLastStep ? 'Сохранить' : 'Далее'}
                     </Button>
@@ -329,7 +323,7 @@ const AddUser: React.FC = () => {
                 {!currentStep.required && !isLastStep && !showSubForm && !formData[currentStep.id] && (
                     <Button
                         onClick={handleSkip}
-                        color='info'
+                        type='primary'
                     >
                         Пропустить
                     </Button>

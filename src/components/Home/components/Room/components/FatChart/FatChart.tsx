@@ -5,12 +5,14 @@ import { AppDispatch, RootState } from '../../../../../../store';
 import { getAllFatMeasuringAsync } from '../../../../../../store/slices/measurementSlice';
 import style from './FatChart.module.scss';
 import { FatMeasuringData } from '../../../../../../types';
+import { theme } from 'antd';
 
 const FatChart: React.FC = () => {
     const fatMeasuring = useSelector((state: RootState) => state.measurements.fatMeasuring);
     const dispatch = useDispatch<AppDispatch>();
     const { id, gender } = useSelector((state: RootState) => state.user);
-
+    const { token } = theme.useToken(); // Получаем цвета текущей темы
+    const colorText = token.colorTextBase; // Автоматически подстраивается
     const defaultVisibleLines =
         gender === 'male'
             ? { chest: true, abdomen: true, thigh: true, bodyFat: true }
@@ -68,7 +70,6 @@ const FatChart: React.FC = () => {
             [key]: !prev[key],
         }));
     };
-    
 
     return (
         <div className={style.chart}>
@@ -167,15 +168,20 @@ const FatChart: React.FC = () => {
                         axis: {
                             ticks: {
                                 text: {
-                                    fill: '#000',
+                                    fill: colorText,
                                     fontSize: 12,
-                                    fontWeight: 'bold',
+                                },
+                            },
+                            legend: {
+                                text: {
+                                    fill: colorText, // Белый цвет текста для легенды оси
+                                    fontSize: 14,
                                 },
                             },
                         },
                         grid: {
                             line: {
-                                stroke: '#ddd',
+                                stroke: colorText,
                                 strokeWidth: 1,
                                 strokeDasharray: '4 4',
                             },
@@ -184,7 +190,13 @@ const FatChart: React.FC = () => {
                             text: {
                                 fontWeight: 'bold',
                                 fontSize: 13,
-                                fill: '#333',
+                                fill: colorText,
+                            },
+                        },
+                        dots: {
+                            text: {
+                                fontSize: 13,
+                                fill: colorText,
                             },
                         },
                     }}

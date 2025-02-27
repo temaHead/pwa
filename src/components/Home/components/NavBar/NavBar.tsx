@@ -1,30 +1,38 @@
-import { Box, Stack, Typography } from '@mui/material';
-import style from './NavBar.module.scss';
+import { Flex, theme, Typography } from 'antd';
 import { Link } from 'react-router-dom';
-import { AccountCircle, Person, RuleRounded } from '@mui/icons-material';
+import { FileDoneOutlined, LineChartOutlined, UserOutlined } from '@ant-design/icons';
+import style from './NavBar.module.scss';
+
+const { Text } = Typography;
 
 function NavBar() {
+    const { token } = theme.useToken(); // Получаем цвета текущей темы
+    const backgroundColor = token.colorBgLayout; // Автоматически подстраивается
+    const colorIcon = token.colorIcon;
+
+
     return (
-        <div className={style.navBar}>
-        <Box
-            display="flex"
-            justifyContent="space-around"
-            alignItems="center"
-            padding="16px"
-        >
-            <Stack spacing={1} alignItems="center" component={Link} to="/room" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <AccountCircle fontSize="large" />
-                <Typography variant="caption">Личный кабинет</Typography>
-            </Stack>
-            <Stack spacing={1} alignItems="center" component={Link} to="/measurements" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <RuleRounded fontSize="large" />
-                <Typography variant="caption">Мои замеры</Typography>
-            </Stack>
-            <Stack spacing={1} alignItems="center" component={Link} to="/profile" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <Person fontSize="large" />
-                <Typography variant="caption">Профиль</Typography>
-            </Stack>
-        </Box>
+        <div className={style.navBar} style={{ backgroundColor }}>
+            <Flex justify="space-around" align="center" style={{ padding: '16px' }}>
+                <Link to="/room" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <Flex vertical align="center">
+                        <LineChartOutlined style={{ fontSize: '24px', color: colorIcon }} />
+                        <Text type="secondary">Мои графики</Text>
+                    </Flex>
+                </Link>
+                <Link to="/measurements" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <Flex vertical align="center">
+                        <FileDoneOutlined style={{ fontSize: '24px', color: colorIcon }} />
+                        <Text type="secondary">Мои замеры</Text>
+                    </Flex>
+                </Link>
+                <Link to="/profile" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <Flex vertical align="center">
+                        <UserOutlined style={{ fontSize: '24px', color: colorIcon }} />
+                        <Text type="secondary">Профиль</Text>
+                    </Flex>
+                </Link>
+            </Flex>
         </div>
     );
 }

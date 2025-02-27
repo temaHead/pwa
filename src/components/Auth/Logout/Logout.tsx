@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { auth } from '../../../firebase';
 import { removeUser } from '../../../store/slices/userSlice';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@mui/material';
+import { Button } from 'antd';
 
 const Logout = () => {
     const dispatch = useDispatch();
@@ -22,8 +22,7 @@ const Logout = () => {
 
     return (
         <Button
-            variant="contained"
-            color="error"
+            type="primary"
             onClick={handleLogout}
             style={{ marginTop: '16px' }}
         >

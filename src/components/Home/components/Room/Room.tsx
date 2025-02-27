@@ -7,9 +7,14 @@ import GraphFilter from './components/GraphFilter/GraphFilter';
 import style from './Room.module.scss';
 import { RootState } from '../../../../store';
 import PureWeightChart from './components/PureWeightChart/PureWeightChart';
+import { theme } from 'antd';
 
 const Room: React.FC = () => {
     const widgets = useSelector((state: RootState) => state.widgets.widgets);
+    const { token } = theme.useToken(); // Получаем цвета текущей темы
+    const colorText = token.colorTextBase; // Автоматически подстраивается
+    const colorBgContainer = token.colorBgContainer;
+
 
     const getGraphComponent = (id: string) => {
         switch (id) {
@@ -28,6 +33,9 @@ const Room: React.FC = () => {
 
     return (
         <div className={style.room}>
+            <div className={style.title} style={{ color: colorText }} >
+                Мои графики
+            </div>
             <GraphFilter />
             <div className={style.graphsContainer}>
                 {widgets
@@ -36,6 +44,7 @@ const Room: React.FC = () => {
                         <div
                             key={widget.id}
                             className={style.graphWrapper}
+                            style={{ backgroundColor: colorBgContainer, color: colorText }}
                         >
                             {getGraphComponent(widget.id)}
                         </div>

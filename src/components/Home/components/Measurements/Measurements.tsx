@@ -1,7 +1,7 @@
 import style from './Measurements.module.scss';
 import { useNavigate } from 'react-router-dom';
-import AddIcon from '@mui/icons-material/Add';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import { PlusOutlined, LeftOutlined } from '@ant-design/icons';
+
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
@@ -17,6 +17,7 @@ import BodyMeasurement from './components/BodyMeasurement/BodyMeasurement';
 import Filter from './components/Filter/Filter';
 import { updateUserProfileAsync } from '../../../../store/slices/userSlice';
 import CollapsibleSection from '../../../../shared/components/CollapsibleSection/CollapsibleSection';
+import { theme } from 'antd';
 
 function Measurements() {
     const navigate = useNavigate();
@@ -27,7 +28,10 @@ function Measurements() {
     const bodyMeasuring = useSelector((state: RootState) => state.measurements.bodyMeasuring);
     const filters = useSelector((state: RootState) => state.filter.filters);
     const user = useSelector((state: RootState) => state.user);
-
+    const { token } = theme.useToken(); // Получаем цвета текущей темы
+    const backgroundColor = token.colorBgLayout; // Автоматически подстраивается
+    const textColor = token.colorTextBase;
+    const colorIcon = token.colorIcon;
     const [isModalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
@@ -109,14 +113,14 @@ function Measurements() {
     };
 
     return (
-        <div className={style.measurements}>
+        <div className={style.measurements} style={{ backgroundColor, color: textColor }}>
             <div className={style.header}>
                 <div className={style.icon} onClick={handleGoToRoom}>
-                    <ArrowBackIosIcon />
+                    <LeftOutlined style={{ color: colorIcon }} />
                 </div>
                 <div className={style.title}>Мои замеры</div>
                 <div className={style.icon} onClick={handleAddMeasurement}>
-                    <AddIcon />
+                    <PlusOutlined style={{ color: colorIcon }} />
                 </div>
             </div>
             <div className={style.filter}>

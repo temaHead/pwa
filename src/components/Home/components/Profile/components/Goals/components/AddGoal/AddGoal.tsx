@@ -1,140 +1,85 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { Button } from '@mui/material';
+import { Button, Input, DatePicker, Select } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import { useState } from 'react';
-import Selector from '../../../../../../../../shared/components/Selector/Selector';
+import { LeftOutlined } from '@ant-design/icons';
+import { useCallback, useMemo, useState } from 'react';
 import { AppDispatch, RootState } from '../../../../../../../../store';
 import { addGoalAsync } from '../../../../../../../../store/slices/goalsSlice';
 import {
     addWeightMeasuringAsync,
     addFatMeasuringAsync,
 } from '../../../../../../../../store/slices/measurementSlice';
-import Input from '../../../../../../../../shared/components/Input/Input';
-import style from './AddGoal.module.scss';
+import dayjs from 'dayjs';
+import styles from './AddGoal.module.scss';
+import { Goal } from '../../../../../../../../types';
 
-// Типы для состояния цели
-interface GoalState {
-    startDate: string;
-    endDate: string;
-    daysToComplete: number;
-    status: 'active' | 'done' | 'failed' | 'pending' | 'initial';
-    type: 'weight' | 'fat' | '';
-    currentWeight: number | null;
-    desiredWeight: number | null;
-    currentFat: number | null;
-    desiredFat: number | null;
-}
+const { Option } = Select;
 
 function AddGoal() {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-
+    
     const { id, currentWeight, bodyFat } = useSelector((state: RootState) => state.user);
 
-    const [goal, setGoal] = useState<GoalState>({
+    const initialGoal = useMemo(() => ({
         startDate: '',
         endDate: '',
         daysToComplete: 0,
-        status: 'initial',
-        type: '',
+        status: 'initial' as 'active' | 'done' | 'failed' | 'pending' | 'success',
+        type: '' as 'weight' | 'fat' | '',
         currentWeight: currentWeight || null,
         desiredWeight: null,
         currentFat: bodyFat || null,
         desiredFat: null,
-    });
+    }), [currentWeight, bodyFat]);
 
+    const [goal, setGoal] = useState<Goal>(initialGoal);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
-    // Обработка изменений в инпутах
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
+    const handleInputChange = (name: string, value: string) => {
         setGoal((prev) => ({
             ...prev,
-            [name]: value,
+            [name]: name === 'type' && (value === 'weight' || value === 'fat' || value === '') ? value : prev.type,
         }));
-        // Очищаем ошибку при изменении поля
-        setErrors((prev) => ({ ...prev, [name]: '' }));
     };
 
-    // Обработка изменений дат
-    const handleDateChange = (name: string, value: string) => {
-        setGoal((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+    const handleDateChange = useCallback((name: string, date: dayjs.Dayjs | null) => {
+        if (!date) return;
+        const formattedDate = date.format('YYYY-MM-DD');
+        setGoal((prev) => ({ ...prev, [name]: formattedDate }));
 
         if (name === 'startDate' || name === 'endDate') {
-            const startDate = name === 'startDate' ? new Date(value) : new Date(goal.startDate);
-            const endDate = name === 'endDate' ? new Date(value) : new Date(goal.endDate);
-
-            if (startDate && endDate) {
-                const timeDiff = endDate.getTime() - startDate.getTime();
-                const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-                setGoal((prev) => ({
-                    ...prev,
-                    daysToComplete: daysDiff,
-                }));
+            const startDate = dayjs(name === 'startDate' ? formattedDate : goal.startDate);
+            const endDate = dayjs(name === 'endDate' ? formattedDate : goal.endDate);
+            if (startDate.isValid() && endDate.isValid()) {
+                setGoal((prev) => ({ ...prev, daysToComplete: endDate.diff(startDate, 'day') }));
             }
         }
-        // Очищаем ошибку при изменении поля
         setErrors((prev) => ({ ...prev, [name]: '' }));
-    };
+    }, [goal.startDate, goal.endDate]);
 
-    // Обработка изменений дней
-    const handleDaysChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const days = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
-        if (!isNaN(days)) {
-            const startDate = new Date(goal.startDate);
-            const endDate = new Date(startDate);
-            endDate.setDate(startDate.getDate() + days);
-
-            setGoal((prev) => ({
-                ...prev,
-                daysToComplete: days,
-                endDate: endDate.toISOString().split('T')[0],
-            }));
-        }
-        // Очищаем ошибку при изменении поля
-        setErrors((prev) => ({ ...prev, daysToComplete: '' }));
-    };
-
-    // Валидация формы
-    const validateForm = () => {
+    const validateForm = useCallback(() => {
         const newErrors: Record<string, string> = {};
-
         if (!goal.startDate) newErrors.startDate = 'Дата начала обязательна';
         if (!goal.endDate) newErrors.endDate = 'Дата окончания обязательна';
         if (goal.daysToComplete <= 0) newErrors.daysToComplete = 'Укажите количество дней';
         if (!goal.type) newErrors.type = 'Тип цели обязателен';
-
-        if (goal.type === 'weight') {
-            if (goal.currentWeight === null || goal.currentWeight === undefined) {
-                newErrors.currentWeight = 'Текущий вес обязателен';
-            }
-            if (goal.desiredWeight === null || goal.desiredWeight === undefined) {
-                newErrors.desiredWeight = 'Желаемый вес обязателен';
-            }
-        } else if (goal.type === 'fat') {
-            if (goal.currentFat === null || goal.currentFat === undefined) {
-                newErrors.currentFat = 'Текущий % жира обязателен';
-            }
-            if (goal.desiredFat === null || goal.desiredFat === undefined) {
-                newErrors.desiredFat = 'Желаемый % жира обязателен';
-            }
+        
+        if (goal.type === 'weight' && (goal.currentWeight === null || goal.desiredWeight === null)) {
+            newErrors.currentWeight = 'Текущий вес обязателен';
+            newErrors.desiredWeight = 'Желаемый вес обязателен';
+        } else if (goal.type === 'fat' && (goal.currentFat === null || goal.desiredFat === null)) {
+            newErrors.currentFat = 'Текущий % жира обязателен';
+            newErrors.desiredFat = 'Желаемый % жира обязателен';
         }
 
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0; // Возвращает true, если ошибок нет
-    };
+        return Object.keys(newErrors).length === 0;
+    }, [goal]);
 
-    // Сохранение цели
-    const handleSaveGoal = async () => {
-        if (!id) return;
-
-        // Проверяем форму на ошибки
-        if (!validateForm()) return;
-
+    const handleSaveGoal = useCallback(async () => {
+        if (!id || !validateForm()) return;
+        
         const newGoal = {
             startDate: goal.startDate,
             endDate: goal.endDate,
@@ -146,152 +91,67 @@ function AddGoal() {
             desiredFat: goal.desiredFat,
             initialFat: goal.currentFat,
             status: goal.status,
+            daysToComplete: goal.daysToComplete
         };
-
-        // Сохраняем цель
         await dispatch(addGoalAsync({ userId: id, goal: newGoal }));
 
-        // Обновляем замеры, если тип цели связан с ними
-        if (goal.type === 'weight' && goal.currentWeight && goal.currentWeight !== currentWeight) {
-            await dispatch(
-                addWeightMeasuringAsync({
-                    weight: goal.currentWeight,
-                    timestamp: goal.startDate,
-                })
-            );
-        } else if (goal.type === 'fat' && goal.currentFat && goal.currentFat !== bodyFat) {
-            await dispatch(
-                addFatMeasuringAsync({
-                    bodyFat: goal.currentFat,
-                    measurements: {
-                        thigh: null,
-                        chest: null,
-                        abdomen: null,
-                        tricep: null,
-                        waist: null,
-                    },
-                    timestamp: goal.startDate,
-                })
-            );
+        if (goal.type === 'weight' &&  goal.currentWeight != null && goal.currentWeight !== currentWeight) {
+            await dispatch(addWeightMeasuringAsync({ weight: goal.currentWeight, timestamp: goal.startDate }));
+        } else if (goal.type === 'fat' && goal.currentFat != null && goal.currentFat !== bodyFat) {
+            await dispatch(addFatMeasuringAsync({ bodyFat: goal.currentFat, measurements: {
+                chest: null,
+                abdomen: null,
+                thigh: null,
+                tricep: null,
+                waist: null
+            }, timestamp: goal.startDate }));
         }
 
         navigate('/profile');
-    };
-
-    // Навигация назад
-    const handleGoBack = () => {
-        navigate('/profile');
-    };
+    }, [goal, id, dispatch, navigate, validateForm, currentWeight, bodyFat]);
 
     return (
-        <div className={style.addGoal}>
-            <div className={style.header}>
-                <div
-                    className='icon'
-                    onClick={handleGoBack}
-                >
-                    <ArrowBackIosIcon />
-                </div>
-                <div className='title'>Добавить цель</div>
+        <div className={styles.addGoal}>
+            <div className={styles.header}>
+                <LeftOutlined onClick={() => navigate('/profile')} />
+                <span className={styles.title}>Добавить цель</span>
             </div>
 
-            <div className={style.form}>
-                <div className={style.inputs}>
-                    <Input
-                        label='Дата начала'
-                        type='date'
-                        name='startDate'
-                        value={goal.startDate}
-                        onChange={(e) => handleDateChange('startDate', e.target.value)}
-                        error={errors.startDate}
-                    />
-                    <Input
-                        label='Дата окончания'
-                        type='date'
-                        name='endDate'
-                        value={goal.endDate}
-                        onChange={(e) => handleDateChange('endDate', e.target.value)}
-                        error={errors.endDate}
-                    />
-                    {goal.startDate && goal.endDate && (
-                        <Input
-                            label='Дней на выполнение'
-                            name='daysToComplete'
-                            value={goal.daysToComplete === null ? '' : goal.daysToComplete.toString()}
-                            onChange={handleDaysChange}
-                            type='number'
-                            error={errors.daysToComplete}
-                        />
-                    )}
-
-                    <Selector
-                        label='Тип цели'
-                        name='type'
-                        value={goal.type}
-                        onChange={handleInputChange}
-                        options={[
-                            { value: '', label: 'Выберите тип цели' },
-                            { value: 'weight', label: 'Похудеть/Набрать вес' },
-                            { value: 'fat', label: 'Изменить % жира в организме' },
-                        ]}
-                    />
-
-                    <div className={style.content}>
-                        {goal.type === 'weight' && (
-                            <>
-                                <Input
-                                    label='Текущий вес'
-                                    name='currentWeight'
-                                    value={goal.currentWeight || ''}
-                                    onChange={handleInputChange}
-                                    type='number'
-                                    postValue='кг'
-                                    error={errors.currentWeight}
-                                />
-                                <Input
-                                    label='Желаемый вес'
-                                    name='desiredWeight'
-                                    value={goal.desiredWeight || ''}
-                                    onChange={handleInputChange}
-                                    type='number'
-                                    postValue='кг'
-                                    error={errors.desiredWeight}
-                                />
-                            </>
-                        )}
-
-                        {goal.type === 'fat' && (
-                            <>
-                                <Input
-                                    label='Текущий % жира'
-                                    name='currentFat'
-                                    value={goal.currentFat || ''}
-                                    onChange={handleInputChange}
-                                    type='number'
-                                    postValue='%'
-                                    error={errors.currentFat}
-                                />
-                                <Input
-                                    label='Желаемый % жира'
-                                    name='desiredFat'
-                                    value={goal.desiredFat || ''}
-                                    onChange={handleInputChange}
-                                    type='number'
-                                    postValue='%'
-                                    error={errors.desiredFat}
-                                />
-                            </>
-                        )}
-                    </div>
-
-                    <Button
-                        variant='contained'
-                        color='primary'
-                        onClick={handleSaveGoal}
-                    >
-                        Сохранить цель
-                    </Button>
-                </div>
+            <div className={styles.form}>
+                <DatePicker
+                    placeholder='Дата начала'
+                    value={goal.startDate ? dayjs(goal.startDate) : null}
+                    onChange={(date) => handleDateChange('startDate', date)}
+                    status={errors.startDate ? 'error' : ''}
+                />
+                <DatePicker
+                    placeholder='Дата окончания'
+                    value={goal.endDate ? dayjs(goal.endDate) : null}
+                    onChange={(date) => handleDateChange('endDate', date)}
+                    status={errors.endDate ? 'error' : ''}
+                />
+                <Select
+                    placeholder='Тип цели'
+                    value={goal.type}
+                    onChange={(value) => handleInputChange('type', value)}
+                >
+                    <Option value=''>Выберите тип цели</Option>
+                    <Option value='weight'>Похудеть/Набрать вес</Option>
+                    <Option value='fat'>Изменить % жира</Option>
+                </Select>
+                {goal.type === 'weight' && (
+                    <>
+                        <Input type='number' placeholder='Текущий вес' value={goal.currentWeight || ''} onChange={(e) => handleInputChange('currentWeight', e.target.value)} />
+                        <Input type='number' placeholder='Желаемый вес' value={goal.desiredWeight || ''} onChange={(e) => handleInputChange('desiredWeight', e.target.value)} />
+                    </>
+                )}
+                {goal.type === 'fat' && (
+                    <>
+                        <Input type='number' placeholder='Текущий % жира' value={goal.currentFat || ''} onChange={(e) => handleInputChange('currentFat', e.target.value)} />
+                        <Input type='number' placeholder='Желаемый % жира' value={goal.desiredFat || ''} onChange={(e) => handleInputChange('desiredFat', e.target.value)} />
+                    </>
+                )}
+                <Button type='primary' onClick={handleSaveGoal}>Сохранить цель</Button>
             </div>
         </div>
     );

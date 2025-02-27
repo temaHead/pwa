@@ -8,13 +8,15 @@ import {
 } from '../../../../../../store/slices/measurementSlice';
 import style from './PureWeightChart.module.scss';
 import { calculatePureWeight, FatMeasurement, WeightMeasurement } from './utils';
+import { theme } from 'antd';
 
 const PureWeightChart: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const weightMeasuring = useSelector((state: RootState) => state.measurements.weightMeasuring);
     const fatMeasuring = useSelector((state: RootState) => state.measurements.fatMeasuring);
     const { id } = useSelector((state: RootState) => state.user);
-
+    const { token } = theme.useToken(); // Получаем цвета текущей темы
+    const colorText = token.colorTextBase; // Автоматически подстраивается
     const [visibleLines, setVisibleLines] = useState({
         Вес: true,
         'Чистая масса': true,
@@ -165,15 +167,20 @@ const PureWeightChart: React.FC = () => {
                         axis: {
                             ticks: {
                                 text: {
-                                    fill: '#000',
+                                    fill: colorText,
                                     fontSize: 12,
-                                    fontWeight: 'bold',
+                                },
+                            },
+                            legend: {
+                                text: {
+                                    fill: colorText, // Белый цвет текста для легенды оси
+                                    fontSize: 14,
                                 },
                             },
                         },
                         grid: {
                             line: {
-                                stroke: '#ddd',
+                                stroke: colorText,
                                 strokeWidth: 1,
                                 strokeDasharray: '4 4',
                             },
@@ -182,7 +189,13 @@ const PureWeightChart: React.FC = () => {
                             text: {
                                 fontWeight: 'bold',
                                 fontSize: 13,
-                                fill: '#333',
+                                fill: colorText,
+                            },
+                        },
+                        dots: {
+                            text: {
+                                fontSize: 13,
+                                fill: colorText,
                             },
                         },
                     }}

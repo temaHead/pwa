@@ -1,18 +1,24 @@
 .goals{
     display: flex;
-    gap : 10px;
     overflow: auto;
     height: 100%;
     align-items: center;
     scrollbar-width: none; // Для Firefox (скрывает полосу прокрутки)
+    border-radius: 44px;
+    margin: 0 10px;
 
     &::-webkit-scrollbar {
         display: none; // Для Chrome, Safari
     }
     .addGoal {
-        height: 95px;
-        width: 95px;
+        height: 90px;
+        width: 90px;
         border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgb(233, 233, 232);
+        margin-left: 6px;
     
         .circle {
             height: 100px;

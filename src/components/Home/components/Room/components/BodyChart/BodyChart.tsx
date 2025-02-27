@@ -1,43 +1,60 @@
-import React, { useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { BodyMeasuringData } from '../../../../../../types';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ResponsiveLine } from '@nivo/line';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../../../store';
 import { getAllBodyMeasuringAsync } from '../../../../../../store/slices/measurementSlice';
 import style from './BodyChart.module.scss';
+import { BodyMeasuring } from '../../../../../../types';
+import { theme } from 'antd';
 
-interface BodyChartProps {
-    data?: BodyMeasuringData[]; // Данные с замерами тела
-}
-
-const BodyChart: React.FC<BodyChartProps> = () => {
+const BodyChart: React.FC = () => {
     const bodyMeasuring = useSelector((state: RootState) => state.measurements.bodyMeasuring);
     const dispatch = useDispatch<AppDispatch>();
     const { id } = useSelector((state: RootState) => state.user);
-
-    const [visibleLines, setVisibleLines] = React.useState({
+    console.log(bodyMeasuring);
+    const { token } = theme.useToken(); // Получаем цвета текущей темы
+    const colorText = token.colorTextBase; // Автоматически подстраивается
+    const defaultVisibleLines = {
         chest: true,
         hips: true,
         thigh: true,
         arms: true,
         waist: true,
-    });
-
-    // Преобразуем данные для графика
-    const chartData = bodyMeasuring.map((item) => ({
-        date: new Date(item.timestamp || 0).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }), // Форматируем дату
-        chest: item.bodyMeasuring.chest, // Грудь
-        hips: item.bodyMeasuring.hips, // Бедра
-        thigh: item.bodyMeasuring.thigh, // Бедро
-        arms: item.bodyMeasuring.arms, // Руки
-        waist: item.bodyMeasuring.waist, // Талия
-    }));
+    };
+    const [visibleLines, setVisibleLines] = useState(defaultVisibleLines);
 
     useEffect(() => {
         if (id) {
             dispatch(getAllBodyMeasuringAsync(id));
         }
     }, [dispatch, id]);
+
+    const chartData = useMemo(
+        () =>
+            Object.keys(visibleLines)
+                .map((key) => ({
+                    id: key,
+                    data: bodyMeasuring.map((item) => ({
+                        x: new Date(item.timestamp || 0).toLocaleDateString('ru-RU', {
+                            day: 'numeric',
+                            month: 'short',
+                        }),
+                        y: item.bodyMeasuring[key as keyof typeof visibleLines],
+                    })),
+                }))
+                .filter((series) => visibleLines[series.id as keyof typeof visibleLines]),
+        [bodyMeasuring, visibleLines]
+    );
+
+    const areaBaseline = useMemo(() => {
+        const values = bodyMeasuring.flatMap((item) =>
+            (Object.keys(visibleLines) as Array<keyof BodyMeasuring>)
+                .filter((key) => visibleLines[key]) // Берем только активные линии
+                .map((key) => item.bodyMeasuring[key] ?? null)
+        );
+
+        return values.length > 0 ? Math.min(...values.filter((val): val is number => val !== null)) : 0;
+    }, [bodyMeasuring, visibleLines]);
 
     const handleToggleLine = (key: keyof typeof visibleLines) => {
         setVisibleLines((prev) => ({
@@ -47,13 +64,13 @@ const BodyChart: React.FC<BodyChartProps> = () => {
     };
 
     return (
-        <div className={style.bodyChart}>
-            <div>График замеров тела</div>
-            <div style={{ marginBottom: '20px' }}>
+        <div className={style.chart}>
+            <div className={style.chartTitle}>📊 График замеров тела</div>
+            <div className={style.controls}>
                 {Object.keys(visibleLines).map((key) => (
                     <label
                         key={key}
-                        style={{ marginRight: '10px' }}
+                        className={style.checkboxLabel}
                     >
                         <input
                             type='checkbox'
@@ -69,68 +86,106 @@ const BodyChart: React.FC<BodyChartProps> = () => {
                 ))}
             </div>
             <div className={style.chartContainer}>
-                <ResponsiveContainer>
-                    <LineChart
-                        data={chartData}
-                        margin={{
-                            top: 20,
-                            right: 30,
-                            left: 20,
-                            bottom: 5,
-                        }}
-                    >
-                        <CartesianGrid strokeDasharray='3 3' />
-                        <XAxis dataKey='date' />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        {visibleLines.chest && (
-                            <Line
-                                type='monotone'
-                                dataKey='chest'
-                                stroke='#8884d8'
-                                activeDot={{ r: 8 }}
-                                name='Грудь'
-                            />
-                        )}
-                        {visibleLines.hips && (
-                            <Line
-                                type='monotone'
-                                dataKey='hips'
-                                stroke='#82ca9d'
-                                activeDot={{ r: 8 }}
-                                name='Бедра'
-                            />
-                        )}
-                        {visibleLines.thigh && (
-                            <Line
-                                type='monotone'
-                                dataKey='thigh'
-                                stroke='#ffc658'
-                                activeDot={{ r: 8 }}
-                                name='Бедро'
-                            />
-                        )}
-                        {visibleLines.arms && (
-                            <Line
-                                type='monotone'
-                                dataKey='arms'
-                                stroke='#ff7300'
-                                activeDot={{ r: 8 }}
-                                name='Руки'
-                            />
-                        )}
-                        {visibleLines.waist && (
-                            <Line
-                                type='monotone'
-                                dataKey='waist'
-                                stroke='#413ea0'
-                                activeDot={{ r: 8 }}
-                                name='Талия'
-                            />
-                        )}
-                    </LineChart>
-                </ResponsiveContainer>
+                <ResponsiveLine
+                    data={chartData}
+                    margin={{ top: 50, right: 20, bottom: 100, left: 60 }}
+                    xScale={{ type: 'point' }}
+                    yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false, reverse: false }}
+                    curve='monotoneX'
+                    axisBottom={{
+                        tickSize: 5,
+                        tickPadding: 5,
+                        tickRotation: -30,
+                        legend: 'Дата',
+                        legendOffset: 50,
+                        legendPosition: 'middle',
+                    }}
+                    axisLeft={{
+                        tickSize: 0,
+                        tickPadding: 15,
+                        tickRotation: 0,
+                        legend: 'см',
+                        legendOffset: -45,
+                        legendPosition: 'middle',
+                    }}
+                    enableGridX={false}
+                    enableGridY={false}
+                    colors={{ scheme: 'nivo' }}
+                    lineWidth={4}
+                    pointSize={11}
+                    enablePoints={true}
+                    pointBorderWidth={2}
+                    enablePointLabel={true}
+                    pointLabel='data.yFormatted'
+                    pointBorderColor={{ from: 'serieColor' }}
+                    pointLabelYOffset={-10}
+                    enableArea={true}
+                    areaBlendMode='normal'
+                    areaBaselineValue={areaBaseline}
+                    areaOpacity={0.15}
+                    useMesh={true}
+                    enableSlices='x'
+                    motionConfig='wobbly'
+                    legends={[
+                        {
+                            anchor: 'bottom-left',
+                            direction: 'row',
+                            translateY: 90,
+                            translateX: -20,
+                            itemsSpacing: 0,
+                            itemWidth: 80,
+                            itemHeight: 20,
+                            itemOpacity: 0.75,
+                            symbolSize: 12,
+                            symbolShape: 'circle',
+                            symbolBorderColor: 'rgba(0, 0, 0, .5)',
+                            effects: [
+                                {
+                                    on: 'hover',
+                                    style: {
+                                        itemOpacity: 1,
+                                    },
+                                },
+                            ],
+                        },
+                    ]}
+                    theme={{
+                        axis: {
+                            ticks: {
+                                text: {
+                                    fill: colorText,
+                                    fontSize: 12,
+                                },
+                            },
+                            legend: {
+                                text: {
+                                    fill: colorText, // Белый цвет текста для легенды оси
+                                    fontSize: 14,
+                                },
+                            },
+                        },
+                        grid: {
+                            line: {
+                                stroke: colorText,
+                                strokeWidth: 1,
+                                strokeDasharray: '4 4',
+                            },
+                        },
+                        legends: {
+                            text: {
+                                fontWeight: 'bold',
+                                fontSize: 13,
+                                fill: colorText,
+                            },
+                        },
+                        dots: {
+                            text: {
+                                fontSize: 13,
+                                fill: colorText,
+                            },
+                        },
+                    }}
+                />
             </div>
         </div>
     );

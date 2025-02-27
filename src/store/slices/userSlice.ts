@@ -12,6 +12,7 @@ const initialState: UserProfile = {
     gender: null,
     height: null,
     bodyFat: null,
+    theme:'light',
 };
 
 export const updateUserProfileAsync = createAsyncThunk(
@@ -50,6 +51,7 @@ const userSlice = createSlice({
             state.gender = action.payload.gender || null;
             state.height = action.payload.height || null;
             state.bodyFat = action.payload.bodyFat || null;
+            state.theme = action.payload.theme || 'light';
         },
         removeUser(state) {
             state.email = null;
@@ -60,6 +62,7 @@ const userSlice = createSlice({
             state.gender = null;
             state.height = null;
             state.bodyFat = null;
+            state.theme = 'light';
             window.localStorage.removeItem('id');
         },
     },
@@ -75,6 +78,7 @@ const userSlice = createSlice({
             state.gender = updatedData.gender || null;
             state.height = updatedData.height || null;
             state.bodyFat = updatedData.bodyFat || null;
+            state.theme = updatedData.theme || 'light';
         })
         builder.addCase(addUserProfileAsync.fulfilled, (state, action) => {
             // Обновляем профиль в состоянии после успешного запроса
@@ -87,6 +91,7 @@ const userSlice = createSlice({
             state.gender = updatedData.gender || null;
             state.height = updatedData.height || null;
             state.bodyFat = updatedData.bodyFat || null;
+            state.theme = updatedData.theme || 'light';
         })
         
     },

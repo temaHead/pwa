@@ -2,6 +2,7 @@
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);    
     position: sticky;
     bottom: 0;
+    outline: none;
     z-index: 2;
     .page {
         flex: 1; // Все элементы растягиваются, занимая равное пространство

@@ -1,176 +1,106 @@
-import { useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { TextField, Button, MenuItem, Select, FormControl, InputLabel, Alert, Box } from '@mui/material';
+import { Button, Select, Form, Input, Alert, DatePicker } from 'antd';
 import { AppDispatch, RootState } from '../../../../../../../../store';
 import { updateGoalAsync } from '../../../../../../../../store/slices/goalsSlice';
 import { Goal } from '../../../../../../../../types';
+import dayjs from 'dayjs';
 
-const GoalEditing = () => {
+
+const { Option } = Select;
+
+const GoalEditing = memo(() => {
     const { goalId } = useParams<{ goalId: string }>();
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const goalData = useSelector((state: RootState) => state.goals.goals.find((g) => g.id === goalId));
 
-    const [goal, setGoal] = useState<Goal | null>(null);
+    const [form] = Form.useForm();
     const [updatedStatus, setUpdatedStatus] = useState<Goal['status'] | null>(null);
 
     useEffect(() => {
         if (goalData) {
-            setGoal(goalData.goal);
+            form.setFieldsValue({
+                ...goalData.goal,
+                startDate: goalData.goal.startDate ? dayjs(goalData.goal.startDate) : null,
+                endDate: goalData.goal.endDate ? dayjs(goalData.goal.endDate) : null
+            });
         }
-    }, [goalData]);
+    }, [goalData, form]);
 
-    if (!goal) {
-        return <div>Цель не найдена</div>;
-    }
-
-    const handleChange = (field: keyof Goal, value: string | number | null) => {
-        setGoal((prev) => (prev ? { ...prev, [field]: value } : prev));
-    };
-
-    const handleSave = () => {
-        if (goalData) {
-            dispatch(
-                updateGoalAsync({ id: goalData.id, goal: { ...goal, status: updatedStatus || goal.status } })
-            );
+    const handleSave = useCallback(() => {
+        if (!goalData) return;
+    
+        form.validateFields().then((values) => {
+            dispatch(updateGoalAsync({ 
+                id: goalData.id, 
+                goal: { 
+                    ...values, 
+                    status: updatedStatus || goalData.goal.status,
+                    startDate: values.startDate ? values.startDate.format('YYYY-MM-DD') : null,
+                    endDate: values.endDate ? values.endDate.format('YYYY-MM-DD') : null
+                }
+            }));
             navigate(-1);
-        }
-    };
+        });
+    }, [dispatch, goalData, updatedStatus, form, navigate]);
+    
 
     return (
-        <Box
-            maxWidth='400px'
-            margin='auto'
-            padding='20px'
-        >
+        <div style={{ maxWidth: 400, margin: 'auto', padding: 20 }}>
             <h2>Редактирование цели</h2>
-
-            {/* Информационный блок при статусе "done" */}
-            {goal.status === 'done' && (
+            {goalData && goalData.goal.status === 'done' && (
                 <>
-                    <Alert
-                        severity='info'
-                        sx={{ marginBottom: 2 }}
-                    >
-                        Время на выполнение вашей задачи закончилось. Обновите статус цели.
-                    </Alert>
-                    <FormControl
-                        fullWidth
-                        margin='normal'
-                    >
-                        <InputLabel>Обновите статус</InputLabel>
-                        <Select
-                            value={updatedStatus || ''}
-                            onChange={(e) => setUpdatedStatus(e.target.value as Goal['status'])}
-                        >
-                            <MenuItem value='success'>Успешно</MenuItem>
-                            <MenuItem value='failed'>Провалена</MenuItem>
+                    <Alert message='Время на выполнение вашей задачи закончилось. Обновите статус цели.' type='info' showIcon style={{ marginBottom: 16 }} />
+                    <Form.Item label='Обновите статус'>
+                        <Select value={updatedStatus} onChange={setUpdatedStatus}>
+                            <Option value='success'>Успешно</Option>
+                            <Option value='failed'>Провалена</Option>
                         </Select>
-                    </FormControl>
+                    </Form.Item>
                 </>
             )}
-
-            <FormControl
-                fullWidth
-                margin='normal'
-            >
-                <InputLabel>Тип цели</InputLabel>
-                <Select
-                    value={goal.type}
-                    onChange={(e) => handleChange('type', e.target.value)}
-                >
-                    <MenuItem value='weight'>Вес</MenuItem>
-                    <MenuItem value='fat'>Процент жира</MenuItem>
-                </Select>
-            </FormControl>
-
-            {/* Поля для веса */}
-            {goal.type === 'weight' && (
-                <>
-                    <TextField
-                        fullWidth
-                        label='Начальный вес'
-                        type='number'
-                        value={goal.initialWeight ?? ''}
-                        onChange={(e) => handleChange('initialWeight', Number(e.target.value))}
-                        margin='normal'
-                    />
-                    <TextField
-                        fullWidth
-                        label='Желаемый вес'
-                        type='number'
-                        value={goal.desiredWeight ?? ''}
-                        onChange={(e) => handleChange('desiredWeight', Number(e.target.value))}
-                        margin='normal'
-                    />
-                </>
-            )}
-
-            {/* Поля для жира */}
-            {goal.type === 'fat' && (
-                <>
-                    <TextField
-                        fullWidth
-                        label='Начальный жир (%)'
-                        type='number'
-                        value={goal.initialFat ?? ''}
-                        onChange={(e) => handleChange('initialFat', Number(e.target.value))}
-                        margin='normal'
-                    />
-                    <TextField
-                        fullWidth
-                        label='Желаемый жир (%)'
-                        type='number'
-                        value={goal.desiredFat ?? ''}
-                        onChange={(e) => handleChange('desiredFat', Number(e.target.value))}
-                        margin='normal'
-                    />
-                </>
-            )}
-
-            <TextField
-                fullWidth
-                label='Дата начала'
-                type='date'
-                value={goal.startDate}
-                onChange={(e) => handleChange('startDate', e.target.value)}
-                margin='normal'
-                InputLabelProps={{ shrink: true }}
-            />
-
-            <TextField
-                fullWidth
-                label='Дата окончания'
-                type='date'
-                value={goal.endDate}
-                onChange={(e) => handleChange('endDate', e.target.value)}
-                margin='normal'
-                InputLabelProps={{ shrink: true }}
-            />
-
-            <Box
-                display='flex'
-                justifyContent='space-between'
-                marginTop='20px'
-            >
-                <Button
-                    variant='contained'
-                    color='primary'
-                    onClick={handleSave}
-                >
-                    Сохранить
-                </Button>
-                <Button
-                    variant='outlined'
-                    color='secondary'
-                    onClick={() => navigate(-1)}
-                >
-                    Отмена
-                </Button>
-            </Box>
-        </Box>
+            <Form form={form} layout='vertical'>
+                <Form.Item name='type' label='Тип цели' rules={[{ required: true, message: 'Выберите тип цели' }]}>
+                    <Select>
+                        <Option value='weight'>Вес</Option>
+                        <Option value='fat'>Процент жира</Option>
+                    </Select>
+                </Form.Item>
+                {goalData && goalData.goal.type === 'weight' && (
+                    <>
+                        <Form.Item name='initialWeight' label='Начальный вес'>
+                            <Input type='number' />
+                        </Form.Item>
+                        <Form.Item name='desiredWeight' label='Желаемый вес'>
+                            <Input type='number' />
+                        </Form.Item>
+                    </>
+                )}
+                {goalData && goalData.goal.type === 'fat' && (
+                    <>
+                        <Form.Item name='initialFat' label='Начальный жир (%)'>
+                            <Input type='number' />
+                        </Form.Item>
+                        <Form.Item name='desiredFat' label='Желаемый жир (%)'>
+                            <Input type='number' />
+                        </Form.Item>
+                    </>
+                )}
+                <Form.Item name='startDate' label='Дата начала'>
+                    <DatePicker format='YYYY-MM-DD' style={{ width: '100%' }} />
+                </Form.Item>
+                <Form.Item name='endDate' label='Дата окончания'>
+                    <DatePicker format='YYYY-MM-DD' style={{ width: '100%' }} />
+                </Form.Item>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
+                    <Button type='primary' onClick={handleSave}>Сохранить</Button>
+                    <Button onClick={() => navigate(-1)}>Отмена</Button>
+                </div>
+            </Form>
+        </div>
     );
-};
+});
 
 export default GoalEditing;
