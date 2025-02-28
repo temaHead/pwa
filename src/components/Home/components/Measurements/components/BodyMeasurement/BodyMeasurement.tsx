@@ -46,14 +46,20 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
     };
 
     const handleTouchMove = (e: React.TouchEvent) => {
-        const deltaX = e.touches[0].clientX - startX.current;
-        const newTranslateX = Math.min(0, Math.max(-75, deltaX));
-        setTranslateX(newTranslateX);
-    };
-
-    const handleTouchEnd = () => {
-        setTranslateX(translateX < -40 ? -75 : 0);
-    };
+         const deltaX = e.touches[0].clientX - startX.current;
+         requestAnimationFrame(() => {
+             setTranslateX(Math.min(0, Math.max(-75, deltaX)));
+         });
+     };
+     
+ 
+ const handleTouchEnd = () => {
+     requestAnimationFrame(() => {
+         setTimeout(() => {
+             setTranslateX(translateX < -40 ? -75 : 0);
+         }, 10);
+     });
+ };
 
     const handleInputChange = (field: keyof BodyMeasuringData['bodyMeasuring'], value: string) => {
         setEditedBody((prev) => ({

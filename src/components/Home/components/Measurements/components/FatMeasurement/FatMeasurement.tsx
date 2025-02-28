@@ -51,14 +51,21 @@ const FatMeasurement: React.FC<FatMeasurementProps> = ({ item }) => {
             startX.current = e.touches[0].clientX;
         };
     
-        const handleTouchMove = (e: React.TouchEvent) => {
-            const deltaX = e.touches[0].clientX - startX.current;
+   const handleTouchMove = (e: React.TouchEvent) => {
+        const deltaX = e.touches[0].clientX - startX.current;
+        requestAnimationFrame(() => {
             setTranslateX(Math.min(0, Math.max(-75, deltaX)));
-        };
+        });
+    };
     
-        const handleTouchEnd = () => {
+
+const handleTouchEnd = () => {
+    requestAnimationFrame(() => {
+        setTimeout(() => {
             setTranslateX(translateX < -40 ? -75 : 0);
-        };
+        }, 10);
+    });
+};
 
     const handleInputChange = (field: keyof FatMeasuringData['measurements'], value: string) => {
         setEditedMeasurements((prev) => ({
