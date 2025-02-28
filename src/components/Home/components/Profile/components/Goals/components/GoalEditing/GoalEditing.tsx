@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Select, Form, Input, Alert } from 'antd';
+import { Button, Select, Form, Input, Alert, theme } from 'antd';
 import { AppDispatch, RootState } from '../../../../../../../../store';
 import { updateGoalAsync } from '../../../../../../../../store/slices/goalsSlice';
 import { Goal } from '../../../../../../../../types';
@@ -13,7 +13,8 @@ const GoalEditing = memo(() => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const goalData = useSelector((state: RootState) => state.goals.goals.find((g) => g.id === goalId));
-
+    const { token } = theme.useToken(); // Получаем цвета текущей темы
+    const textColor = token.colorTextBase;
     const [form] = Form.useForm();
     const [updatedStatus, setUpdatedStatus] = useState<Goal['status'] | null>(null);
 
@@ -47,7 +48,7 @@ const GoalEditing = memo(() => {
     }, [dispatch, goalData, updatedStatus, form, navigate]);
 
     return (
-        <div style={{ maxWidth: 400, margin: 'auto', padding: 20 }}>
+        <div style={{ maxWidth: 400, margin: 'auto', padding: 20, color: textColor }}>
             <h2>Редактирование цели</h2>
             {goalData && goalData.goal.status === 'done' && (
                 <>

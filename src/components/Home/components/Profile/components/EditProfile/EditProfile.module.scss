@@ -8,25 +8,24 @@
     .header {
         display: flex;
         align-items: center;
-        justify-content: space-between; /* Для распределения пространства между элементами */
-        position: relative; /* Для управления абсолютным позиционированием тайтла */
-        padding: 0 16px; /* Отступы слева и справа */
+        justify-content: center; /* Центрируем содержимое */
+        position: relative;
+        padding: 0 16px;
     
         .icon {
-            flex-shrink: 0; /* Иконка не сжимается */
-            display: flex;
-            align-items: center;
-            cursor: pointer; /* Указатель мыши меняется на "руку" */
+            position: absolute;
+            left: 0; /* Фиксируем стрелку у левого края */
         }
     
         .title {
-            position: absolute; /* Абсолютное позиционирование */
-            left: 50%; /* Центрируем по горизонтали */
-            transform: translateX(-50%); /* Смещение на половину ширины */
-            font-size: 18px; /* Размер текста */
-            font-weight: bold; /* Жирный шрифт */
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            flex-grow: 1; /* Позволяет заголовку центрироваться */
         }
     }
+    
+    
     .avatar{
         display: flex; /* Используем Flexbox для выравнивания содержимого */
         align-items: stretch; /* Растягиваем элементы по высоте контейнера */
@@ -66,6 +65,12 @@
         gap: 15px;
         align-items: flex-start;
     }
+
+    .container input[type="date"] {
+        width: 100%;
+        min-width: 100%; // Чтобы работало в Safari
+    }
+
     .logout {
         justify-self: flex-end;
     }

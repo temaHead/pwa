@@ -1,12 +1,13 @@
 .goals{
     display: flex;
-    overflow: auto;
     height: 113px;
     align-items: center;
     scrollbar-width: none; // Для Firefox (скрывает полосу прокрутки)
     border-radius: 50px;
     padding: 13px;
     margin: 0 10px;
+    overflow-y: hidden;
+    overflow-x: scroll;
 
     &::-webkit-scrollbar {
         display: none; // Для Chrome, Safari
