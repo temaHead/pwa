@@ -16,6 +16,8 @@
         z-index: 1;
         border: white 1px solid;
         border-radius: 0 8px 8px 0;
+        will-change: opacity, transform;
+        transition: opacity 0.3s ease, transform 0.3s ease;
 
         .deleteIcon {
             color: white;
@@ -30,8 +32,9 @@
         border-radius: 8px;
         padding: 10px;
         z-index: 1;
-        transition: transform 0.2s ease-out;
+        transition: transform 0.3s ease-out;
         will-change: transform;
+        transform: translate3d(0, 0, 0);
     }
 
     .content {

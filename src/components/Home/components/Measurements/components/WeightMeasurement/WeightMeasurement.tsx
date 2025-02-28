@@ -32,12 +32,19 @@ const WeightMeasurement: React.FC<WeightMeasurementProps> = ({ item }) => {
 
     const handleTouchMove = (e: React.TouchEvent) => {
         const deltaX = e.touches[0].clientX - startX.current;
-        setTranslateX(Math.min(0, Math.max(-75, deltaX)));
+        requestAnimationFrame(() => {
+            setTranslateX(Math.min(0, Math.max(-75, deltaX)));
+        });
     };
+    
 
-    const handleTouchEnd = () => {
-        setTranslateX(translateX < -40 ? -75 : 0);
-    };
+const handleTouchEnd = () => {
+    requestAnimationFrame(() => {
+        setTimeout(() => {
+            setTranslateX(translateX < -40 ? -75 : 0);
+        }, 10); // Даем браузеру время обработать финальное положение
+    });
+};
 
     const handleSave = async () => {
         if (!item.id) {
