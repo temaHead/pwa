@@ -1,9 +1,16 @@
-.pureWeightChart{
+.pureWeightChart {
     height: 350px;
     width: 100%;
 }
 
-.chartContainer{
+.chartContainer {
     height: 300px;
-    width: 100%;
+    width: 10;
+}
+
+.switchContainer {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }

@@ -6,7 +6,7 @@
     .deleteArea {
         position: absolute;
         top: 0;
-        right: 0px;
+        right: 1px;
         width: 80px;
         height: 100%;
         background-color: red;
@@ -14,7 +14,7 @@
         align-items: center;
         justify-content: center;
         z-index: 0;
-        border: white 1px solid;
+        // border: white 1px solid;
         border-radius: 0 8px 8px 0;
         will-change: opacity, transform;
         transition: opacity 0.3s ease, transform 0.3s ease;
@@ -28,7 +28,7 @@
 
     .fatMeasurement {
         position: relative;
-        border: 1px solid #ccc;
+        // border: 1px solid #ccc;
         border-radius: 8px;
         padding: 10px;
         z-index: 1;

@@ -5,15 +5,17 @@ import { updateUserProfileAsync } from '../../../../../../store/slices/userSlice
 import { UserProfile } from '../../../../../../types';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeftOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Input, Select, Avatar, Flex, Form } from 'antd';
+import { Button, Input, Select, Avatar, Flex, Form, theme } from 'antd';
 import style from './EditProfile.module.scss';
+import CustomSelect from '../../../../../../shared/components/CustomSelect/CustomSelect';
 
 const { Option } = Select;
 
 function EditProfile() {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-
+    const { token } = theme.useToken(); // Получаем цвета текущей темы
+    const textColor = token.colorTextBase;
     const user = useSelector((state: RootState) => state.user, shallowEqual);
     const [profile, setProfile] = useState<UserProfile>(user);
 
@@ -47,7 +49,7 @@ function EditProfile() {
     }, [dispatch, profile, navigate]);
 
     return (
-        <div className={style.editProfile}>
+        <div className={style.editProfile} style={{ color: textColor }}>
             <Flex
                 justify='center'
                 align='center'
@@ -87,7 +89,7 @@ function EditProfile() {
                         type='date'
                         value={dateValue}
                         onChange={handleDateChange}
-                        style={{ width: '100%' }}
+                        style={{ width: '100%', minWidth:'100%' }}
                     />
                 </Form.Item>
 
@@ -122,7 +124,7 @@ function EditProfile() {
                 </Form.Item>
 
                 <Form.Item label='Пол'>
-                    <Select
+                    <CustomSelect
                         value={profileData.gender || undefined}
                         onChange={handleSelectChange('gender')}
                         style={{ width: '100%' }}
@@ -130,7 +132,7 @@ function EditProfile() {
                         <Option value='Не выбран'>Не выбран</Option>
                         <Option value='Мужчина'>Мужчина</Option>
                         <Option value='Женщина'>Женщина</Option>
-                    </Select>
+                    </CustomSelect>
                 </Form.Item>
             </Form>
 

@@ -12,3 +12,11 @@
     height: 300px;
     width: 100%;
 }
+
+.switchContainer {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}

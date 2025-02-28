@@ -11,6 +11,8 @@ const WeightChart: React.FC = () => {
     const { id } = useSelector((state: RootState) => state.user);
     const { token } = theme.useToken(); // Получаем цвета текущей темы
     const colorText = token.colorTextBase; // Автоматически подстраивается
+    const colorBackground = token.colorBgLayout;
+
     const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
@@ -101,8 +103,6 @@ const WeightChart: React.FC = () => {
                                     fontSize: 14,
                                 },
                             },
-
-
                         },
                         grid: {
                             line: {
@@ -110,7 +110,6 @@ const WeightChart: React.FC = () => {
                                 strokeWidth: 1,
                                 strokeDasharray: '4 4',
                             },
-
                         },
                         legends: {
                             text: {
@@ -118,14 +117,19 @@ const WeightChart: React.FC = () => {
                                 fontSize: 13,
                                 fill: colorText,
                             },
-
                         },
                         dots: {
                             text: {
                                 fontSize: 13,
                                 fill: colorText,
                             },
-                        }
+                        },
+                        tooltip: {
+                            container: {
+                                background: colorBackground,
+                                color: colorText,
+                            },
+                        },
                     }}
                     motionConfig='wobbly'
                     legends={[

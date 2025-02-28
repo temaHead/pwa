@@ -36,6 +36,7 @@ function App() {
             colorTextBase: themeMode === 'dark' ? '#ffffff' : '#000000',
             colorBgLayout: themeMode === 'dark' ? '#131720' : '#edf2f5',
             colorBgContainer: themeMode === 'dark' ? '#1f2636' : '#ffffff',
+            colorPrimaryActive: themeMode === 'dark' ? '#1890ff' : '#e9e9e9',
             colorIcon: themeMode === 'dark' ? '#b7b8bc' : '#bebfc1',
         },
     };

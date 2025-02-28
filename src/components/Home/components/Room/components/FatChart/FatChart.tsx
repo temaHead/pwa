@@ -5,7 +5,7 @@ import { AppDispatch, RootState } from '../../../../../../store';
 import { getAllFatMeasuringAsync } from '../../../../../../store/slices/measurementSlice';
 import style from './FatChart.module.scss';
 import { FatMeasuringData } from '../../../../../../types';
-import { theme } from 'antd';
+import { Switch, theme } from 'antd';
 
 const FatChart: React.FC = () => {
     const fatMeasuring = useSelector((state: RootState) => state.measurements.fatMeasuring);
@@ -13,6 +13,8 @@ const FatChart: React.FC = () => {
     const { id, gender } = useSelector((state: RootState) => state.user);
     const { token } = theme.useToken(); // Получаем цвета текущей темы
     const colorText = token.colorTextBase; // Автоматически подстраивается
+    const colorBackground = token.colorBgLayout;
+
     const defaultVisibleLines =
         gender === 'male'
             ? { chest: true, abdomen: true, thigh: true, bodyFat: true }
@@ -74,25 +76,32 @@ const FatChart: React.FC = () => {
     return (
         <div className={style.chart}>
             <div className={style.chartTitle}>📊 График замеров жира</div>
-            <div className={style.controls}>
-                {Object.keys(visibleLines).map((key) => (
-                    <label
-                        key={key}
-                        className={style.checkboxLabel}
-                    >
-                        <input
-                            type='checkbox'
+            <div className={style.switchContainer}>
+                {Object.keys(visibleLines).map((key) => {
+                    const label =
+                        key === 'chest'
+                            ? 'Грудь'
+                            : key === 'abdomen'
+                            ? 'Живот'
+                            : key === 'thigh'
+                            ? 'Бедро'
+                            : key === 'tricep'
+                            ? 'Трицепс'
+                            : key === 'waist'
+                            ? 'Талия'
+                            : key === 'bodyFat'
+                            ? '% жира'
+                            : key;
+                    return (
+                        <Switch
+                            key={key}
                             checked={visibleLines[key as keyof typeof visibleLines]}
                             onChange={() => handleToggleLine(key as keyof typeof visibleLines)}
+                            checkedChildren={label}
+                            unCheckedChildren={label}
                         />
-                        {key === 'chest' && 'Грудь'}
-                        {key === 'abdomen' && 'Живот'}
-                        {key === 'thigh' && 'Бедро'}
-                        {key === 'tricep' && 'Трицепс'}
-                        {key === 'waist' && 'Талия'}
-                        {key === 'bodyFat' && '% жира'}
-                    </label>
-                ))}
+                    );
+                })}
             </div>
             <div className={style.chartContainer}>
                 <ResponsiveLine
@@ -199,6 +208,12 @@ const FatChart: React.FC = () => {
                                 fill: colorText,
                             },
                         },
+                        tooltip: {
+                            container: {
+                                background: colorBackground,
+                                color: colorText,
+                            },
+                        }
                     }}
                 />
             </div>

@@ -5,6 +5,7 @@ import { Button, Select, Form, Input, Alert, theme } from 'antd';
 import { AppDispatch, RootState } from '../../../../../../../../store';
 import { updateGoalAsync } from '../../../../../../../../store/slices/goalsSlice';
 import { Goal } from '../../../../../../../../types';
+import CustomSelect from '../../../../../../../../shared/components/CustomSelect/CustomSelect';
 
 const { Option } = Select;
 
@@ -59,13 +60,13 @@ const GoalEditing = memo(() => {
                         style={{ marginBottom: 16 }}
                     />
                     <Form.Item label='Обновите статус'>
-                        <Select
+                        <CustomSelect
                             value={updatedStatus}
                             onChange={setUpdatedStatus}
                         >
                             <Option value='success'>Успешно</Option>
                             <Option value='failed'>Провалена</Option>
-                        </Select>
+                        </CustomSelect>
                     </Form.Item>
                 </>
             )}

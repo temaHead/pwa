@@ -65,3 +65,13 @@ button {
 .ant-btn {
     box-shadow: none !important;
 }
+
+.ant-input,
+.ant-select-selector {
+    font-size: 16px !important;
+} 
+/* Цвет фона и текста выбранной опции */
+.ant-select-item-option-selected {
+    background-color: var(--selected-bg, #1890ff) !important;
+    color: var(--selected-text, #fff) !important;
+}

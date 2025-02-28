@@ -6,7 +6,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../../store';
 import { useNavigate } from 'react-router-dom';
 import { LeftOutlined } from '@ant-design/icons';
-import { Button, Input, Select } from 'antd';
+import { Button, Input } from 'antd';
+import CustomSelect from '../../../../../shared/components/CustomSelect/CustomSelect';
 
 interface Step {
     id: string;
@@ -285,7 +286,7 @@ const AddUser: React.FC = () => {
                     </Button>
                 </div>
             ) : currentStep.type === 'select' ? (
-                <Select
+                <CustomSelect
                 value={formData[currentStep.id] ?? undefined}
                 onChange={(value) => handleInputChange(currentStep.id, value)}
                 options={currentStep.options || []}

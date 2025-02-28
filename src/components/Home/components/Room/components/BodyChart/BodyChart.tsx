@@ -5,7 +5,7 @@ import { AppDispatch, RootState } from '../../../../../../store';
 import { getAllBodyMeasuringAsync } from '../../../../../../store/slices/measurementSlice';
 import style from './BodyChart.module.scss';
 import { BodyMeasuring } from '../../../../../../types';
-import { theme } from 'antd';
+import { Switch, theme } from 'antd';
 
 const BodyChart: React.FC = () => {
     const bodyMeasuring = useSelector((state: RootState) => state.measurements.bodyMeasuring);
@@ -14,6 +14,7 @@ const BodyChart: React.FC = () => {
     console.log(bodyMeasuring);
     const { token } = theme.useToken(); // Получаем цвета текущей темы
     const colorText = token.colorTextBase; // Автоматически подстраивается
+    const colorBackground = token.colorBgLayout;
     const defaultVisibleLines = {
         chest: true,
         hips: true,
@@ -66,23 +67,35 @@ const BodyChart: React.FC = () => {
     return (
         <div className={style.chart}>
             <div className={style.chartTitle}>📊 График замеров тела</div>
-            <div className={style.controls}>
+            <div className={style.switchContainer}>
                 {Object.keys(visibleLines).map((key) => (
-                    <label
+                    <Switch
                         key={key}
-                        className={style.checkboxLabel}
-                    >
-                        <input
-                            type='checkbox'
-                            checked={visibleLines[key as keyof typeof visibleLines]}
-                            onChange={() => handleToggleLine(key as keyof typeof visibleLines)}
-                        />
-                        {key === 'chest' && 'Грудь'}
-                        {key === 'hips' && 'Бедра'}
-                        {key === 'thigh' && 'Бедро'}
-                        {key === 'arms' && 'Руки'}
-                        {key === 'waist' && 'Талия'}
-                    </label>
+                        checked={visibleLines[key as keyof typeof visibleLines]}
+                        onChange={() => handleToggleLine(key as keyof typeof visibleLines)}
+                        checkedChildren={
+                            key === 'chest'
+                                ? 'Грудь'
+                                : key === 'hips'
+                                ? 'Бедра'
+                                : key === 'thigh'
+                                ? 'Бедро'
+                                : key === 'arms'
+                                ? 'Руки'
+                                : 'Талия'
+                        }
+                        unCheckedChildren={
+                            key === 'chest'
+                                ? 'Грудь'
+                                : key === 'hips'
+                                ? 'Бедра'
+                                : key === 'thigh'
+                                ? 'Бедро'
+                                : key === 'arms'
+                                ? 'Руки'
+                                : 'Талия'
+                        }
+                    />
                 ))}
             </div>
             <div className={style.chartContainer}>
@@ -182,6 +195,12 @@ const BodyChart: React.FC = () => {
                             text: {
                                 fontSize: 13,
                                 fill: colorText,
+                            },
+                        },
+                        tooltip: {
+                            container: {
+                                background: colorBackground,
+                                color: colorText,
                             },
                         },
                     }}

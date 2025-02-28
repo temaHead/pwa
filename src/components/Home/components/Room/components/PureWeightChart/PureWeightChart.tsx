@@ -8,7 +8,7 @@ import {
 } from '../../../../../../store/slices/measurementSlice';
 import style from './PureWeightChart.module.scss';
 import { calculatePureWeight, FatMeasurement, WeightMeasurement } from './utils';
-import { theme } from 'antd';
+import { theme, Switch } from 'antd';
 
 const PureWeightChart: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -17,6 +17,7 @@ const PureWeightChart: React.FC = () => {
     const { id } = useSelector((state: RootState) => state.user);
     const { token } = theme.useToken(); // Получаем цвета текущей темы
     const colorText = token.colorTextBase; // Автоматически подстраивается
+    const colorBackground = token.colorBgLayout;
     const [visibleLines, setVisibleLines] = useState({
         Вес: true,
         'Чистая масса': true,
@@ -28,20 +29,20 @@ const PureWeightChart: React.FC = () => {
             dispatch(getAllFatMeasuringAsync(id));
         }
     }, [dispatch, id]);
-    // Вычисляем чистую массу тела
+
     const pureData = useMemo(() => {
-        if (weightMeasuring.length === 0) return []; // Ждём загрузки веса
+        if (weightMeasuring.length === 0) return []; 
 
         const validFatMeasuring: FatMeasurement[] = fatMeasuring
-            .filter((entry) => entry.timestamp && entry.bodyFat !== null) // Убираем пустые данные
+            .filter((entry) => entry.timestamp && entry.bodyFat !== null)
             .map(({ timestamp, bodyFat }) => ({
                 timestamp: timestamp as string,
                 bodyFat: bodyFat as number,
             }));
 
         const validWeightMeasuring: WeightMeasurement[] = weightMeasuring
-            .filter((entry) => entry.timestamp && entry.weight !== null) // Фильтруем пустые записи
-            .map(({ timestamp, weight }) => ({ timestamp: timestamp as string, weight: String(weight) })); // Преобразуем в string
+            .filter((entry) => entry.timestamp && entry.weight !== null)
+            .map(({ timestamp, weight }) => ({ timestamp: timestamp as string, weight: String(weight) }));
 
         return calculatePureWeight(validFatMeasuring, validWeightMeasuring);
     }, [weightMeasuring, fatMeasuring]);
@@ -50,17 +51,14 @@ const PureWeightChart: React.FC = () => {
         const values = pureData
             .flatMap(({ weight, pureWeight }) =>
                 Object.keys(visibleLines)
-                    .filter((key) => visibleLines[key as keyof typeof visibleLines]) // Берем только активные линии
+                    .filter((key) => visibleLines[key as keyof typeof visibleLines])
                     .map((key) => (key === 'Вес' ? parseFloat(weight) : pureWeight))
             )
-            .filter((val) => val !== undefined && val !== null); // Исключаем null/undefined
+            .filter((val) => val !== undefined && val !== null);
 
         return values.length > 0 ? Math.min(...values) : 0;
     }, [pureData, visibleLines]);
 
-    console.log(pureData, 'pureData');
-
-    // Подготовка данных для графика
     const chartData = useMemo(() => {
         return [
             {
@@ -79,24 +77,20 @@ const PureWeightChart: React.FC = () => {
             },
         ].filter((series) => visibleLines[series.id as keyof typeof visibleLines]);
     }, [pureData, visibleLines]);
-    console.log(chartData, 'chartData');
 
     return (
         <div className={style.pureWeightChart}>
             <div>График изменения веса и чистой массы тела</div>
-            <div className={style.controls}>
+            <div className={style.switchContainer}>
                 {(Object.keys(visibleLines) as Array<keyof typeof visibleLines>).map((key) => (
-                    <label
-                        key={key}
-                        className={style.checkboxLabel}
-                    >
-                        <input
-                            type='checkbox'
+                    <div key={key}>
+                        <Switch
                             checked={visibleLines[key]}
                             onChange={() => setVisibleLines((prev) => ({ ...prev, [key]: !prev[key] }))}
+                            checkedChildren={key}
+                            unCheckedChildren={key}
                         />
-                        {key === 'Вес' ? 'Вес' : 'Чистая масса'}
-                    </label>
+                    </div>
                 ))}
             </div>
             <div className={style.chartContainer}>
@@ -173,7 +167,7 @@ const PureWeightChart: React.FC = () => {
                             },
                             legend: {
                                 text: {
-                                    fill: colorText, // Белый цвет текста для легенды оси
+                                    fill: colorText,
                                     fontSize: 14,
                                 },
                             },
@@ -198,6 +192,12 @@ const PureWeightChart: React.FC = () => {
                                 fill: colorText,
                             },
                         },
+                        tooltip: {
+                            container: {
+                                background: colorBackground,
+                                color: colorText,
+                            },
+                        }
                     }}
                 />
             </div>

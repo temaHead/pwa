@@ -66,9 +66,10 @@
         align-items: flex-start;
     }
 
-    .container input[type="date"] {
+    input[type="date"] {
         width: 100%;
         min-width: 100%; // Чтобы работало в Safari
+        height: 35px;
     }
 
     .logout {

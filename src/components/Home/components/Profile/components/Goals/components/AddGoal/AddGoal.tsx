@@ -12,6 +12,7 @@ import {
 import dayjs from 'dayjs';
 import styles from './AddGoal.module.scss';
 import { Goal } from '../../../../../../../../types';
+import CustomSelect from '../../../../../../../../shared/components/CustomSelect/CustomSelect';
 
 const { Option } = Select;
 
@@ -130,7 +131,7 @@ function AddGoal() {
                     onChange={(date) => handleDateChange('endDate', date)}
                     status={errors.endDate ? 'error' : ''}
                 />
-                <Select
+                <CustomSelect
                     placeholder='Тип цели'
                     value={goal.type}
                     onChange={(value) => handleInputChange('type', value)}
@@ -138,7 +139,7 @@ function AddGoal() {
                     <Option value=''>Выберите тип цели</Option>
                     <Option value='weight'>Похудеть/Набрать вес</Option>
                     <Option value='fat'>Изменить % жира</Option>
-                </Select>
+                </CustomSelect>
                 {goal.type === 'weight' && (
                     <>
                         <Input type='number' placeholder='Текущий вес' value={goal.currentWeight || ''} onChange={(e) => handleInputChange('currentWeight', e.target.value)} />
