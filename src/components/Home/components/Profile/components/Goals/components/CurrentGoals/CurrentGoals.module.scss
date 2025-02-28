@@ -1,14 +1,13 @@
 .currentGoalsList {
     min-height: 120px;
     max-height: 280px;
-    border: 1px solid #ccc;
     background-color: #ccc;
     border-radius: 5px;
     overflow: auto;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding: 5px;
+    padding: 10px;
     scrollbar-width: none; // Для Firefox (скрывает полосу прокрутки)
 
     &::-webkit-scrollbar {

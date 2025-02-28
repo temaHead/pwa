@@ -1,10 +1,11 @@
 .goals{
     display: flex;
     overflow: auto;
-    height: 100%;
+    height: 113px;
     align-items: center;
     scrollbar-width: none; // Для Firefox (скрывает полосу прокрутки)
-    border-radius: 44px;
+    border-radius: 50px;
+    padding: 13px;
     margin: 0 10px;
 
     &::-webkit-scrollbar {
@@ -18,7 +19,6 @@
         align-items: center;
         justify-content: center;
         background-color: rgb(233, 233, 232);
-        margin-left: 6px;
     
         .circle {
             height: 100px;
@@ -42,8 +42,6 @@
                 .content {
                     height: 100%;
                     width: 100%;
-                    background-color: rgb(233, 233, 232);
-                    z-index: -1;
                     border-radius: 50%;
                     display: flex;
                     align-items: center;

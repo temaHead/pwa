@@ -84,16 +84,16 @@ function Profile() {
                     className={style.userInfo}
                 >
                     <div className={style.item}>
-                        <Text strong>{`${user.currentWeight || 0} кг`}</Text>
                         <Text type='secondary'>Вес</Text>
+                        <Text strong>{`${user.currentWeight || 0} кг`}</Text>
                     </div>
-                    <div className={style.item}>
-                        <Text strong>{`${user.height || 0} см`}</Text>
+                    <div className={`${style.item} ${style.height}`}>
                         <Text type='secondary'>Рост</Text>
+                        <Text strong>{`${user.height || 0} см`}</Text>
                     </div>
                     <div className={style.item}>
-                        <Text strong>{`${user.bodyFat || 0}%`}</Text>
                         <Text type='secondary'>% жира</Text>
+                        <Text strong>{`${user.bodyFat || 0}`}</Text>
                     </div>
                 </Flex>
 
