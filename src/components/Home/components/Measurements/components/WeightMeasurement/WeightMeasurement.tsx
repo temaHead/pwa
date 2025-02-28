@@ -42,7 +42,7 @@ const handleTouchEnd = () => {
     requestAnimationFrame(() => {
         setTimeout(() => {
             setTranslateX(translateX < -40 ? -75 : 0);
-        }, 10); // Даем браузеру время обработать финальное положение
+        }, 10);
     });
 };
 
