@@ -64,6 +64,11 @@ const userSlice = createSlice({
             state.bodyFat = null;
             state.theme = 'light';
             window.localStorage.removeItem('id');
+            localStorage.removeItem('skipPin');
+            localStorage.removeItem('pin');
+            sessionStorage.removeItem('pinVerified');
+            localStorage.removeItem('faceID');
+            localStorage.removeItem('faceIDRegistered');
         },
     },
     extraReducers: (builder) => {

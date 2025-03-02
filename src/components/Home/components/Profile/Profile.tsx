@@ -36,7 +36,10 @@ function Profile() {
     };
 
     return (
-        <div className={style.profile} style={{ backgroundColor, color: textColor }}>
+        <div
+            className={style.profile}
+            style={{ backgroundColor, color: textColor }}
+        >
             {/* Шапка профиля */}
             <Flex
                 justify='space-between'
@@ -124,6 +127,29 @@ function Profile() {
             >
                 <Logout />
             </Flex>
+            <Button
+                type='default'
+                block
+                style={{ marginTop: '20px' }}
+                onClick={() => {
+                    localStorage.removeItem('skipPin');
+                    localStorage.removeItem('pin');
+                    sessionStorage.removeItem('pinVerified');
+                }}
+            >
+                удалить пин код из локалстораж
+            </Button>
+            <Button
+                type='default'
+                block
+                style={{ marginTop: '20px' }}
+                onClick={() => {
+                    localStorage.removeItem('faceID');
+                    localStorage.removeItem('faceIDRegistered');
+                }}
+            >
+                удалить face из локалстораж
+            </Button>
         </div>
     );
 }
