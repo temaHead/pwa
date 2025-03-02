@@ -222,7 +222,7 @@ const PinCodeInput = ({
 
                 {/* Первый ряд точек */}
                 <div style={{ margin: '20px 0', fontSize: '24px', letterSpacing: '10px' }}>
-                    {firstPin.split('').map((char, index) => (
+                    {firstPin.split('').map((_, index) => (
                         <span key={index}>•</span>
                     ))}
                 </div>
@@ -237,7 +237,7 @@ const PinCodeInput = ({
                             color: error ? 'red' : 'inherit',
                         }}
                     >
-                        {secondPin.split('').map((char, index) => (
+                        {secondPin.split('').map((_, index) => (
                             <span key={index}>•</span>
                         ))}
                     </div>
