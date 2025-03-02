@@ -21,6 +21,7 @@ const PinCodeInput = ({
     const [faceIDRegistered, setFaceIDRegistered] = useState(
         localStorage.getItem('faceIDRegistered') === 'true'
     ); // Флаг наличия Face ID
+    
     const navigate = useNavigate();
     const user = useSelector((state: RootState) => state.user);
 
@@ -51,14 +52,24 @@ const PinCodeInput = ({
                 timeout: 60000, // Таймаут 60 секунд
                 attestation: 'direct',
             };
-
+    
             const credential = await navigator.credentials.create({
                 publicKey: publicKeyCredentialCreationOptions,
             });
-
-            if (credential) {
-                // Сохраняем данные в localStorage (небезопасно!)
-                localStorage.setItem('faceID', JSON.stringify(credential));
+    
+            if (credential && credential instanceof PublicKeyCredential) {
+                // Сохраняем только необходимые данные
+                const credentialData = {
+                    id: credential.id,
+                    rawId: Array.from(new Uint8Array(credential.rawId)), // Преобразуем rawId в массив
+                    response: {
+                        clientDataJSON: Array.from(new Uint8Array(credential.response.clientDataJSON)), // Преобразуем clientDataJSON в массив
+                        attestationObject: Array.from(new Uint8Array((credential.response as AuthenticatorAttestationResponse).attestationObject)), // Преобразуем attestationObject в массив
+                    },
+                    type: credential.type,
+                };
+    
+                localStorage.setItem('faceID', JSON.stringify(credentialData));
                 localStorage.setItem('faceIDRegistered', 'true');
                 setFaceIDRegistered(true); // Обновляем состояние
                 alert('Face ID успешно настроен!');
@@ -68,29 +79,35 @@ const PinCodeInput = ({
             alert('Ошибка при настройке Face ID. Пожалуйста, попробуйте снова.');
         }
     };
-
+    
     // Аутентификация с использованием Face ID
     const authenticateWithFaceID = async () => {
         try {
             const faceId = localStorage.getItem('faceID');
             if (faceId) {
-                const credential = JSON.parse(faceId);
-
+                const credentialData = JSON.parse(faceId);
+    
                 const publicKeyCredentialRequestOptions: PublicKeyCredentialRequestOptions = {
-                    challenge: credential.response.clientDataJSON, // Используем clientDataJSON как challenge (небезопасно!)
+                    challenge: crypto.getRandomValues(new Uint8Array(32)), // Генерация нового случайного challenge
                     timeout: 60000, // Таймаут 60 секунд
-                    allowCredentials: [], // Пустой массив, чтобы разрешить любой аутентификатор
+                    allowCredentials: [
+                        {
+                            id: new Uint8Array(credentialData.rawId), // Используем rawId
+                            type: 'public-key',
+                        },
+                    ],
                     userVerification: 'required', // Требуется проверка пользователя (Face ID/Touch ID)
                     rpId: window.location.hostname, // Привязка к домену
                 };
-
+    
                 const assertion = await navigator.credentials.get({
                     publicKey: publicKeyCredentialRequestOptions,
                 });
-
-                if (assertion) {
-                    // Проверяем, что assertion совпадает с сохранённым credential (небезопасно!)
-                    if (JSON.stringify(assertion) === faceId) {
+    
+                if (assertion && assertion instanceof PublicKeyCredential) {
+                    // Проверяем, что ID аутентификатора совпадает
+                    if (assertion.id === credentialData.id) {
+                        alert('Аутентификация прошла успешно!');
                         return true;
                     }
                 }
@@ -98,6 +115,7 @@ const PinCodeInput = ({
         } catch (error) {
             console.error('Ошибка при аутентификации с использованием Face ID:', error);
         }
+        alert('Ошибка аутентификации. Пожалуйста, попробуйте снова.');
         return false;
     };
 
@@ -159,8 +177,13 @@ const PinCodeInput = ({
                     const shouldRegisterFaceID = window.confirm('Хотите настроить Face ID для быстрой аутентификации?');
                     if (shouldRegisterFaceID) {
                         await registerFaceID();
+                        const isAuthenticated = await authenticateWithFaceID();
+                        if (isAuthenticated) {
+                            navigate('/');
+                        } else {
+                            alert('Ошибка аутентификации с использованием Face ID.');
+                        }
                     }
-                    navigate('/');
                 }
             } else {
                 setError(true);
