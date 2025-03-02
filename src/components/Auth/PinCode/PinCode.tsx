@@ -25,6 +25,17 @@ const PinCodeInput = ({
     const navigate = useNavigate();
     const user = useSelector((state: RootState) => state.user);
 
+
+    const isPlatformAuthenticatorSupported = async () => {
+        try {
+            const result = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+            return result;
+        } catch (error) {
+            alert('Ошибка при проверке поддержки платформенного аутентификатора:');
+            alert(error);
+            return false;
+        }
+    };
     // Регистрация Face ID
     const registerFaceID = async () => {
         try {
@@ -46,11 +57,12 @@ const PinCodeInput = ({
                     },
                 ],
                 authenticatorSelection: {
-                    authenticatorAttachment: 'platform', // Использование встроенного аутентификатора (Face ID/Touch ID)
+                    authenticatorAttachment: 'platform', // Только встроенные аутентификаторы (Face ID/Touch ID)
                     userVerification: 'required', // Требуется проверка пользователя
+                    requireResidentKey: true, // Требуется резидентный ключ (для удобства)
                 },
                 timeout: 60000, // Таймаут 60 секунд
-                attestation: 'direct',
+                attestation: 'none', // Отключаем attestation, так как он не нужен для Face ID
             };
     
             const credential = await navigator.credentials.create({
@@ -64,7 +76,6 @@ const PinCodeInput = ({
                     rawId: Array.from(new Uint8Array(credential.rawId)), // Преобразуем rawId в массив
                     response: {
                         clientDataJSON: Array.from(new Uint8Array(credential.response.clientDataJSON)), // Преобразуем clientDataJSON в массив
-                        attestationObject: Array.from(new Uint8Array((credential.response as AuthenticatorAttestationResponse).attestationObject)), // Преобразуем attestationObject в массив
                     },
                     type: credential.type,
                 };
@@ -79,12 +90,12 @@ const PinCodeInput = ({
             alert('Ошибка при настройке Face ID. Пожалуйста, попробуйте снова.');
         }
     };
-    
     // Аутентификация с использованием Face ID
     const authenticateWithFaceID = async () => {
         try {
             const faceId = localStorage.getItem('faceID');
             if (faceId) {
+                alert('Аутентификация с использованием Face ID');
                 const credentialData = JSON.parse(faceId);
     
                 const publicKeyCredentialRequestOptions: PublicKeyCredentialRequestOptions = {
@@ -161,19 +172,21 @@ const PinCodeInput = ({
             const storedPin = localStorage.getItem('pin');
             const hashedPin = hashPin(firstPin);
             if (hashedPin === storedPin) {
-                sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
-                setPinVerified('true');
-
+                
                 // Если Face ID настроен, предлагаем аутентификацию
                 if (faceIDRegistered) {
                     const isAuthenticated = await authenticateWithFaceID();
                     if (isAuthenticated) {
+                        sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
+                        setPinVerified('true');
                         navigate('/');
                     } else {
                         alert('Ошибка аутентификации с использованием Face ID.');
                     }
                 } else {
-                    // Предлагаем настроить Face ID
+                    if(await isPlatformAuthenticatorSupported()){
+                        alert('Платформенный аутентификатор поддерживается');
+                         // Предлагаем настроить Face ID
                     const shouldRegisterFaceID = window.confirm('Хотите настроить Face ID для быстрой аутентификации?');
                     if (shouldRegisterFaceID) {
                         await registerFaceID();
@@ -184,6 +197,8 @@ const PinCodeInput = ({
                             alert('Ошибка аутентификации с использованием Face ID.');
                         }
                     }
+                    }
+                   
                 }
             } else {
                 setError(true);
