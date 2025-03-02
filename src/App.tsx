@@ -20,6 +20,7 @@ import AddGoal from './components/Home/components/Profile/components/Goals/compo
 import GoalEditing from './components/Home/components/Profile/components/Goals/components/GoalEditing/GoalEditing';
 import { ConfigProvider, ThemeConfig } from 'antd'; // Импорт Ant Design ConfigProvider
 import ruRU from 'antd/locale/ru_RU'; // Локализация Ant Design на русский
+import PinCodeInput from './components/Auth/PinCode/PinCode';
 
 const SignIn = lazy(() => import('./components/Auth/SignIn/SignIn'));
 const SignUp = lazy(() => import('./components/Auth/SignUp/SignUp'));
@@ -28,10 +29,12 @@ const Profile = lazy(() => import('./components/Home/components/Profile/Profile'
 function App() {
     const user = useSelector((state: RootState) => state.user);
     const themeMode = useSelector((state: RootState) => state.user.theme); // Получаем тему из Redux
+    const pin = localStorage.getItem('pin');
+    const skipPin = localStorage.getItem('skipPin');
 
     const themeConfig: ThemeConfig = {
         token: {
-            colorPrimary: themeMode === 'dark' ? '#1890ff' : '#1677ff', 
+            colorPrimary: themeMode === 'dark' ? '#1890ff' : '#1677ff',
             colorBgBase: themeMode === 'dark' ? '#131720' : '#ffffff',
             colorTextBase: themeMode === 'dark' ? '#ffffff' : '#000000',
             colorBgLayout: themeMode === 'dark' ? '#131720' : '#edf2f5',
@@ -45,6 +48,8 @@ function App() {
     const id = window.localStorage.getItem('id');
     const [isAuth, setIsAuth] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true); // Состояние загрузки
+    const [pinVerified, setPinVerified] = useState(sessionStorage.getItem('pinVerified'));
+
 
     useEffect(() => {
         setLoading(true);
@@ -102,7 +107,11 @@ function App() {
                         !loading ? (
                             isAuth ? (
                                 user?.currentWeight ? (
-                                    <Home />
+                                    (pin && pinVerified) || skipPin ? (
+                                        <Home />
+                                    ) : (
+                                        <Navigate to='/pin' />
+                                    )
                                 ) : (
                                     <Navigate to='/addUser' />
                                 )
@@ -114,17 +123,48 @@ function App() {
                         )
                     }
                 >
-                    <Route path='' element={<Desktop />}>
-                        <Route index element={<Room />} />
-                        <Route path='room' element={<Room />} />
-                        <Route path='/measurements' element={<Measurements />} />
-                        <Route path='/profile' element={<Profile />} />
-                        <Route path='/editProfile' element={<EditProfile />} />
-                        <Route path='/addGoal' element={<AddGoal />} />
-                        <Route path='/goalEditing/:goalId' element={<GoalEditing />} />
+                    <Route
+                        path=''
+                        element={<Desktop />}
+                    >
+                        <Route
+                            index
+                            element={<Room />}
+                        />
+                        <Route
+                            path='room'
+                            element={<Room />}
+                        />
+                        <Route
+                            path='/measurements'
+                            element={<Measurements />}
+                        />
+                        <Route
+                            path='/profile'
+                            element={<Profile />}
+                        />
+                        <Route
+                            path='/editProfile'
+                            element={<EditProfile />}
+                        />
+                        <Route
+                            path='/addGoal'
+                            element={<AddGoal />}
+                        />
+                        <Route
+                            path='/goalEditing/:goalId'
+                            element={<GoalEditing />}
+                        />
                     </Route>
                 </Route>
-                <Route path='/start' element={isAuth ? <Navigate to='/' /> : <Start />} />
+                <Route
+                    path='/pin'
+                    element={(pin && pinVerified) || skipPin ? <Navigate to='/' /> : <PinCodeInput setPinVerified={setPinVerified} />}
+                />
+                <Route
+                    path='/start'
+                    element={isAuth ? <Navigate to='/' /> : <Start />}
+                />
                 <Route
                     path='/signIn'
                     element={
@@ -149,7 +189,10 @@ function App() {
                         )
                     }
                 />
-                <Route path='/addUser' element={user && user.currentWeight ? <Navigate to='/' /> : <AddUser />} />
+                <Route
+                    path='/addUser'
+                    element={user && user.currentWeight ? <Navigate to='/' /> : <AddUser />}
+                />
             </Routes>
         </ConfigProvider>
     );
