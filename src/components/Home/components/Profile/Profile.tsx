@@ -127,29 +127,6 @@ function Profile() {
             >
                 <Logout />
             </Flex>
-            <Button
-                type='default'
-                block
-                style={{ marginTop: '20px' }}
-                onClick={() => {
-                    localStorage.removeItem('skipPin');
-                    localStorage.removeItem('pin');
-                    sessionStorage.removeItem('pinVerified');
-                }}
-            >
-                удалить пин код из локалстораж
-            </Button>
-            <Button
-                type='default'
-                block
-                style={{ marginTop: '20px' }}
-                onClick={() => {
-                    localStorage.removeItem('faceID');
-                    localStorage.removeItem('faceIDRegistered');
-                }}
-            >
-                удалить face из локалстораж
-            </Button>
         </div>
     );
 }

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import CryptoJS from 'crypto-js'; // Для хеширования пин-кода
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
+import FaceIDInstallation from './components/FaceID';
 
 const { Title } = Typography;
 
@@ -21,10 +22,10 @@ const PinCodeInput = ({
     const [faceIDRegistered, setFaceIDRegistered] = useState(
         localStorage.getItem('faceIDRegistered') === 'true'
     ); // Флаг наличия Face ID
-    
+    const [showFaceIdBanner, setShowFaceIdBanner] = useState(false);
+
     const navigate = useNavigate();
     const user = useSelector((state: RootState) => state.user);
-
 
     const isPlatformAuthenticatorSupported = async () => {
         try {
@@ -64,11 +65,11 @@ const PinCodeInput = ({
                 timeout: 60000, // Таймаут 60 секунд
                 attestation: 'none', // Отключаем attestation, так как он не нужен для Face ID
             };
-    
+
             const credential = await navigator.credentials.create({
                 publicKey: publicKeyCredentialCreationOptions,
             });
-    
+
             if (credential && credential instanceof PublicKeyCredential) {
                 // Сохраняем только необходимые данные
                 const credentialData = {
@@ -79,10 +80,16 @@ const PinCodeInput = ({
                     },
                     type: credential.type,
                 };
-    
+
                 localStorage.setItem('faceID', JSON.stringify(credentialData));
                 localStorage.setItem('faceIDRegistered', 'true');
                 setFaceIDRegistered(true); // Обновляем состояние
+                // Хешируем пин-код и сохраняем в localStorage
+                const hashedPin = hashPin(firstPin);
+                localStorage.setItem('pin', hashedPin);
+                sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
+                setPinVerified('true');
+                navigate('/');
                 alert('Face ID успешно настроен!');
             }
         } catch (error) {
@@ -90,6 +97,17 @@ const PinCodeInput = ({
             alert('Ошибка при настройке Face ID. Пожалуйста, попробуйте снова.');
         }
     };
+
+    const skipFaceID = () => {
+        localStorage.setItem('skipFaceID', 'true');
+        const hashedPin = hashPin(firstPin);
+        localStorage.setItem('pin', hashedPin);
+        sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
+        setPinVerified('true');
+        setShowFaceIdBanner(false);
+        navigate('/');
+    };
+
     // Аутентификация с использованием Face ID
     const authenticateWithFaceID = async () => {
         try {
@@ -97,7 +115,7 @@ const PinCodeInput = ({
             if (faceId) {
                 alert('Аутентификация с использованием Face ID');
                 const credentialData = JSON.parse(faceId);
-    
+
                 const publicKeyCredentialRequestOptions: PublicKeyCredentialRequestOptions = {
                     challenge: crypto.getRandomValues(new Uint8Array(32)), // Генерация нового случайного challenge
                     timeout: 60000, // Таймаут 60 секунд
@@ -110,11 +128,11 @@ const PinCodeInput = ({
                     userVerification: 'required', // Требуется проверка пользователя (Face ID/Touch ID)
                     rpId: window.location.hostname, // Привязка к домену
                 };
-    
+
                 const assertion = await navigator.credentials.get({
                     publicKey: publicKeyCredentialRequestOptions,
                 });
-    
+
                 if (assertion && assertion instanceof PublicKeyCredential) {
                     // Проверяем, что ID аутентификатора совпадает
                     if (assertion.id === credentialData.id) {
@@ -165,6 +183,23 @@ const PinCodeInput = ({
         }
     };
 
+    // Проверка Face ID при наличии пин-кода и Face ID
+    useEffect(() => {
+        const checkFaceID = async () => {
+            if (hasPin && faceIDRegistered) {
+                const isAuthenticated = await authenticateWithFaceID();
+                if (isAuthenticated) {
+                    sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
+                    setPinVerified('true');
+                } else {
+                    alert('Ошибка аутентификации с использованием Face ID.');
+                }
+            }
+        };
+
+        checkFaceID();
+    }, [hasPin, faceIDRegistered, setPinVerified]);
+
     // Обработчик подтверждения пин-кода
     const handleSubmit = async () => {
         if (hasPin) {
@@ -172,34 +207,8 @@ const PinCodeInput = ({
             const storedPin = localStorage.getItem('pin');
             const hashedPin = hashPin(firstPin);
             if (hashedPin === storedPin) {
-                
-                // Если Face ID настроен, предлагаем аутентификацию
-                if (faceIDRegistered) {
-                    const isAuthenticated = await authenticateWithFaceID();
-                    if (isAuthenticated) {
-                        sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
-                        setPinVerified('true');
-                        navigate('/');
-                    } else {
-                        alert('Ошибка аутентификации с использованием Face ID.');
-                    }
-                } else {
-                    if(await isPlatformAuthenticatorSupported()){
-                        alert('Платформенный аутентификатор поддерживается');
-                         // Предлагаем настроить Face ID
-                    const shouldRegisterFaceID = window.confirm('Хотите настроить Face ID для быстрой аутентификации?');
-                    if (shouldRegisterFaceID) {
-                        await registerFaceID();
-                        const isAuthenticated = await authenticateWithFaceID();
-                        if (isAuthenticated) {
-                            navigate('/');
-                        } else {
-                            alert('Ошибка аутентификации с использованием Face ID.');
-                        }
-                    }
-                    }
-                   
-                }
+                sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
+                setPinVerified('true');
             } else {
                 setError(true);
                 setTimeout(() => {
@@ -214,18 +223,20 @@ const PinCodeInput = ({
             } else {
                 // Сравниваем два пин-кода
                 if (firstPin === secondPin) {
-                    // Хешируем пин-код и сохраняем в localStorage
-                    const hashedPin = hashPin(firstPin);
-                    localStorage.setItem('pin', hashedPin);
-                    sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
-                    setPinVerified('true');
-
+                    console.log('Пин-коды совпадают');
                     // Предлагаем настроить Face ID
-                    const shouldRegisterFaceID = window.confirm('Хотите настроить Face ID для быстрой аутентификации?');
-                    if (shouldRegisterFaceID) {
-                        await registerFaceID();
+                    if (await isPlatformAuthenticatorSupported()) {
+                        console.log('Face ID поддерживается');
+                        setShowFaceIdBanner(true);
+                    } else {
+                        console.log('Face ID не поддерживается');
+                        // setShowFaceIdBanner(true);
+
+                        localStorage.setItem('pin', hashPin(firstPin)); // Сохраняем пин-код в localStorage
+                        sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
+                        setPinVerified('true');
+                        navigate('/');
                     }
-                    navigate('/');
                 } else {
                     // Показываем ошибку
                     setError(true);
@@ -252,119 +263,123 @@ const PinCodeInput = ({
     }, [firstPin, hasPin, isSecondInput, secondPin]);
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-            <Card style={{ width: 300, textAlign: 'center' }}>
-                <Title level={4}>
-                    {hasPin ? 'Введите пин-код' : isSecondInput ? 'Введите повторно' : 'Установите пин-код'}
-                </Title>
+        <>
+            {showFaceIdBanner ? (
+                <FaceIDInstallation
+                    onSetup={registerFaceID}
+                    onSkip={skipFaceID}
+                />
+            ) : (
+                <div
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        height: '100vh',
+                    }}
+                >
+                    <Card style={{ width: 300, textAlign: 'center' }}>
+                        <Title level={4}>
+                            {hasPin
+                                ? 'Введите пин-код'
+                                : isSecondInput
+                                ? 'Введите повторно'
+                                : 'Установите пин-код'}
+                        </Title>
 
-                {/* Первый ряд точек */}
-                <div style={{ margin: '20px 0', fontSize: '24px', letterSpacing: '10px' }}>
-                    {firstPin.split('').map((_, index) => (
-                        <span key={index}>•</span>
-                    ))}
-                </div>
+                        {/* Первый ряд точек */}
+                        <div style={{ margin: '20px 0', fontSize: '24px', letterSpacing: '10px' }}>
+                            {firstPin.split('').map((_, index) => (
+                                <span key={index}>•</span>
+                            ))}
+                        </div>
 
-                {/* Второй ряд точек (если нужно) */}
-                {!hasPin && isSecondInput && (
-                    <div
-                        style={{
-                            margin: '20px 0',
-                            fontSize: '24px',
-                            letterSpacing: '10px',
-                            color: error ? 'red' : 'inherit',
-                        }}
-                    >
-                        {secondPin.split('').map((_, index) => (
-                            <span key={index}>•</span>
-                        ))}
-                    </div>
-                )}
-
-                {/* Сообщение об ошибке */}
-                {error && (
-                    <div style={{ color: 'red', marginBottom: '10px' }}>
-                        {hasPin ? 'Неверный пин-код' : 'Пин-код не совпадает. Попробуйте ещё раз.'}
-                    </div>
-                )}
-
-                {/* Кнопки с цифрами */}
-                <Row gutter={[16, 16]}>
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) => (
-                        <Col span={8} key={number}>
-                            <Button
-                                type="primary"
-                                block
-                                onClick={() => handleNumberClick(number.toString())}
+                        {/* Второй ряд точек (если нужно) */}
+                        {!hasPin && isSecondInput && (
+                            <div
+                                style={{
+                                    margin: '20px 0',
+                                    fontSize: '24px',
+                                    letterSpacing: '10px',
+                                    color: error ? 'red' : 'inherit',
+                                }}
                             >
-                                {number}
-                            </Button>
-                        </Col>
-                    ))}
-                    <Col span={8}>
-                        <Button block disabled style={{ visibility: 'hidden' }} />
-                    </Col>
-                    <Col span={8}>
-                        <Button
-                            type="primary"
-                            block
-                            onClick={() => handleNumberClick('0')}
-                        >
-                            0
-                        </Button>
-                    </Col>
-                    <Col span={8}>
-                        {(firstPin.length > 0 || secondPin.length > 0) && (
-                            <Button
-                                type="primary"
-                                block
-                                danger
-                                icon={<DeleteOutlined />}
-                                onClick={handleDeleteClick}
-                            />
+                                {secondPin.split('').map((_, index) => (
+                                    <span key={index}>•</span>
+                                ))}
+                            </div>
                         )}
-                    </Col>
-                </Row>
 
-                {/* Кнопка "Пропустить" (только если пин-код не установлен) */}
-                {!hasPin && !isSecondInput && (
-                    <Button
-                        type="default"
-                        block
-                        style={{ marginTop: '20px' }}
-                        onClick={() => {
-                            localStorage.setItem('skipPin', 'true');
-                            navigate('/');
-                        }}
-                    >
-                        Пропустить
-                    </Button>
-                )}
-                 <Button
-                        type="default"
-                        block
-                        style={{ marginTop: '20px' }}
-                        onClick={() => {
-                            localStorage.removeItem('skipPin');
-                            localStorage.removeItem('pin');
-                            sessionStorage.removeItem('pinVerified')
-                        }}
-                    >
-                        удалить пин код из локалстораж
-                    </Button>
-                    <Button
-                        type="default"
-                        block
-                        style={{ marginTop: '20px' }}
-                        onClick={() => {
-                            localStorage.removeItem('faceID');
-                            localStorage.removeItem('faceIDRegistered');
-                        }}
-                    >
-                        удалить face из локалстораж
-                    </Button>
-            </Card>
-        </div>
+                        {/* Сообщение об ошибке */}
+                        {error && (
+                            <div style={{ color: 'red', marginBottom: '10px' }}>
+                                {hasPin ? 'Неверный пин-код' : 'Пин-код не совпадает. Попробуйте ещё раз.'}
+                            </div>
+                        )}
+
+                        {/* Кнопки с цифрами */}
+                        <Row gutter={[16, 16]}>
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) => (
+                                <Col
+                                    span={8}
+                                    key={number}
+                                >
+                                    <Button
+                                        type='primary'
+                                        block
+                                        onClick={() => handleNumberClick(number.toString())}
+                                    >
+                                        {number}
+                                    </Button>
+                                </Col>
+                            ))}
+                            <Col span={8}>
+                                <Button
+                                    block
+                                    disabled
+                                    style={{ visibility: 'hidden' }}
+                                />
+                            </Col>
+                            <Col span={8}>
+                                <Button
+                                    type='primary'
+                                    block
+                                    onClick={() => handleNumberClick('0')}
+                                >
+                                    0
+                                </Button>
+                            </Col>
+                            <Col span={8}>
+                                {(firstPin.length > 0 || secondPin.length > 0) && (
+                                    <Button
+                                        type='primary'
+                                        block
+                                        danger
+                                        icon={<DeleteOutlined />}
+                                        onClick={handleDeleteClick}
+                                    />
+                                )}
+                            </Col>
+                        </Row>
+
+                        {/* Кнопка "Пропустить" (только если пин-код не установлен) */}
+                        {!hasPin && !isSecondInput && (
+                            <Button
+                                type='default'
+                                block
+                                style={{ marginTop: '20px' }}
+                                onClick={() => {
+                                    localStorage.setItem('skipPin', 'true');
+                                    navigate('/');
+                                }}
+                            >
+                                Пропустить
+                            </Button>
+                        )}
+                    </Card>
+                </div>
+            )}
+        </>
     );
 };
 
