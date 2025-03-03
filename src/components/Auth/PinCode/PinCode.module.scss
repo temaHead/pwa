@@ -1,0 +1,78 @@
+.pinCodeContainer {
+    position: relative;
+    height: 100dvh;
+    width: 100dvw;
+    .content {
+        margin-top: 200px;
+    }
+    .title {
+        font-size: 17px;
+        font-weight: 500;
+    }
+    .pinCodes {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin-top: 20px;
+        margin-bottom: 40px;
+    }
+    .pinCode {
+        height: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-width: 100px;
+
+        .dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin: 0 5px;
+            background-color: #dcdce7; // Бледно-серый цвет для пустых точек
+            transition: background-color 0.3s;
+        }
+
+        .dot.filled {
+            background-color: #000; // Черный цвет для заполненных точек
+        }
+    }
+    .error {
+        position: absolute;
+        display: flex;
+        top: 120px;
+        width: 100%;
+        color: red;
+        justify-content: center;
+    }
+    .numberPad {
+        display: flex;
+        flex-direction: column;
+        height: 320px;
+        justify-content: space-between;
+        margin: 0 auto;
+        width: 232px;
+        .numberPadRow {
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+        }
+    }
+    .pinButton {
+        font-size: 30px;
+        font-weight: 400;
+        height: 50px;
+        width: 50px;
+        &.disabled{
+            opacity: 0;
+        }
+    }
+    .pinButtonExit {
+        font-size: 15px;
+        color: red;
+    }
+    .pinButtonDelete {
+        font-size: 25px;
+    }
+}

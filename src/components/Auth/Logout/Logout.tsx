@@ -5,7 +5,12 @@ import { removeUser } from '../../../store/slices/userSlice';
 import { useNavigate } from 'react-router-dom';
 import { Button } from 'antd';
 
-const Logout = () => {
+interface LogoutProps {
+    text?: string; // Текст кнопки (опциональный, по умолчанию "Выйти")
+    [key: string]: unknown; // Позволяет прокидывать любые другие пропсы
+}
+
+const Logout: React.FC<LogoutProps> = ({ text = 'Выйти', ...props }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -24,9 +29,9 @@ const Logout = () => {
         <Button
             type="primary"
             onClick={handleLogout}
-            style={{ marginTop: '16px' }}
+            {...props} // Прокидываем все пропсы в кнопку
         >
-            Выйти
+            {text} {/* Используем переданный текст или значение по умолчанию */}
         </Button>
     );
 };

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Card, Row, Col, Typography } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { Button } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import CryptoJS from 'crypto-js'; // Для хеширования пин-кода
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import FaceIDInstallation from './components/FaceID';
-
-const { Title } = Typography;
+import style from './PinCode.module.scss';
+import FaceIdIcon from '/face.svg'; // Иконка Face ID
+import Logout from '../Logout/Logout';
 
 const PinCodeInput = ({
     setPinVerified,
@@ -90,7 +91,6 @@ const PinCodeInput = ({
                 sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
                 setPinVerified('true');
                 navigate('/');
-                alert('Face ID успешно настроен!');
             }
         } catch (error) {
             console.error('Ошибка при регистрации Face ID:', error);
@@ -113,7 +113,6 @@ const PinCodeInput = ({
         try {
             const faceId = localStorage.getItem('faceID');
             if (faceId) {
-                alert('Аутентификация с использованием Face ID');
                 const credentialData = JSON.parse(faceId);
 
                 const publicKeyCredentialRequestOptions: PublicKeyCredentialRequestOptions = {
@@ -136,7 +135,6 @@ const PinCodeInput = ({
                 if (assertion && assertion instanceof PublicKeyCredential) {
                     // Проверяем, что ID аутентификатора совпадает
                     if (assertion.id === credentialData.id) {
-                        alert('Аутентификация прошла успешно!');
                         return true;
                     }
                 }
@@ -185,18 +183,6 @@ const PinCodeInput = ({
 
     // Проверка Face ID при наличии пин-кода и Face ID
     useEffect(() => {
-        const checkFaceID = async () => {
-            if (hasPin && faceIDRegistered) {
-                const isAuthenticated = await authenticateWithFaceID();
-                if (isAuthenticated) {
-                    sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
-                    setPinVerified('true');
-                } else {
-                    alert('Ошибка аутентификации с использованием Face ID.');
-                }
-            }
-        };
-
         checkFaceID();
     }, [hasPin, faceIDRegistered, setPinVerified]);
 
@@ -230,7 +216,6 @@ const PinCodeInput = ({
                         setShowFaceIdBanner(true);
                     } else {
                         console.log('Face ID не поддерживается');
-                        // setShowFaceIdBanner(true);
 
                         localStorage.setItem('pin', hashPin(firstPin)); // Сохраняем пин-код в localStorage
                         sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
@@ -247,6 +232,19 @@ const PinCodeInput = ({
                         setIsSecondInput(false);
                     }, 2000); // Сбрасываем состояние через 2 секунды
                 }
+            }
+        }
+    };
+
+    const checkFaceID = async () => {
+        if (hasPin && faceIDRegistered) {
+            const isAuthenticated = await authenticateWithFaceID();
+            if (isAuthenticated) {
+                sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
+                setPinVerified('true');
+                navigate('/');
+            } else {
+                alert('Ошибка аутентификации с использованием Face ID.');
             }
         }
     };
@@ -270,97 +268,146 @@ const PinCodeInput = ({
                     onSkip={skipFaceID}
                 />
             ) : (
-                <div
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: '100vh',
-                    }}
-                >
-                    <Card style={{ width: 300, textAlign: 'center' }}>
-                        <Title level={4}>
+                <div className={style.pinCodeContainer}>
+                    <div className={style.content}>
+                        <div className={style.title}>
                             {hasPin
-                                ? 'Введите пин-код'
+                                ? 'Введите пин-код для входа'
                                 : isSecondInput
-                                ? 'Введите повторно'
-                                : 'Установите пин-код'}
-                        </Title>
-
-                        {/* Первый ряд точек */}
-                        <div style={{ margin: '20px 0', fontSize: '24px', letterSpacing: '10px' }}>
-                            {firstPin.split('').map((_, index) => (
-                                <span key={index}>•</span>
-                            ))}
+                                ? 'Введите пин-код повторно'
+                                : 'Установите пин-код для входа'}
                         </div>
-
-                        {/* Второй ряд точек (если нужно) */}
-                        {!hasPin && isSecondInput && (
-                            <div
-                                style={{
-                                    margin: '20px 0',
-                                    fontSize: '24px',
-                                    letterSpacing: '10px',
-                                    color: error ? 'red' : 'inherit',
-                                }}
-                            >
-                                {secondPin.split('').map((_, index) => (
-                                    <span key={index}>•</span>
+                        <div className={style.pinCodes}>
+                            {/* Первый ряд точек */}
+                            <div className={style.pinCode}>
+                                {Array.from({ length: 4 }).map((_, index) => (
+                                    <div
+                                        key={index}
+                                        className={`${style.dot} ${
+                                            index < firstPin.length ? style.filled : ''
+                                        }`}
+                                    />
                                 ))}
                             </div>
-                        )}
+
+                            {/* Второй ряд точек (если нужно) */}
+                            <div className={style.pinCode}>
+                                {!hasPin && isSecondInput && (
+                                    <div
+                                        className={style.pinCode}
+                                        style={{
+                                            color: error ? 'red' : 'inherit',
+                                        }}
+                                    >
+                                        {Array.from({ length: 4 }).map((_, index) => (
+                                            <div
+                                                key={index}
+                                                className={`${style.dot} ${
+                                                    index < secondPin.length ? style.filled : ''
+                                                }`}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
 
                         {/* Сообщение об ошибке */}
                         {error && (
-                            <div style={{ color: 'red', marginBottom: '10px' }}>
-                                {hasPin ? 'Неверный пин-код' : 'Пин-код не совпадает. Попробуйте ещё раз.'}
+                            <div
+                                className={style.error}
+                                style={{ color: 'red' }}
+                            >
+                                {hasPin ? 'Неверный пин-код' : 'Пин-коды не совпадают. Попробуйте ещё раз.'}
                             </div>
                         )}
 
                         {/* Кнопки с цифрами */}
-                        <Row gutter={[16, 16]}>
-                            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) => (
-                                <Col
-                                    span={8}
-                                    key={number}
-                                >
+                        <div className={style.numberPad}>
+                            <div className={style.numberPadRow}>
+                                {[1, 2, 3].map((number) => (
                                     <Button
-                                        type='primary'
-                                        block
+                                        key={number}
+                                        className={style.pinButton}
+                                        shape='circle'
+                                        type='text'
                                         onClick={() => handleNumberClick(number.toString())}
                                     >
                                         {number}
                                     </Button>
-                                </Col>
-                            ))}
-                            <Col span={8}>
+                                ))}
+                            </div>
+                            <div className={style.numberPadRow}>
+                                {[4, 5, 6].map((number) => (
+                                    <Button
+                                        key={number}
+                                        className={style.pinButton}
+                                        shape='circle'
+                                        type='text'
+                                        onClick={() => handleNumberClick(number.toString())}
+                                    >
+                                        {number}
+                                    </Button>
+                                ))}
+                            </div>
+                            <div className={style.numberPadRow}>
+                                {[7, 8, 9].map((number) => (
+                                    <Button
+                                        key={number}
+                                        className={style.pinButton}
+                                        shape='circle'
+                                        type='text'
+                                        onClick={() => handleNumberClick(number.toString())}
+                                    >
+                                        {number}
+                                    </Button>
+                                ))}
+                            </div>
+                            <div className={style.numberPadRow}>
+                                <Logout
+                                    className={`${style.pinButton} ${style.pinButtonExit}`}
+                                    shape='circle'
+                                    type='text'
+                                >
+                                    Выйти
+                                </Logout>
                                 <Button
-                                    block
-                                    disabled
-                                    style={{ visibility: 'hidden' }}
-                                />
-                            </Col>
-                            <Col span={8}>
-                                <Button
-                                    type='primary'
-                                    block
+                                    className={style.pinButton}
+                                    shape='circle'
+                                    type='text'
                                     onClick={() => handleNumberClick('0')}
                                 >
                                     0
                                 </Button>
-                            </Col>
-                            <Col span={8}>
-                                {(firstPin.length > 0 || secondPin.length > 0) && (
+                                {firstPin.length > 0 || secondPin.length > 0 ? (
                                     <Button
-                                        type='primary'
-                                        block
+                                        className={`${style.pinButton} ${style.pinButtonDelete}`}
+                                        shape='circle'
                                         danger
-                                        icon={<DeleteOutlined />}
+                                        type='text'
+                                        icon={<ArrowLeftOutlined />}
                                         onClick={handleDeleteClick}
                                     />
+                                ) : (
+                                    <Button
+                                        className={`${style.pinButton} ${style.pinButtonFaceID} ${
+                                            !faceIDRegistered && style.disabled
+                                        }`}
+                                        shape='circle'
+                                        type='text'
+                                        onClick={checkFaceID}
+                                        disabled={!faceIDRegistered}
+                                    >
+                                        {' '}
+                                        <img
+                                            src={FaceIdIcon}
+                                            alt='Face ID Icon'
+                                            style={{ width: '30px', height: '30px' }}
+                                        />
+                                    </Button>
                                 )}
-                            </Col>
-                        </Row>
+                            </div>
+                        </div>
 
                         {/* Кнопка "Пропустить" (только если пин-код не установлен) */}
                         {!hasPin && !isSecondInput && (
@@ -376,7 +423,7 @@ const PinCodeInput = ({
                                 Пропустить
                             </Button>
                         )}
-                    </Card>
+                    </div>
                 </div>
             )}
         </>
