@@ -1,0 +1,47 @@
+.editProfile {
+    padding: 16px;
+    background-color: var(--background-color);
+    min-height: 100vh;
+}
+
+.header {
+    margin-bottom: 24px;
+    position: relative;
+}
+
+.icon {
+    position: absolute;
+    left: 0;
+}
+
+.title {
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.settingsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.settingItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background-color: var(--card-background-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.settingLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+}
+
+.settingIcon {
+    font-size: 18px;
+}

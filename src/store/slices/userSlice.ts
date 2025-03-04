@@ -3,7 +3,10 @@ import { addUserProfile, updateUserProfile } from '../../api/user-api';
 import { FatMeasuring, UserProfile } from '../../types';
 import { RootState } from '..';
 
-const initialState: UserProfile = {
+const initialState: UserProfile & {
+    pin: string | null;
+    skipPin: boolean;
+} = {
     email: null,
     id: null,
     name: null,
@@ -12,7 +15,9 @@ const initialState: UserProfile = {
     gender: null,
     height: null,
     bodyFat: null,
-    theme:'light',
+    theme: 'light',
+    pin: localStorage.getItem('pin') || null, // Инициализируем из localStorage
+    skipPin: localStorage.getItem('skipPin') === 'true', // Инициализируем из localStorage
 };
 
 export const updateUserProfileAsync = createAsyncThunk(
@@ -28,15 +33,15 @@ export const updateUserProfileAsync = createAsyncThunk(
 
 export const addUserProfileAsync = createAsyncThunk(
     'user/addUserProfile',
-    async( {profile, fatMeasuring}:{profile: UserProfile, fatMeasuring: FatMeasuring}, {getState}) => {
+    async ({ profile, fatMeasuring }: { profile: UserProfile; fatMeasuring: FatMeasuring }, { getState }) => {
         const state = getState() as RootState;
         const userId = state.user.id;
         if (!userId) throw new Error('User ID not found');
-        
-        const updatedUserData = await addUserProfile(profile, userId , fatMeasuring);
+
+        const updatedUserData = await addUserProfile(profile, userId, fatMeasuring);
         return updatedUserData;
     }
-)
+);
 
 const userSlice = createSlice({
     name: 'user',
@@ -70,6 +75,23 @@ const userSlice = createSlice({
             localStorage.removeItem('faceID');
             localStorage.removeItem('faceIDRegistered');
         },
+
+        setPin(state, action) {
+            state.pin = action.payload;
+            if (action.payload) {
+                localStorage.setItem('pin', action.payload);
+            } else {
+                localStorage.removeItem('pin');
+            }
+        },
+        setSkipPin(state, action) {
+            state.skipPin = action.payload;
+            if (action.payload) {
+                localStorage.setItem('skipPin', 'true');
+            } else {
+                localStorage.removeItem('skipPin');
+            }
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(updateUserProfileAsync.fulfilled, (state, action) => {
@@ -84,7 +106,7 @@ const userSlice = createSlice({
             state.height = updatedData.height || null;
             state.bodyFat = updatedData.bodyFat || null;
             state.theme = updatedData.theme || 'light';
-        })
+        });
         builder.addCase(addUserProfileAsync.fulfilled, (state, action) => {
             // Обновляем профиль в состоянии после успешного запроса
             const updatedData = action.payload;
@@ -97,10 +119,9 @@ const userSlice = createSlice({
             state.height = updatedData.height || null;
             state.bodyFat = updatedData.bodyFat || null;
             state.theme = updatedData.theme || 'light';
-        })
-        
+        });
     },
 });
 
-export const { setUser, removeUser } = userSlice.actions;
+export const { setUser, removeUser, setPin, setSkipPin } = userSlice.actions;
 export default userSlice.reducer;

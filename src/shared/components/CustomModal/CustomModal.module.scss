@@ -1,0 +1,123 @@
+.modal {
+    .ant-modal-content {
+        border-radius: 12px;
+        padding: 24px;
+    }
+
+    .ant-modal-header {
+        border-bottom: none;
+        padding: 0;
+    }
+
+    .ant-modal-body {
+        padding: 0;
+    }
+
+    .ant-modal-footer {
+        border-top: none;
+        padding: 16px 0 0;
+        text-align: right;
+    }
+}
+
+.modalContent {
+    text-align: center;
+}
+
+.modalTitle {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-color);
+}
+
+.modalDescription {
+    font-size: 16px;
+    color: var(--text-secondary-color);
+    margin-bottom: 24px;
+}
+
+.okButton {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    border-radius: 8px;
+    padding: 8px 24px;
+    font-weight: 500;
+
+    &:hover {
+        background-color: var(--primary-hover-color);
+        border-color: var(--primary-hover-color);
+    }
+}
+
+.cancelButton {
+    border-radius: 8px;
+    padding: 8px 24px;
+    font-weight: 500;
+    margin-right: 8px;
+
+    &:hover {
+        background-color: var(--background-hover-color);
+    }
+}.modal {
+    .ant-modal-content {
+        border-radius: 12px;
+        padding: 24px;
+    }
+
+    .ant-modal-header {
+        border-bottom: none;
+        padding: 0;
+    }
+
+    .ant-modal-body {
+        padding: 0;
+    }
+
+    .ant-modal-footer {
+        border-top: none;
+        padding: 16px 0 0;
+        text-align: right;
+    }
+}
+
+.modalContent {
+    text-align: center;
+}
+
+.modalTitle {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-color);
+}
+
+.modalDescription {
+    font-size: 16px;
+    color: var(--text-secondary-color);
+    margin-bottom: 24px;
+}
+
+.okButton {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    border-radius: 8px;
+    padding: 8px 24px;
+    font-weight: 500;
+
+    &:hover {
+        background-color: var(--primary-hover-color);
+        border-color: var(--primary-hover-color);
+    }
+}
+
+.cancelButton {
+    border-radius: 8px;
+    padding: 8px 24px;
+    font-weight: 500;
+    margin-right: 8px;
+
+    &:hover {
+        background-color: var(--background-hover-color);
+    }
+}

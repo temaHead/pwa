@@ -3,12 +3,13 @@ import { Button } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import CryptoJS from 'crypto-js'; // Для хеширования пин-кода
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import FaceIDInstallation from './components/FaceID';
 import style from './PinCode.module.scss';
 import FaceIdIcon from '/face.svg'; // Иконка Face ID
 import Logout from '../Logout/Logout';
+import { setPin, setSkipPin } from '../../../store/slices/userSlice';
 
 const PinCodeInput = ({
     setPinVerified,
@@ -24,6 +25,7 @@ const PinCodeInput = ({
         localStorage.getItem('faceIDRegistered') === 'true'
     ); // Флаг наличия Face ID
     const [showFaceIdBanner, setShowFaceIdBanner] = useState(false);
+    const dispatch = useDispatch();
 
     const navigate = useNavigate();
     const user = useSelector((state: RootState) => state.user);
@@ -87,6 +89,7 @@ const PinCodeInput = ({
                 setFaceIDRegistered(true); // Обновляем состояние
                 // Хешируем пин-код и сохраняем в localStorage
                 const hashedPin = hashPin(firstPin);
+                dispatch(setPin(hashedPin)); // Обновляем состояние пин-кода в Redux
                 localStorage.setItem('pin', hashedPin);
                 sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
                 setPinVerified('true');
@@ -100,7 +103,11 @@ const PinCodeInput = ({
 
     const skipFaceID = () => {
         localStorage.setItem('skipFaceID', 'true');
+        dispatch(setSkipPin(true)); // Обновляем состояние skipPin в Redux
+
         const hashedPin = hashPin(firstPin);
+        dispatch(setPin(hashedPin)); // Обновляем состояние пин-кода в Redux
+
         localStorage.setItem('pin', hashedPin);
         sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
         setPinVerified('true');
@@ -216,7 +223,8 @@ const PinCodeInput = ({
                         setShowFaceIdBanner(true);
                     } else {
                         console.log('Face ID не поддерживается');
-
+                        const hashedPin = hashPin(firstPin);
+                        dispatch(setPin(hashedPin));
                         localStorage.setItem('pin', hashPin(firstPin)); // Сохраняем пин-код в localStorage
                         sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
                         setPinVerified('true');
@@ -417,6 +425,7 @@ const PinCodeInput = ({
                                 style={{ marginTop: '20px' }}
                                 onClick={() => {
                                     localStorage.setItem('skipPin', 'true');
+                                    dispatch(setSkipPin(true));
                                     navigate('/');
                                 }}
                             >

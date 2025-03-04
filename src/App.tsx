@@ -21,6 +21,7 @@ import GoalEditing from './components/Home/components/Profile/components/Goals/c
 import { ConfigProvider, ThemeConfig } from 'antd'; // Импорт Ant Design ConfigProvider
 import ruRU from 'antd/locale/ru_RU'; // Локализация Ant Design на русский
 import PinCodeInput from './components/Auth/PinCode/PinCode';
+import Settings from './components/Home/components/Profile/components/Settings/Settings';
 
 const SignIn = lazy(() => import('./components/Auth/SignIn/SignIn'));
 const SignUp = lazy(() => import('./components/Auth/SignUp/SignUp'));
@@ -28,9 +29,9 @@ const Profile = lazy(() => import('./components/Home/components/Profile/Profile'
 
 function App() {
     const user = useSelector((state: RootState) => state.user);
-    const themeMode = useSelector((state: RootState) => state.user.theme); // Получаем тему из Redux
-    const pin = localStorage.getItem('pin');
-    const skipPin = localStorage.getItem('skipPin');
+    const themeMode = user.theme; // Получаем тему из Redux
+    const pin = user.pin; // Получаем пин-код из Redux
+    const skipPin = user.skipPin; // Получаем skipPin из Redux
 
     const themeConfig: ThemeConfig = {
         token: {
@@ -49,7 +50,6 @@ function App() {
     const [isAuth, setIsAuth] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true); // Состояние загрузки
     const [pinVerified, setPinVerified] = useState(sessionStorage.getItem('pinVerified'));
-
 
     useEffect(() => {
         setLoading(true);
@@ -155,11 +155,21 @@ function App() {
                             path='/goalEditing/:goalId'
                             element={<GoalEditing />}
                         />
+                        <Route
+                            path='/settings'
+                            element={<Settings />}
+                        />
                     </Route>
                 </Route>
                 <Route
                     path='/pin'
-                    element={(pin && pinVerified) || skipPin ? <Navigate to='/' /> : <PinCodeInput setPinVerified={setPinVerified} />}
+                    element={
+                        (pin && pinVerified) || skipPin ? (
+                            <Navigate to='/' />
+                        ) : (
+                            <PinCodeInput setPinVerified={setPinVerified} />
+                        )
+                    }
                 />
                 <Route
                     path='/start'

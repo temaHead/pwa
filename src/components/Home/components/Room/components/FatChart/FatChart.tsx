@@ -64,7 +64,6 @@ const FatChart: React.FC = () => {
                 .filter((series) => visibleLines[series.id as keyof typeof visibleLines]),
         [fatMeasuring, visibleLines]
     );
-    console.log(chartData, 'fat');
 
     const handleToggleLine = (key: keyof typeof visibleLines) => {
         setVisibleLines((prev) => ({

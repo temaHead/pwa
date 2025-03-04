@@ -23,10 +23,6 @@ function CurrentGoalWeight(props: CurrentGoalWeightProps) {
     const initialWeight = Number(goal.goal.initialWeight);
     const targetWeight = Number(goal.goal.desiredWeight);
 
-    console.log('Начальный вес:', initialWeight);
-    console.log('Целевой вес:', targetWeight);
-    console.log('Текущий вес:', currentWeight);
-
     const totalDifference = Math.abs(targetWeight - initialWeight);
     let currentDifference = Math.abs(currentWeight - initialWeight);
 

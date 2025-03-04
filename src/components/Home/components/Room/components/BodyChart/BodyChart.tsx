@@ -11,7 +11,6 @@ const BodyChart: React.FC = () => {
     const bodyMeasuring = useSelector((state: RootState) => state.measurements.bodyMeasuring);
     const dispatch = useDispatch<AppDispatch>();
     const { id } = useSelector((state: RootState) => state.user);
-    console.log(bodyMeasuring);
     const { token } = theme.useToken(); // Получаем цвета текущей темы
     const colorText = token.colorTextBase; // Автоматически подстраивается
     const colorBackground = token.colorBgLayout;

@@ -1,15 +1,13 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
-import Logout from '../../../Auth/Logout/Logout';
 import { useNavigate } from 'react-router-dom';
-import { EditOutlined, UserOutlined, BulbOutlined, LeftOutlined } from '@ant-design/icons';
-import { Button, Typography, Flex, Avatar, Switch, theme } from 'antd';
+import { UserOutlined, LeftOutlined, SettingOutlined } from '@ant-design/icons';
+import { Button, Typography, Flex, Avatar, theme } from 'antd';
 import Goals from './components/Goals/Goals';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { getAllGoalsAsync } from '../../../../store/slices/goalsSlice';
 import CurrentGoals from './components/Goals/components/CurrentGoals/CurrentGoals';
 import style from './Profile.module.scss';
-import { updateUserProfileAsync } from '../../../../store/slices/userSlice';
 
 const { Title, Text } = Typography;
 
@@ -19,7 +17,6 @@ function Profile() {
 
     // Извлечение данных из Redux Store
     const user = useSelector((state: RootState) => state.user);
-    const [userTheme, setUserTheme] = useState<'light' | 'dark'>(user.theme || 'light');
     const { token } = theme.useToken(); // Получаем цвета текущей темы
     const backgroundColor = token.colorBgLayout; // Автоматически подстраивается
     const textColor = token.colorTextBase;
@@ -27,13 +24,6 @@ function Profile() {
     useEffect(() => {
         if (user.id) dispatch(getAllGoalsAsync(user.id));
     }, [dispatch, user.id]);
-
-    const toggleTheme = async () => {
-        const newTheme: 'light' | 'dark' = userTheme === 'light' ? 'dark' : 'light';
-        setUserTheme(newTheme);
-        const updatedProfile = { ...user, theme: newTheme };
-        await dispatch(updateUserProfileAsync(updatedProfile));
-    };
 
     return (
         <div
@@ -55,7 +45,7 @@ function Profile() {
                     level={4}
                     style={{ margin: 0 }}
                 >
-                    Профиль
+                    {user.name}
                 </Title>
                 <Flex
                     align='center'
@@ -63,8 +53,8 @@ function Profile() {
                 >
                     <Button
                         type='text'
-                        icon={<EditOutlined style={{ color: colorIcon }} />}
-                        onClick={() => navigate('/editProfile')}
+                        icon={<SettingOutlined style={{ color: colorIcon }} />}
+                        onClick={() => navigate('/settings')}
                     />
                 </Flex>
             </Flex>
@@ -111,21 +101,18 @@ function Profile() {
                     <Goals />
                 </div>
             </div>
-            <div>
-                <Switch
-                    checked={userTheme === 'dark'}
-                    onChange={toggleTheme}
-                    checkedChildren={<BulbOutlined />}
-                    unCheckedChildren={<BulbOutlined />}
-                />
-            </div>
 
             {/* Кнопка выхода */}
             <Flex
                 justify='center'
                 className={style.logout}
             >
-                <Logout />
+                <Button
+                    type='primary'
+                    onClick={() => navigate('/editProfile')}
+                >
+                    Редактировать
+                </Button>
             </Flex>
         </div>
     );
