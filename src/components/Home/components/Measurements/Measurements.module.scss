@@ -5,31 +5,7 @@
     padding: 15px 15px 0;
     box-sizing: border-box;
     gap: 20px;
-    .header {
-        display: flex;
-        align-items: center; /* Выравнивание элементов по вертикали */
-        justify-content: space-between; /* Раздвигает элементы в стороны */
-        position: relative;
-        padding: 0 16px; /* Добавляет отступы слева и справа */
-        height: 56px; /* Высота блока */
 
-        .title {
-            flex-grow: 1; /* Заставляет заголовок занимать свободное пространство */
-            text-align: center; /* Центрирует текст внутри */
-            font-weight: bold; /* Жирный текст */
-            font-size: 20px; /* Размер шрифта */
-            position: absolute; /* Фиксирует заголовок в центре */
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-    }
 }
 
 .measurementsList{

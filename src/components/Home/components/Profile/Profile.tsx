@@ -1,13 +1,14 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
 import { useNavigate } from 'react-router-dom';
-import { UserOutlined, LeftOutlined, SettingOutlined } from '@ant-design/icons';
+import { UserOutlined, SettingOutlined } from '@ant-design/icons';
 import { Button, Typography, Flex, Avatar, theme } from 'antd';
 import Goals from './components/Goals/Goals';
 import { useEffect } from 'react';
 import { getAllGoalsAsync } from '../../../../store/slices/goalsSlice';
 import CurrentGoals from './components/Goals/components/CurrentGoals/CurrentGoals';
 import style from './Profile.module.scss';
+import Header from '../../../../shared/components/Header/Header';
 
 const { Title, Text } = Typography;
 
@@ -30,34 +31,12 @@ function Profile() {
             className={style.profile}
             style={{ backgroundColor, color: textColor }}
         >
-            {/* Шапка профиля */}
-            <Flex
-                justify='space-between'
-                align='center'
-                className={style.header}
-            >
-                <Button
-                    type='text'
-                    icon={<LeftOutlined style={{ color: colorIcon }} />}
-                    onClick={() => navigate('/room')}
-                />
-                <Title
-                    level={4}
-                    style={{ margin: 0 }}
-                >
-                    {user.name}
-                </Title>
-                <Flex
-                    align='center'
-                    gap={8}
-                >
-                    <Button
-                        type='text'
-                        icon={<SettingOutlined style={{ color: colorIcon }} />}
-                        onClick={() => navigate('/settings')}
-                    />
-                </Flex>
-            </Flex>
+
+            <Header
+            title={user.name || 'Профиль'}
+            rightIcon={<SettingOutlined style={{ color: colorIcon }} />}
+            onRightClick={() => navigate('/settings')}
+            />
 
             {/* Аватар */}
             <Flex

@@ -2,28 +2,9 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: 30px;
+    padding: 15px;
     box-sizing: border-box;
 
-    .header {
-        display: flex;
-        align-items: center;
-        justify-content: center; /* Центрируем содержимое */
-        position: relative;
-        padding: 0 16px;
-    
-        .icon {
-            position: absolute;
-            left: 0; /* Фиксируем стрелку у левого края */
-        }
-    
-        .title {
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            flex-grow: 1; /* Позволяет заголовку центрироваться */
-        }
-    }
     
     
     .avatar{

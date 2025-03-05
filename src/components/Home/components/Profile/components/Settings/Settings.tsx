@@ -1,18 +1,18 @@
-import { ArrowLeftOutlined, BulbOutlined, LockOutlined, SmileOutlined } from '@ant-design/icons';
-import { Button, Flex, Switch, theme } from 'antd';
+import { BulbOutlined, LockOutlined, SmileOutlined } from '@ant-design/icons';
+import { Switch, theme } from 'antd';
 import style from './Settings.module.scss';
-import { useNavigate } from 'react-router-dom';
 import { AppDispatch, RootState } from '../../../../../../store';
 import { useDispatch, useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { setPin, setSkipPin, updateUserProfileAsync } from '../../../../../../store/slices/userSlice';
 import Logout from '../../../../../Auth/Logout/Logout';
 import CustomModal from '../../../../../../shared/components/CustomModal/CustomModal';
+import Header from '../../../../../../shared/components/Header/Header';
 
 function Settings() {
-    const navigate = useNavigate();
     const { token } = theme.useToken(); // Получаем цвета текущей темы
     const textColor = token.colorTextBase;
+    const backgroundColor = token.colorBgContainer;
     const dispatch = useDispatch<AppDispatch>();
 
     const user = useSelector((state: RootState) => state.user);
@@ -44,7 +44,6 @@ function Settings() {
 
     // Проверка поддержки платформенного аутентификатора
     const isPlatformAuthenticatorSupported = async () => {
-
         /// РАСКОММЕНТИРОВАТЬ ПОСЛЕ СТИЛИЗАЦИИ
         // try {
         //     const result = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
@@ -53,7 +52,7 @@ function Settings() {
         //     console.error('Ошибка при проверке поддержки платформенного аутентификатора:', error);
         //     return false;
         // }
-        return true
+        return true;
     };
 
     const toggleTheme = async () => {
@@ -73,12 +72,13 @@ function Settings() {
         }
     };
 
-    const togglePinCode =  () => {
+    const togglePinCode = () => {
         if (usePinCode) {
             // Если свитч выключен, удаляем пин-код и добавляем skipPin
             localStorage.removeItem('pin');
             localStorage.setItem('skipPin', 'true');
             dispatch(setPin(null));
+            dispatch(setSkipPin(true));
         } else {
             // Если свитч включен, добавляем пин-код (логику добавления пин-кода пока пропускаем)
             localStorage.removeItem('skipPin');
@@ -88,7 +88,6 @@ function Settings() {
             dispatch(setPin(null));
         }
         setUsePinCode(!usePinCode); // Обновляем состояние свитча
-        navigate('/');
     };
 
     const handleFaceIDToggle = () => {
@@ -135,11 +134,11 @@ function Settings() {
                     timeout: 60000, // Таймаут 60 секунд
                     attestation: 'none', // Отключаем attestation, так как он не нужен для Face ID
                 };
-    
+
                 const credential = await navigator.credentials.create({
                     publicKey: publicKeyCredentialCreationOptions,
                 });
-    
+
                 if (credential && credential instanceof PublicKeyCredential) {
                     // Сохраняем только необходимые данные
                     const credentialData = {
@@ -150,7 +149,7 @@ function Settings() {
                         },
                         type: credential.type,
                     };
-    
+
                     localStorage.setItem('faceID', JSON.stringify(credentialData));
                     localStorage.setItem('faceIDRegistered', 'true');
                     setUseFaceID(true); // Обновляем состояние свитча только после успешной регистрации
@@ -182,23 +181,17 @@ function Settings() {
             className={style.editProfile}
             style={{ color: textColor }}
         >
-            <Flex
-                justify='center'
-                align='center'
-                className={style.header}
-            >
-                <Button
-                    type='text'
-                    icon={<ArrowLeftOutlined />}
-                    onClick={() => navigate(-1)}
-                    className={style.icon}
-                />
-                <div className={style.title}>Настройки</div>
-            </Flex>
+            <Header
+                title={'Настройки'}
+                showBackButton
+            />
 
             <div className={style.settingsContainer}>
                 {/* Настройка темы */}
-                <div className={style.settingItem}>
+                <div
+                    className={style.settingItem}
+                    style={{ color: textColor, backgroundColor }}
+                >
                     <div className={style.settingLabel}>
                         <BulbOutlined className={style.settingIcon} />
                         <span>Темная тема</span>
@@ -212,7 +205,10 @@ function Settings() {
                 </div>
 
                 {/* Настройка пин-кода */}
-                <div className={style.settingItem}>
+                <div
+                    className={style.settingItem}
+                    style={{ color: textColor, backgroundColor }}
+                >
                     <div className={style.settingLabel}>
                         <LockOutlined className={style.settingIcon} />
                         <span>Использовать пин-код</span>
@@ -225,7 +221,10 @@ function Settings() {
 
                 {/* Настройка Face ID (отображается только при поддержке) */}
                 {isFaceIDSupported && (
-                    <div className={style.settingItem}>
+                    <div
+                        className={`${style.settingItem} ${!usePinCode ? style.disabled : ''}`}
+                        style={{ color: textColor, backgroundColor }}
+                    >
                         <div className={style.settingLabel}>
                             <SmileOutlined className={style.settingIcon} />
                             <span>Использовать Face ID</span>
@@ -247,16 +246,16 @@ function Settings() {
                 isOpen={activeModal !== null}
                 onClose={handleCloseModal}
                 onOk={handleConfirmModal}
-                title="Подтвердите действие"
+                title='Подтвердите действие'
                 description={
                     activeModal === 'pinCode' && useFaceID
-                        ? "Вы уверены, что хотите удалить пин-код и Face ID для входа?"
+                        ? 'Вы уверены, что хотите удалить пин-код и Face ID для входа?'
                         : activeModal === 'pinCode'
-                        ? "Вы уверены, что хотите удалить пин-код для входа?"
-                        : "Вы уверены, что хотите удалить вход по Face ID?"
+                        ? 'Вы уверены, что хотите удалить пин-код для входа?'
+                        : 'Вы уверены, что хотите удалить вход по Face ID?'
                 }
-                okText="Удалить"
-                cancelText="Отмена"
+                okText='Удалить'
+                cancelText='Отмена'
             />
         </div>
     );

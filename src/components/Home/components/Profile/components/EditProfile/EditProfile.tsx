@@ -4,10 +4,11 @@ import { AppDispatch, RootState } from '../../../../../../store';
 import { updateUserProfileAsync } from '../../../../../../store/slices/userSlice';
 import { UserProfile } from '../../../../../../types';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeftOutlined, UserOutlined } from '@ant-design/icons';
+import {  UserOutlined } from '@ant-design/icons';
 import { Button, Input, Select, Avatar, Flex, Form, theme } from 'antd';
 import style from './EditProfile.module.scss';
 import CustomSelect from '../../../../../../shared/components/CustomSelect/CustomSelect';
+import Header from '../../../../../../shared/components/Header/Header';
 
 const { Option } = Select;
 
@@ -50,19 +51,10 @@ function EditProfile() {
 
     return (
         <div className={style.editProfile} style={{ color: textColor }}>
-            <Flex
-                justify='center'
-                align='center'
-                className={style.header}
-            >
-                <Button
-                    type='text'
-                    icon={<ArrowLeftOutlined />}
-                    onClick={() => navigate('/profile')}
-                    className={style.icon}
-                />
-                <div className={style.title}>Редактировать профиль</div>
-            </Flex>
+             <Header
+                title={'Редактирование профиля'}
+                showBackButton
+            />
 
             <Flex
                 justify='center'

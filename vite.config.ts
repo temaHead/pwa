@@ -13,20 +13,20 @@ const manifest: Partial<ManifestOptions> = {
     lang: 'ru-RU',
     name: 'Sport App',
     short_name: 'Sport',
-    start_url: '/', // Стартовая страница
-    scope: '/', // Область действия PWA
+    start_url: '/',
+    scope: '/',
     orientation: 'portrait',
 };
+
 export default defineConfig({
     plugins: [
         react(),
         VitePWA({
             registerType: 'autoUpdate',
             workbox: {
-                skipWaiting: true, // Немедленно применяем новый Service Worker
-                clientsClaim: true, // Контроль над всеми клиентами
-                globPatterns: ['**/*.{html,css,js,ico,png,svg,woff2,woff,ttf,scss,tsx,ts,jsx,jpg}'],
-                globDirectory: 'dist',
+                skipWaiting: true,
+                clientsClaim: true,
+                globPatterns: ['**/*.{html,css,scss,js,ico,png,svg,woff2,woff,ttf,tsx,ts,jsx,jpg}'],
                 maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
                 runtimeCaching: [
                     {
@@ -41,7 +41,7 @@ export default defineConfig({
                         },
                     },
                     {
-                        urlPattern: /\.(?:js|css)$/,
+                        urlPattern: /\.(?:js|css|scss)$/,
                         handler: 'StaleWhileRevalidate',
                         options: {
                             cacheName: 'static-resources',
@@ -63,36 +63,54 @@ export default defineConfig({
                         handler: 'NetworkFirst',
                         options: {
                             cacheName: 'pages-cache',
-                            networkTimeoutSeconds: 3,
+                            networkTimeoutSeconds: 5,
                             expiration: {
                                 maxEntries: 10,
                                 maxAgeSeconds: 24 * 60 * 60, // 1 день
                             },
                         },
                     },
-                    
                 ],
             },
             manifest: manifest,
             injectManifest: {
-                swSrc: 'src/sw.ts', // Путь к вашему кастомному Service Worker
-                swDest: 'dist/sw.js', // Куда сохранить сгенерированный Service Worker
+                swSrc: 'src/sw.ts',
+                swDest: 'dist/sw.js',
             },
         }),
     ],
+    css: {
+        preprocessorOptions: {
+            scss: {
+            },
+        },
+        modules: {
+            localsConvention: 'camelCaseOnly', // Оптимизация имен классов
+        },
+    },
     build: {
+        target: 'esnext',
         minify: 'terser',
         terserOptions: {
             compress: {
-                drop_console: true, // Удалить console.log в production
+                drop_console: true,
+                drop_debugger: true,
+                pure_funcs: ['console.log', 'console.info'],
             },
         },
         rollupOptions: {
             output: {
                 manualChunks: {
                     vendor: ['react', 'react-dom'],
+                    antd: ['antd'],
                 },
             },
         },
+        modulePreload: {
+            polyfill: false,
+        },
+    },
+    optimizeDeps: {
+        include: ['react', 'react-dom', 'antd'],
     },
 });

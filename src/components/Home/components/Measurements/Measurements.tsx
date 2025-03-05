@@ -1,6 +1,5 @@
 import style from './Measurements.module.scss';
-import { useNavigate } from 'react-router-dom';
-import { PlusOutlined, LeftOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -18,9 +17,9 @@ import Filter from './components/Filter/Filter';
 import { updateUserProfileAsync } from '../../../../store/slices/userSlice';
 import CollapsibleSection from '../../../../shared/components/CollapsibleSection/CollapsibleSection';
 import { theme } from 'antd';
+import Header from '../../../../shared/components/Header/Header';
 
 function Measurements() {
-    const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
 
     const fatMeasuring = useSelector((state: RootState) => state.measurements.fatMeasuring);
@@ -41,10 +40,6 @@ function Measurements() {
             dispatch(getAllBodyMeasuringAsync(user.id));
         }
     }, [dispatch, user.id]);
-
-    const handleGoToRoom = () => {
-        navigate('/room');
-    };
 
     const handleAddMeasurement = () => {
         setModalOpen(true);
@@ -114,15 +109,12 @@ function Measurements() {
 
     return (
         <div className={style.measurements} style={{ backgroundColor, color: textColor }}>
-            <div className={style.header}>
-                <div className={style.icon} onClick={handleGoToRoom}>
-                    <LeftOutlined style={{ color: colorIcon }} />
-                </div>
-                <div className={style.title}>Мои замеры</div>
-                <div className={style.icon} onClick={handleAddMeasurement}>
-                    <PlusOutlined style={{ color: colorIcon }} />
-                </div>
-            </div>
+            
+            <Header
+            title={'Mои замеры'}
+            rightIcon={<PlusOutlined style={{ color: colorIcon }} />}
+            onRightClick={handleAddMeasurement}
+            />
             <div className={style.filter}>
                 <Filter />
             </div>

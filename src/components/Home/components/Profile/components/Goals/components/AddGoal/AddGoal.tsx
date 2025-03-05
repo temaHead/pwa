@@ -1,7 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Input, DatePicker, Select } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { LeftOutlined } from '@ant-design/icons';
 import { useCallback, useMemo, useState } from 'react';
 import { AppDispatch, RootState } from '../../../../../../../../store';
 import { addGoalAsync } from '../../../../../../../../store/slices/goalsSlice';
@@ -13,6 +12,7 @@ import dayjs from 'dayjs';
 import styles from './AddGoal.module.scss';
 import { Goal } from '../../../../../../../../types';
 import CustomSelect from '../../../../../../../../shared/components/CustomSelect/CustomSelect';
+import Header from '../../../../../../../../shared/components/Header/Header';
 
 const { Option } = Select;
 
@@ -113,10 +113,10 @@ function AddGoal() {
 
     return (
         <div className={styles.addGoal}>
-            <div className={styles.header}>
-                <LeftOutlined onClick={() => navigate('/profile')} />
-                <span className={styles.title}>Добавить цель</span>
-            </div>
+             <Header
+                title={'Добавить цель'}
+                showBackButton
+            />
 
             <div className={styles.form}>
                 <DatePicker

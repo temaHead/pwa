@@ -420,7 +420,7 @@ const PinCodeInput = ({
                         {/* Кнопка "Пропустить" (только если пин-код не установлен) */}
                         {!hasPin && !isSecondInput && (
                             <Button
-                                type='default'
+                                type='text'
                                 block
                                 style={{ marginTop: '20px' }}
                                 onClick={() => {

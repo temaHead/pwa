@@ -8,6 +8,7 @@ import style from './Room.module.scss';
 import { RootState } from '../../../../store';
 import PureWeightChart from './components/PureWeightChart/PureWeightChart';
 import { theme } from 'antd';
+import Header from '../../../../shared/components/Header/Header';
 
 const Room: React.FC = () => {
     const widgets = useSelector((state: RootState) => state.widgets.widgets);
@@ -33,9 +34,10 @@ const Room: React.FC = () => {
 
     return (
         <div className={style.room}>
-            <div className={style.title} style={{ color: colorText }} >
-                Мои графики
-            </div>
+        
+            <Header
+            title={'Мои графики'}
+            />
             <GraphFilter />
             <div className={style.graphsContainer}>
                 {widgets

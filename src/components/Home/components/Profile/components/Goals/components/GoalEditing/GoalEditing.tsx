@@ -6,6 +6,7 @@ import { AppDispatch, RootState } from '../../../../../../../../store';
 import { updateGoalAsync } from '../../../../../../../../store/slices/goalsSlice';
 import { Goal } from '../../../../../../../../types';
 import CustomSelect from '../../../../../../../../shared/components/CustomSelect/CustomSelect';
+import Header from '../../../../../../../../shared/components/Header/Header';
 
 const { Option } = Select;
 
@@ -49,8 +50,11 @@ const GoalEditing = memo(() => {
     }, [dispatch, goalData, updatedStatus, form, navigate]);
 
     return (
-        <div style={{ maxWidth: 400, margin: 'auto', padding: 20, color: textColor }}>
-            <h2>Редактирование цели</h2>
+        <div style={{  padding: 15, color: textColor }}>
+             <Header
+                title={'Редактирование цели'}
+                showBackButton
+            />
             {goalData && goalData.goal.status === 'done' && (
                 <>
                     <Alert
