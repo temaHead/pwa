@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Typography, Row, Col } from 'antd';
+import { Button, Typography, Row, Col, theme } from 'antd';
 import FaceIdIcon from '/face.svg'; // Иконка Face ID
 import style from './FaceID.module.scss'; // Подключаем стили
 
@@ -11,9 +11,15 @@ interface FaceIDSetupProps {
 }
 
 const FaceIDInstallation: React.FC<FaceIDSetupProps> = ({ onSetup, onSkip }) => {
+
+        const { token } = theme.useToken();
+        const textColor = token.colorTextBase;
+        const backgroundColor = token.colorBgLayout;
+    
     return (
         <div
-            className={style.faceIdInstallation}
+            className={style.faceIdInstallation }
+            style={{ backgroundColor, color: textColor }}
         >
             <Row justify="center" align="middle" gutter={[16, 16]}>
                 <Col span={24} className={style.faceIdIcon}>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from 'antd';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Button, theme } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import CryptoJS from 'crypto-js'; // Для хеширования пин-кода
@@ -10,6 +10,7 @@ import style from './PinCode.module.scss';
 import FaceIdIcon from '/face.svg'; // Иконка Face ID
 import Logout from '../Logout/Logout';
 import { setPin, setSkipPin } from '../../../store/slices/userSlice';
+import classNames from 'classnames';
 
 const PinCodeInput = ({
     setPinVerified,
@@ -26,9 +27,13 @@ const PinCodeInput = ({
     ); // Флаг наличия Face ID
     const [showFaceIdBanner, setShowFaceIdBanner] = useState(false);
     const dispatch = useDispatch();
+    const userTheme = useSelector((state: RootState) => state.user.theme);
 
     const navigate = useNavigate();
     const user = useSelector((state: RootState) => state.user);
+    const { token } = theme.useToken();
+    const textColor = token.colorTextBase;
+    const backgroundColor = token.colorBgLayout;
 
     const isPlatformAuthenticatorSupported = async () => {
         try {
@@ -188,13 +193,10 @@ const PinCodeInput = ({
         }
     };
 
-    // Проверка Face ID при наличии пин-кода и Face ID
-    useEffect(() => {
-        checkFaceID();
-    }, [hasPin, faceIDRegistered, setPinVerified]);
+
 
     // Обработчик подтверждения пин-кода
-    const handleSubmit = async () => {
+    const handleSubmit = useCallback( async () => {
         if (hasPin) {
             // Если пин-код уже есть, проверяем введённый пин-код
             const storedPin = localStorage.getItem('pin');
@@ -242,9 +244,9 @@ const PinCodeInput = ({
                 }
             }
         }
-    };
+    },[hasPin, firstPin, setPinVerified, isSecondInput, secondPin, dispatch, navigate]);
 
-    const checkFaceID = async () => {
+    const checkFaceID = useCallback( async () => {
         if (hasPin && faceIDRegistered) {
             const isAuthenticated = await authenticateWithFaceID();
             if (isAuthenticated) {
@@ -255,7 +257,7 @@ const PinCodeInput = ({
                 alert('Ошибка аутентификации с использованием Face ID.');
             }
         }
-    };
+    },[ hasPin, faceIDRegistered, setPinVerified, navigate]);
 
     // Автоматическая проверка пин-кода после ввода 4 символов
     useEffect(() => {
@@ -266,7 +268,12 @@ const PinCodeInput = ({
         } else if (!hasPin && !isSecondInput && firstPin.length === 4) {
             handleSubmit();
         }
-    }, [firstPin, hasPin, isSecondInput, secondPin]);
+    }, [firstPin, handleSubmit, hasPin, isSecondInput, secondPin]);
+
+        // Проверка Face ID при наличии пин-кода и Face ID
+        useEffect(() => {
+            checkFaceID();
+        }, [hasPin, faceIDRegistered, setPinVerified, checkFaceID]);
 
     return (
         <>
@@ -276,7 +283,10 @@ const PinCodeInput = ({
                     onSkip={skipFaceID}
                 />
             ) : (
-                <div className={style.pinCodeContainer}>
+                <div
+                    className={style.pinCodeContainer}
+                    style={{ backgroundColor, color: textColor }}
+                >
                     <div className={style.content}>
                         <div className={style.title}>
                             {hasPin
@@ -287,35 +297,37 @@ const PinCodeInput = ({
                         </div>
                         <div className={style.pinCodes}>
                             {/* Первый ряд точек */}
-                            <div className={style.pinCode}>
+                            <div
+                                className={classNames(style.pinCode, { [style.dark]: userTheme === 'dark' })}
+                            >
                                 {Array.from({ length: 4 }).map((_, index) => (
                                     <div
                                         key={index}
-                                        className={`${style.dot} ${
-                                            index < firstPin.length ? style.filled : ''
-                                        }`}
+                                        className={classNames(style.dot, {
+                                            [style.filled]: index < firstPin.length,
+                                        })}
                                     />
                                 ))}
                             </div>
 
                             {/* Второй ряд точек (если нужно) */}
-                            <div className={style.pinCode}>
+                            <div
+                                className={classNames(style.pinCode, {
+                                    [style.dark]: userTheme === 'dark',
+                                    [style.errorPinCode]: error, // Ошибка применяется и ко второму ряду
+                                })}
+                            >
                                 {!hasPin && isSecondInput && (
-                                    <div
-                                        className={style.pinCode}
-                                        style={{
-                                            color: error ? 'red' : 'inherit',
-                                        }}
-                                    >
+                                    <>
                                         {Array.from({ length: 4 }).map((_, index) => (
                                             <div
                                                 key={index}
-                                                className={`${style.dot} ${
-                                                    index < secondPin.length ? style.filled : ''
-                                                }`}
+                                                className={classNames(style.dot, {
+                                                    [style.filled]: index < secondPin.length,
+                                                })}
                                             />
                                         ))}
-                                    </div>
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -398,20 +410,23 @@ const PinCodeInput = ({
                                     />
                                 ) : (
                                     <Button
-                                        className={`${style.pinButton} ${style.pinButtonFaceID} ${
-                                            !faceIDRegistered && style.disabled
-                                        }`}
+                                        className={classNames(style.pinButton, style.pinButtonFaceID, {
+                                            [style.dark]: userTheme === 'dark',
+                                            [style.disabled]: !faceIDRegistered,
+                                        })}
                                         shape='circle'
                                         type='text'
                                         onClick={checkFaceID}
                                         disabled={!faceIDRegistered}
                                     >
                                         {' '}
-                                        <img
-                                            src={FaceIdIcon}
-                                            alt='Face ID Icon'
-                                            style={{ width: '30px', height: '30px' }}
-                                        />
+                                        {faceIDRegistered && (
+                                            <img
+                                                src={FaceIdIcon}
+                                                alt='Face ID Icon'
+                                                style={{ width: '30px', height: '30px' }}
+                                            />
+                                        )}
                                     </Button>
                                 )}
                             </div>

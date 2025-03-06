@@ -61,7 +61,7 @@ const GoalEditing = memo(() => {
                         message='Время на выполнение вашей задачи закончилось. Обновите статус цели.'
                         type='info'
                         showIcon
-                        style={{ marginBottom: 16 }}
+                        style={{ marginBottom: 16, color: 'black' }}
                     />
                     <Form.Item label='Обновите статус'>
                         <CustomSelect
@@ -139,13 +139,13 @@ const GoalEditing = memo(() => {
                     />
                 </Form.Item>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
+                    <Button onClick={() => navigate(-1)}>Отмена</Button>
                     <Button
                         type='primary'
                         onClick={handleSave}
                     >
                         Сохранить
                     </Button>
-                    <Button onClick={() => navigate(-1)}>Отмена</Button>
                 </div>
             </Form>
         </div>

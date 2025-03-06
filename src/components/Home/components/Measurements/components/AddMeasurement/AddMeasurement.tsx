@@ -11,7 +11,7 @@ import {
     addWeightMeasuringAsync,
 } from '../../../../../../store/slices/measurementSlice';
 import { calculateBodyFat } from '../../../../../Auth/SignUp/components/AddUser/utils';
-import { Button, Input } from 'antd';
+import { Button, Input, theme } from 'antd';
 
 interface AddMeasurementProps {
     isOpen: boolean;
@@ -35,10 +35,12 @@ interface FormData {
     waistCaliper: number | null;
 }
 
-
-
 const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender, birthDate }) => {
     const dispatch = useDispatch<AppDispatch>();
+
+    const { token } = theme.useToken(); // Получаем цвета текущей темы
+    const backgroundColor = token.colorBgLayout; // Автоматически подстраивается
+    const textColor = token.colorTextBase;
 
     const [{ y }, api] = useSpring(() => ({ y: 100 }));
 
@@ -70,7 +72,6 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
         tricepsCaliper: 'Трицепс',
         waistCaliper: 'Талия',
     };
-    
 
     // Обработчик изменения инпутов
     const handleSubFormInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,7 +154,8 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
                 })
             );
         }
-        if (formData.bodyFat !== null ||
+        if (
+            formData.bodyFat !== null ||
             formData.chestCaliper !== null ||
             formData.bellyCaliper !== null ||
             formData.thighCaliper !== null ||
@@ -214,7 +216,7 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
         ({ last, movement: [, my], cancel }) => {
             if (my > 200) cancel?.();
             api.start({ y: last ? (my > 15 ? 100 : 0) : my });
-            if (last && my >15 ) onClose();
+            if (last && my > 15) onClose();
         },
         { from: () => [0, y.get()] }
     );
@@ -229,9 +231,14 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
                 className={style.modal}
                 style={{
                     transform: y.to((v) => `translateY(${v}%)`),
+                    backgroundColor,
+                    color: textColor,
                 }}
             >
-                <div className={style.header}  {...bind()}>
+                <div
+                    className={style.header}
+                    {...bind()}
+                >
                     <h2>Добавить замер</h2>
                     <Button
                         onClick={close}
@@ -245,7 +252,7 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
                     <form>
                         <div className={style.fieldGroup}>
                             <div>Дата замера</div>
-                              <Input 
+                            <Input
                                 name='date'
                                 value={formData.date}
                                 onChange={handleSubFormInputChange}
@@ -273,8 +280,10 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
                                     value={formData[area as keyof typeof formData] || undefined}
                                     onChange={handleSubFormInputChange}
                                     type='number'
-                                    placeholder={`Введите замер (${measurementLabels[area as keyof typeof measurementLabels]})`}
-                                    />
+                                    placeholder={`Введите замер (${
+                                        measurementLabels[area as keyof typeof measurementLabels]
+                                    })`}
+                                />
                             </div>
                         ))}
                         <h3>Замеры калипером</h3>
@@ -291,12 +300,14 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
                                     value={formData[area as keyof typeof formData] || undefined}
                                     onChange={handleCaliperInputChange}
                                     type='number'
-                                    placeholder={`Введите замер (${measurementLabels[area as keyof typeof measurementLabels]})`}
+                                    placeholder={`Введите замер (${
+                                        measurementLabels[area as keyof typeof measurementLabels]
+                                    })`}
                                 />
                             </div>
                         ))}
-                           <h3>Процент жира</h3>
-                           <div>Подставится автоматически после заполнения замеров калипером</div>
+                        <h3>Процент жира</h3>
+                        <div>Подставится автоматически после заполнения замеров калипером</div>
                         <div className={style.fieldGroup}>
                             <Input
                                 name='bodyFat'
@@ -306,7 +317,6 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
                                 placeholder='Введите процент жира'
                             />
                         </div>
-                       
 
                         <Button
                             type='primary'

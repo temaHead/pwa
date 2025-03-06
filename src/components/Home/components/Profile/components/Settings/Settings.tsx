@@ -3,7 +3,7 @@ import { Switch, theme } from 'antd';
 import style from './Settings.module.scss';
 import { AppDispatch, RootState } from '../../../../../../store';
 import { useDispatch, useSelector } from 'react-redux';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { setPin, setSkipPin, updateUserProfileAsync } from '../../../../../../store/slices/userSlice';
 import Logout from '../../../../../Auth/Logout/Logout';
 import CustomModal from '../../../../../../shared/components/CustomModal/CustomModal';
@@ -25,22 +25,7 @@ function Settings() {
     // Один стейт для управления текущим открытым модальным окном
     const [activeModal, setActiveModal] = useState<'pinCode' | 'faceID' | null>(null);
 
-    // Проверяем поддержку Face ID при загрузке компонента
-    useEffect(() => {
-        const checkFaceIDSupport = async () => {
-            const isSupported = await isPlatformAuthenticatorSupported();
-            setIsFaceIDSupported(isSupported);
-        };
 
-        checkFaceIDSupport();
-    }, []);
-
-    // Автоматически отключаем Face ID, если пин-код отключен
-    useEffect(() => {
-        if (!usePinCode && useFaceID) {
-            toggleFaceID(); // Отключаем Face ID, если пин-код отключен
-        }
-    }, [usePinCode, useFaceID]);
 
     // Проверка поддержки платформенного аутентификатора
     const isPlatformAuthenticatorSupported = async () => {
@@ -100,7 +85,7 @@ function Settings() {
         }
     };
 
-    const toggleFaceID = async () => {
+    const toggleFaceID = useCallback(async () => {
         if (useFaceID) {
             // Если свитч выключен, удаляем Face ID и добавляем skipFaceID
             localStorage.removeItem('faceID');
@@ -159,7 +144,7 @@ function Settings() {
                 alert('Ошибка при настройке Face ID. Пожалуйста, попробуйте снова.');
             }
         }
-    };
+    },[ useFaceID, user.id, user.email, user.name ]);
 
     // Закрытие модального окна
     const handleCloseModal = () => {
@@ -175,6 +160,23 @@ function Settings() {
         }
         setActiveModal(null); // Закрываем модальное окно
     };
+
+        // Проверяем поддержку Face ID при загрузке компонента
+        useEffect(() => {
+            const checkFaceIDSupport = async () => {
+                const isSupported = await isPlatformAuthenticatorSupported();
+                setIsFaceIDSupported(isSupported);
+            };
+    
+            checkFaceIDSupport();
+        }, []);
+    
+        // Автоматически отключаем Face ID, если пин-код отключен
+        useEffect(() => {
+            if (!usePinCode && useFaceID) {
+                toggleFaceID(); // Отключаем Face ID, если пин-код отключен
+            }
+        }, [usePinCode, useFaceID, toggleFaceID]);
 
     return (
         <div

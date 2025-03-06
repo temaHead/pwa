@@ -1,7 +1,7 @@
 import { GoalData } from '../../../../../../../../types';
 import style from './Goal.module.scss';
 import { updateGoalAsync } from '../../../../../../../../store/slices/goalsSlice';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AppDispatch } from '../../../../../../../../store';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -14,7 +14,7 @@ interface GoalProps {
 }
 
 function Goal({ goal, currentWeight, bodyFat }: GoalProps) {
-    const currentDate = new Date();
+    const currentDate = useMemo(() => new Date(), []);
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate(); // Хук для навигации
     const goalData = goal.goal;
@@ -25,16 +25,16 @@ function Goal({ goal, currentWeight, bodyFat }: GoalProps) {
     };
 
     // Функция определения статуса
-    const isGoalDoneStatus = () => {
+    const isGoalDoneStatus = useCallback( () => {
         const startDate = new Date(goalData.startDate);
         const endDate = new Date(goalData.endDate);
         if (startDate <= currentDate && endDate >= currentDate) return 'active';
         if (startDate > currentDate) return 'pending';
         return 'done';
-    };
+    },[ currentDate, goalData.endDate, goalData.startDate]);
 
     // Проверка и обновление статуса
-    const checkAndEditStatus = async () => {
+    const checkAndEditStatus = useCallback( async () => {
         if (!['failed', 'success'].includes(goalData.status)) {
             const newStatus = isGoalDoneStatus();
             if (newStatus !== goalData.status) {
@@ -42,11 +42,11 @@ function Goal({ goal, currentWeight, bodyFat }: GoalProps) {
                 await dispatch(updateGoalAsync({ id: goal.id, goal: { ...goalData, status: newStatus } }));
             }
         }
-    };
+    },[ dispatch, goal, goalData, isGoalDoneStatus]);
 
     useEffect(() => {
         checkAndEditStatus();
-    }, [goal]);
+    }, [checkAndEditStatus, goal]);
 
     // Рассчитываем прогресс
     const initialWeight = Number(goalData.initialWeight);

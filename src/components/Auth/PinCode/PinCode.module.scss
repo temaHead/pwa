@@ -3,7 +3,7 @@
     height: 100dvh;
     width: 100dvw;
     .content {
-        margin-top: 200px;
+        padding-top: 200px;
     }
     .title {
         font-size: 17px;
@@ -37,11 +37,51 @@
         .dot.filled {
             background-color: #000; // Черный цвет для заполненных точек
         }
+        .pinCode {
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 100px;
+        
+            .dot {
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                margin: 0 5px;
+                background-color: #dcdce7; // Светлая тема (пустые точки)
+                transition: background-color 0.3s;
+            }
+        
+            .dot.filled {
+                background-color: #000; // Светлая тема (заполненные точки)
+            }
+        
+            // Темная тема
+           
+        }
+    }    
+    
+    .dark {
+        .dot {
+            background-color: #5a5a5a; // Темная тема (пустые точки)
+        }
+
+        .dot.filled {
+            background-color: #287be1; // Темная тема (заполненные точки)
+        }
+    }
+
+    // Ошибка (меняет цвет точек)
+    .errorPinCode {
+        .dot {
+            background-color: red !important; // Все точки становятся красными
+        }
     }
     .error {
         position: absolute;
         display: flex;
-        top: 120px;
+        top: 330px;
         width: 100%;
         color: red;
         justify-content: center;
@@ -64,10 +104,12 @@
         font-weight: 400;
         height: 50px;
         width: 50px;
+        
         &.disabled{
             opacity: 0;
         }
     }
+
     .pinButtonExit {
         font-size: 15px;
         color: red;
