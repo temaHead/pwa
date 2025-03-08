@@ -195,7 +195,8 @@ export async function getAllFatMeasuring(userId: string): Promise<FatMeasuringDa
             id: doc.id,
             ...doc.data(),
         })) as FatMeasuringData[];
-        return fatMeasuringData;
+        const sortedData = fatMeasuringData.sort((a, b) => dayjs(b.timestamp).unix() - dayjs(a.timestamp).unix());
+        return sortedData;
     } catch (error) {
         console.error('Ошибка получения замеров жира:', error);
         throw error;
@@ -211,7 +212,8 @@ export async function getAllWeightMeasuring(userId: string): Promise<WeightMeasu
             id: doc.id,
             ...doc.data(),
         })) as WeightMeasuringData[];
-        return weightMeasuringData;
+        const sortedData = weightMeasuringData.sort((a, b) => dayjs(b.timestamp).unix() - dayjs(a.timestamp).unix());
+        return sortedData;
     } catch (error) {
         console.error('Ошибка получения замеров веса:', error);
         throw error;
@@ -226,7 +228,8 @@ export async function getAllWeightMeasuring(userId: string): Promise<WeightMeasu
             id: doc.id,
             ...doc.data(),
         })) as BodyMeasuringData[];
-        return bodyMeasuringData;
+        const sortedData = bodyMeasuringData.sort((a, b) => dayjs(b.timestamp).unix() - dayjs(a.timestamp).unix());
+        return sortedData;
     } catch (error) {
         console.error('Ошибка получения измерений лентой:', error);
         throw error;

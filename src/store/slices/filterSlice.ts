@@ -14,9 +14,9 @@ interface FilterState {
 
 const initialState: FilterState = {
     filters: [
-        { id: 'fat', label: 'Показать жировые измерения', visible: true },
-        { id: 'weight', label: 'Показать измерения веса', visible: true },
-        { id: 'body', label: 'Показать измерения лентой', visible: true },
+        { id: 'showFat', label: 'Показать жировые измерения', visible: true },
+        { id: 'showWeight', label: 'Показать измерения веса', visible: true },
+        { id: 'showBody', label: 'Показать измерения лентой', visible: true },
     ],
 };
 
@@ -69,6 +69,9 @@ const filterSlice = createSlice({
             updatedFilters.splice(to, 0, movedFilter);
             state.filters = updatedFilters;
         },
+        setFiltersFromIDB:(state, action: PayloadAction<FilterItem[]>) => {
+            state.filters = action.payload
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -78,6 +81,6 @@ const filterSlice = createSlice({
     },
 });
 
-export const { toggleFilterVisibility, reorderFilters } = filterSlice.actions;
+export const { toggleFilterVisibility, reorderFilters, setFiltersFromIDB } = filterSlice.actions;
 
 export default filterSlice.reducer;

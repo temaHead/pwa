@@ -14,23 +14,26 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
     children,
     defaultExpanded = false,
 }) => {
-    const { token } = theme.useToken(); // Получаем цвета текущей темы
-    const backgroundColor = token.colorBgContainer; // Автоматически подстраивается
+    const { token } = theme.useToken();
+    const backgroundColor = token.colorBgContainer;
+
+    const items = [
+        {
+            key: '1',
+            label: title,
+            children: <div className={style.content}>{children}</div>,
+        },
+    ];
+
     return (
         <Collapse
             style={{ backgroundColor, marginTop: 0 }}
             defaultActiveKey={defaultExpanded ? ['1'] : []}
             expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
             className={style.collapsibleSection}
-        >
-            <Collapse.Panel
-                header={title}
-                key='1'
-            >
-                <div className={style.content}>{children}</div>
-            </Collapse.Panel>
-        </Collapse>
+            items={items}
+        />
     );
 };
 
-export default CollapsibleSection;
+export default React.memo(CollapsibleSection);

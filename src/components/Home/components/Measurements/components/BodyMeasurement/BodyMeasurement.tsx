@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../../../../store';
 import { BodyMeasuringData } from '../../../../../../types';
@@ -12,7 +12,7 @@ import {
     ArrowDownOutlined,
     ArrowUpOutlined,
     CheckOutlined,
-    CloseOutlined
+    CloseOutlined,
 } from '@ant-design/icons';
 import { Button, Input, theme } from 'antd';
 import style from './BodyMeasurement.module.scss';
@@ -37,38 +37,42 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
     const [editedTimestamp, setEditedTimestamp] = useState(item.timestamp || '');
     const [translateX, setTranslateX] = useState(0);
     const startX = useRef(0);
+
     const { token } = theme.useToken(); // Получаем цвета текущей темы
     const backgroundColor = token.colorBgLayout; // Автоматически подстраивается
     const textColor = token.colorTextBase;
     const colorBgContainer = token.colorBgContainer;
-    const handleTouchStart = (e: React.TouchEvent) => {
+
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
         startX.current = e.touches[0].clientX;
-    };
+    }, []);
 
-    const handleTouchMove = (e: React.TouchEvent) => {
-         const deltaX = e.touches[0].clientX - startX.current;
-         requestAnimationFrame(() => {
-             setTranslateX(Math.min(0, Math.max(-75, deltaX)));
-         });
-     };
-     
- 
- const handleTouchEnd = () => {
-     requestAnimationFrame(() => {
-         setTimeout(() => {
-             setTranslateX(translateX < -40 ? -75 : 0);
-         }, 10);
-     });
- };
+    const handleTouchMove = useCallback((e: React.TouchEvent) => {
+        const deltaX = e.touches[0].clientX - startX.current;
+        requestAnimationFrame(() => {
+            setTranslateX(Math.min(0, Math.max(-75, deltaX)));
+        });
+    }, []);
 
-    const handleInputChange = (field: keyof BodyMeasuringData['bodyMeasuring'], value: string) => {
-        setEditedBody((prev) => ({
-            ...prev,
-            [field]: value === '' ? null : parseFloat(value),
-        }));
-    };
+    const handleTouchEnd = useCallback(() => {
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                setTranslateX(translateX < -40 ? -75 : 0);
+            }, 10);
+        });
+    }, [translateX]);
 
-    const handleSave = async () => {
+    const handleInputChange = useCallback(
+        (field: keyof BodyMeasuringData['bodyMeasuring'], value: string) => {
+            setEditedBody((prev) => ({
+                ...prev,
+                [field]: value === '' ? null : parseFloat(value),
+            }));
+        },
+        []
+    );
+
+    const handleSave = useCallback(async () => {
         if (!item.id) {
             console.error('ID отсутствует, невозможно сохранить изменения');
             return;
@@ -86,9 +90,9 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
         } catch (error) {
             console.error('Ошибка при сохранении данных:', error);
         }
-    };
+    }, [dispatch, item.id, editedBody, editedTimestamp]);
 
-    const handleDelete = async () => {
+    const handleDelete = useCallback(async () => {
         if (!item.id) {
             console.error('ID отсутствует, невозможно удалить замер');
             return;
@@ -99,9 +103,9 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
         } catch (error) {
             console.error('Ошибка при удалении замера:', error);
         }
-    };
+    }, [dispatch, item.id]);
 
-    const handleCancel = () => {
+    const handleCancel = useCallback(() => {
         setEditedBody({
             chest: item.bodyMeasuring?.chest || null,
             hips: item.bodyMeasuring?.hips || null,
@@ -111,29 +115,42 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
         });
         setEditedTimestamp(item.timestamp || '');
         setIsEditing(false);
-    };
+    }, [item.bodyMeasuring, item.timestamp]);
 
-    const toggleCollapse = () => {
+    const toggleCollapse = useCallback(() => {
         setIsCollapsed((prev) => !prev);
-    };
+    }, []);
 
-    const measurementLabels: Record<string, string> = {
-        chest: 'Грудь',
-        hips: 'Ягодицы',
-        thigh: 'Бедро',
-        arms: 'Руки',
-        waist: 'Талия',
-    };
+    const measurementLabels = useMemo(
+        () => ({
+            chest: 'Грудь',
+            hips: 'Ягодицы',
+            thigh: 'Бедро',
+            arms: 'Руки',
+            waist: 'Талия',
+        }),
+        []
+    );
+
+    const containerStyle = useMemo(
+        () => ({ backgroundColor: colorBgContainer, color: textColor }),
+        [colorBgContainer, textColor]
+    );
+
+    const bodyMeasurementStyle = useMemo(
+        () => ({ transform: `translateX(${translateX}px)`, backgroundColor }),
+        [translateX, backgroundColor]
+    );
 
     return (
-        <div className={style.container} style={{ backgroundColor: colorBgContainer, color: textColor }}>
+        <div className={style.container} style={containerStyle}>
             <div className={style.deleteArea}>
                 <DeleteOutlined className={style.deleteIcon} onClick={handleDelete} />
             </div>
 
             <div
                 className={style.bodyMeasurement}
-                style={{ transform: `translateX(${translateX}px)`, backgroundColor }}
+                style={bodyMeasurementStyle}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
@@ -211,4 +228,4 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
     );
 };
 
-export default BodyMeasurement;
+export default React.memo(BodyMeasurement);

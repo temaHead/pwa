@@ -22,6 +22,7 @@ import { ConfigProvider, ThemeConfig } from 'antd'; // Импорт Ant Design C
 import ruRU from 'antd/locale/ru_RU'; // Локализация Ant Design на русский
 import PinCodeInput from './components/Auth/PinCode/PinCode';
 import Settings from './components/Home/components/Profile/components/Settings/Settings';
+import { deleteUserFromIDB, getUserFromIDB, saveUserToIDB } from './shared/utils/idb';
 
 const SignIn = lazy(() => import('./components/Auth/SignIn/SignIn'));
 const SignUp = lazy(() => import('./components/Auth/SignUp/SignUp'));
@@ -53,15 +54,27 @@ function App() {
 
     useEffect(() => {
         setLoading(true);
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            if (firebaseUser && firebaseUser.uid === id) {
-                try {
-                    const userDocRef = doc(db, 'users', firebaseUser.uid);
-                    const userDoc = await getDoc(userDocRef);
 
-                    if (userDoc.exists()) {
-                        dispatch(
-                            setUser({
+        const loadUser = async () => {
+            // Загрузка данных из IndexedDB
+            const userFromIDB = await getUserFromIDB();
+
+            if (userFromIDB) {
+                console.log('Данные успешно загружены из IndexedDB:', userFromIDB);
+                // Если данные есть в IndexedDB, используем их
+                dispatch(setUser(userFromIDB));
+                setIsAuth(true);
+            }
+
+            // Проверка аутентификации и синхронизация с бэкендом
+            const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+                if (firebaseUser && firebaseUser.uid === id) {
+                    try {
+                        const userDocRef = doc(db, 'users', firebaseUser.uid);
+                        const userDoc = await getDoc(userDocRef);
+
+                        if (userDoc.exists()) {
+                            const userData = {
                                 email: firebaseUser.email,
                                 id: firebaseUser.uid,
                                 token: firebaseUser.refreshToken,
@@ -73,26 +86,37 @@ function App() {
                                 gender: userDoc.data()?.gender || null,
                                 height: userDoc.data()?.height || null,
                                 bodyFat: userDoc.data()?.bodyFat || null,
-                                theme: userDoc.data()?.theme || 'light', // Загружаем тему
-                            })
-                        );
-                        setIsAuth(true);
-                    }
-                } catch (error) {
-                    console.error('Ошибка при загрузке данных пользователя:', error);
-                }
-            } else {
-                setIsAuth(false);
-                window.localStorage.removeItem('id');
-            }
-            setLoading(false);
-        });
+                                theme: userDoc.data()?.theme || 'light',
+                            };
 
-        return () => unsubscribe();
+                            // Сравниваем данные из IndexedDB с данными из Firestore
+                            if (JSON.stringify(userFromIDB) !== JSON.stringify(userData)) {
+                                console.log('Данные изменились');
+                                console.log(userFromIDB, userData);
+                                // Если данные изменились, обновляем Redux и IndexedDB
+                                dispatch(setUser(userData));
+                                await saveUserToIDB(userData);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Ошибка при загрузке данных пользователя:', error);
+                    }
+                } else {
+                    setIsAuth(false);
+                    window.localStorage.removeItem('id');
+                    await deleteUserFromIDB();
+                }
+                setLoading(false);
+            });
+
+            return () => unsubscribe();
+        };
+
+        loadUser();
     }, [dispatch, id]);
 
     if (loading) {
-        return <LoadingSpinner />;
+        return <div>'app'</div>;
     }
 
     return (
@@ -119,7 +143,7 @@ function App() {
                                 <Navigate to='/start' />
                             )
                         ) : (
-                            <LoadingSpinner />
+                            <div>'loading'</div>
                         )
                     }
                 >

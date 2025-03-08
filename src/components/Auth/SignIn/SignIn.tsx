@@ -9,6 +9,7 @@ import icon from '../../../assets/close-line-icon.svg';
 import { setUser } from '../../../store/slices/userSlice';
 import { doc, getDoc } from 'firebase/firestore';
 import { Button, Form, Input } from 'antd';
+import { saveUserToIDB } from '../../../shared/utils/idb';
 
 const SignIn = () => {
     const dispatch = useDispatch();
@@ -32,23 +33,27 @@ const SignIn = () => {
 
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
-                    dispatch(
-                        setUser({
-                            email: userCredential.user.email,
-                            id: userId,
-                            token: userCredential.user.refreshToken,
-                            name: userData.name || '',
-                            birthDate: userData.birthDate || '',
-                            currentWeight: userData.currentWeight || null,
-                            initialWeight: userData.initialWeight || null,
-                            desiredWeight: userData.desiredWeight || null,
-                            gender: userData.gender || '',
-                            height: userData.height || null,
-                        })
-                    );
+                    const user = {
+                        email: userCredential.user.email,
+                        id: userId,
+                        token: userCredential.user.refreshToken,
+                        name: userData.name || '',
+                        birthDate: userData.birthDate || '',
+                        currentWeight: userData.currentWeight || null,
+                        initialWeight: userData.initialWeight || null,
+                        desiredWeight: userData.desiredWeight || null,
+                        gender: userData.gender || '',
+                        height: userData.height || null,
+                    };
+
+                    // Сохранение данных пользователя в Redux
+                    dispatch(setUser(user));
 
                     // Сохранение ID в локальное хранилище
                     window.localStorage.setItem('id', userId);
+
+                    // Сохранение данных пользователя в IndexedDB
+                    await saveUserToIDB(user);
 
                     // Очистка полей формы
                     setEmail('');

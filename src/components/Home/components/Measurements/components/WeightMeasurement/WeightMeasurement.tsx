@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../../../../store';
 import { WeightMeasuringData } from '../../../../../../types';
@@ -22,31 +22,32 @@ const WeightMeasurement: React.FC<WeightMeasurementProps> = ({ item }) => {
     const [editedTimestamp, setEditedTimestamp] = useState(item.timestamp);
     const [translateX, setTranslateX] = useState(0);
     const startX = useRef(0);
+
     const { token } = theme.useToken(); // Получаем цвета текущей темы
     const backgroundColor = token.colorBgLayout; // Автоматически подстраивается
     const textColor = token.colorTextBase;
     const colorBgContainer = token.colorBgContainer;
-    const handleTouchStart = (e: React.TouchEvent) => {
-        startX.current = e.touches[0].clientX;
-    };
 
-    const handleTouchMove = (e: React.TouchEvent) => {
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+        startX.current = e.touches[0].clientX;
+    }, []);
+
+    const handleTouchMove = useCallback((e: React.TouchEvent) => {
         const deltaX = e.touches[0].clientX - startX.current;
         requestAnimationFrame(() => {
             setTranslateX(Math.min(0, Math.max(-75, deltaX)));
         });
-    };
-    
+    }, []);
 
-const handleTouchEnd = () => {
-    requestAnimationFrame(() => {
-        setTimeout(() => {
-            setTranslateX(translateX < -40 ? -75 : 0);
-        }, 10);
-    });
-};
+    const handleTouchEnd = useCallback(() => {
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                setTranslateX(translateX < -40 ? -75 : 0);
+            }, 10);
+        });
+    }, [translateX]);
 
-    const handleSave = async () => {
+    const handleSave = useCallback(async () => {
         if (!item.id) {
             console.error('ID отсутствует, невозможно сохранить изменения');
             return;
@@ -61,9 +62,9 @@ const handleTouchEnd = () => {
         } catch (error) {
             console.error('Ошибка при сохранении данных:', error);
         }
-    };
+    }, [dispatch, item.id, editedWeight, editedTimestamp]);
 
-    const handleDelete = async () => {
+    const handleDelete = useCallback(async () => {
         if (!item.id) {
             console.error('ID отсутствует, невозможно удалить замер');
             return;
@@ -73,10 +74,22 @@ const handleTouchEnd = () => {
         } catch (error) {
             console.error('Ошибка при удалении замера:', error);
         }
-    };
+    }, [dispatch, item.id]);
+
+    const toggleEdit = useCallback(() => setIsEditing((prev) => !prev), []);
+
+    const containerStyle = useMemo(
+        () => ({ backgroundColor: colorBgContainer, color: textColor }),
+        [colorBgContainer, textColor]
+    );
+
+    const measurementStyle = useMemo(
+        () => ({ transform: `translateX(${translateX}px)`, backgroundColor }),
+        [translateX, backgroundColor]
+    );
 
     return (
-        <div className={style.container} style={{ backgroundColor: colorBgContainer, color: textColor }}>
+        <div className={style.container} style={containerStyle}>
             <div className={style.deleteArea}>
                 <Popconfirm
                     title="Удалить замер?"
@@ -90,7 +103,7 @@ const handleTouchEnd = () => {
 
             <div
                 className={style.measurement}
-                style={{ transform: `translateX(${translateX}px)`, backgroundColor }}
+                style={measurementStyle}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
@@ -126,7 +139,7 @@ const handleTouchEnd = () => {
                             </div>
                             <div className={style.icon}>
                                 {!isEditing && (
-                                    <EditOutlined onClick={() => setIsEditing(true)} />
+                                    <EditOutlined onClick={toggleEdit} />
                                 )}
                             </div>
                         </div>
@@ -148,4 +161,4 @@ const handleTouchEnd = () => {
     );
 };
 
-export default WeightMeasurement;
+export default React.memo(WeightMeasurement);

@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
     BodyMeasuring,
     BodyMeasuringData,
@@ -157,7 +157,20 @@ export const deleteBodyMeasuringAsync = createAsyncThunk('user/deleteBodyMeasuri
 const measurementSlice = createSlice({
     name: 'measurement',
     initialState,
-    reducers: {},
+    reducers: {
+        // Перезапись всех измерений жира
+        setFatMeasurements: (state, action: PayloadAction<FatMeasuringData[]>) => {
+            state.fatMeasuring = action.payload;
+        },
+        // Перезапись всех измерений веса
+        setWeightMeasurements: (state, action: PayloadAction<WeightMeasuringData[]>) => {
+            state.weightMeasuring = action.payload;
+        },
+        // Перезапись всех измерений тела
+        setBodyMeasurements: (state, action: PayloadAction<BodyMeasuringData[]>) => {
+            state.bodyMeasuring = action.payload;
+        },
+    },
     extraReducers: (builder) => {
         builder.addCase(getAllFatMeasuringAsync.fulfilled, (state, action) => {
             state.fatMeasuring = action.payload;
@@ -215,5 +228,8 @@ const measurementSlice = createSlice({
         });
     },
 });
+
+// Экспортируем синхронные экшены
+export const { setFatMeasurements, setWeightMeasurements, setBodyMeasurements } = measurementSlice.actions;
 
 export default measurementSlice.reducer;

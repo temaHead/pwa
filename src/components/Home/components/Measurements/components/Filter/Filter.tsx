@@ -1,4 +1,4 @@
-import React, { useState, useEffect, CSSProperties } from 'react';
+import React, { useState, useEffect, CSSProperties, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Checkbox, theme } from 'antd';
 import { CheckOutlined, DeleteOutlined, HolderOutlined } from '@ant-design/icons';
@@ -15,8 +15,11 @@ import {
     fetchFilterAsync,
     resetFilterAsync,
     saveFilterAsync,
+    setFiltersFromIDB,
 } from '../../../../../../store/slices/filterSlice';
 import CollapsibleSection from '../../../../../../shared/components/CollapsibleSection/CollapsibleSection';
+import { getEntityFromIDB, saveEntityToIDB } from '../../../../../../shared/utils/idb';
+import _ from 'lodash';
 
 interface FilterOption {
     id: string;
@@ -56,11 +59,40 @@ const Filter: React.FC = () => {
         { id: 'showBody', label: 'Показать измерения лентой', visible: true },
     ]);
 
+    // Мемоизация стилей для перетаскиваемых элементов
+    const getItemStyleMemoized = useCallback(
+        (isDragging: boolean, draggableStyle: DraggableProvidedDraggableProps['style'] | undefined) =>
+            getItemStyle(isDragging, draggableStyle, backgroundColor),
+        [backgroundColor]
+    );
+
+    useEffect(() => {
+        const loadAndSyncData = async () => {
+            // Загрузка данных из IndexedDB
+            const filterFromIDB = await getEntityFromIDB('filterStore');
+            if (filterFromIDB) {
+                dispatch(setFiltersFromIDB(filterFromIDB)); // Предполагается, что у вас есть action для установки измерений жира
+            }
+            if (userId) {
+                dispatch(fetchFilterAsync(userId));
+            }
+        };
+        loadAndSyncData();
+    }, [dispatch, userId]);
+
+    // синхронизация данных с бэкендом и сохранение в IndexedDB
     useEffect(() => {
         if (userId) {
-            dispatch(fetchFilterAsync(userId));
+            const syncData = async () => {
+                // Сравниваем данные из IndexedDB с данными из бэкенда для каждой сущности
+                const filterFromIDB = await getEntityFromIDB('filterStore');
+                if (!_.isEqual(filterFromIDB, filters)) {
+                    await saveEntityToIDB('filterStore', filters);
+                }
+            };
+            syncData();
         }
-    }, [dispatch, userId]);
+    }, [dispatch, userId, filters]);
 
     useEffect(() => {
         if (savedFilter) {
@@ -68,36 +100,46 @@ const Filter: React.FC = () => {
         }
     }, [savedFilter]);
 
-    const handleFilterChange = (id: string) => {
+    // Обработчик изменения видимости фильтра
+    const handleFilterChange = useCallback((id: string) => {
         setFilters((prev) =>
             prev.map((filter) => (filter.id === id ? { ...filter, visible: !filter.visible } : filter))
         );
-    };
+    }, []);
 
-    const handleSaveFilter = () => {
+    // Обработчик сохранения фильтров
+    const handleSaveFilter = useCallback(() => {
         if (userId) {
             dispatch(saveFilterAsync({ userId, filters }));
         }
-    };
+    }, [dispatch, userId, filters]);
 
-    const handleResetFilter = () => {
+    // Обработчик сброса фильтров
+    const handleResetFilter = useCallback(() => {
         if (userId) {
             dispatch(resetFilterAsync(userId));
         }
-    };
+    }, [dispatch, userId]);
 
-    const onDragEnd = (result: DropResult) => {
-        if (!result.destination) return;
+    // Обработчик завершения перетаскивания
+    const onDragEnd = useCallback(
+        (result: DropResult) => {
+            if (!result.destination) return;
 
-        const items = Array.from(filters);
-        const [reorderedItem] = items.splice(result.source.index, 1);
-        items.splice(result.destination.index, 0, reorderedItem);
+            const items = Array.from(filters);
+            const [reorderedItem] = items.splice(result.source.index, 1);
+            items.splice(result.destination.index, 0, reorderedItem);
 
-        setFilters(items);
-    };
+            setFilters(items);
+        },
+        [filters]
+    );
 
     return (
-        <div className={style.filter} style={{ color: colorText }}>
+        <div
+            className={style.filter}
+            style={{ color: colorText }}
+        >
             <CollapsibleSection title='Фильтры'>
                 <DragDropContext onDragEnd={onDragEnd}>
                     <Droppable droppableId='filters'>
@@ -118,11 +160,9 @@ const Filter: React.FC = () => {
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}
-                                                style={getItemStyle(
+                                                style={getItemStyleMemoized(
                                                     snapshot.isDragging,
-                                                    provided.draggableProps.style,
-                                                    backgroundColor,
-                                                    
+                                                    provided.draggableProps.style
                                                 )}
                                                 className={style.filterItem}
                                             >

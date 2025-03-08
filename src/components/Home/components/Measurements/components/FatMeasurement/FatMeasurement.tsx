@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../../../store';
 import { FatMeasuringData } from '../../../../../../types';
@@ -33,48 +33,58 @@ const FatMeasurement: React.FC<FatMeasurementProps> = ({ item }) => {
     const [editedTimestamp, setEditedTimestamp] = useState(item.timestamp);
     const [translateX, setTranslateX] = useState(0);
     const startX = useRef(0);
-    const filteredMeasurements =
-        gender === 'male' ? ['chest', 'abdomen', 'thigh'] : ['thigh', 'tricep', 'waist'];
-    const { token } = theme.useToken(); // Получаем цвета текущей темы
-    const backgroundColor = token.colorBgLayout; // Автоматически подстраивается
+
+    const { token } = theme.useToken();
+    const backgroundColor = token.colorBgLayout;
     const textColor = token.colorTextBase;
     const colorBgContainer = token.colorBgContainer;
-    const measurementLabels = {
-        chest: 'Грудь',
-        abdomen: 'Живот',
-        thigh: 'Бедро',
-        tricep: 'Трицепс',
-        waist: 'Талия',
-    };
 
-        const handleTouchStart = (e: React.TouchEvent) => {
-            startX.current = e.touches[0].clientX;
-        };
-    
-   const handleTouchMove = (e: React.TouchEvent) => {
+    const filteredMeasurements = useMemo(
+        () => (gender === 'male' ? ['chest', 'abdomen', 'thigh'] : ['thigh', 'tricep', 'waist']),
+        [gender]
+    );
+
+    const measurementLabels = useMemo(
+        () => ({
+            chest: 'Грудь',
+            abdomen: 'Живот',
+            thigh: 'Бедро',
+            tricep: 'Трицепс',
+            waist: 'Талия',
+        }),
+        []
+    );
+
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+        startX.current = e.touches[0].clientX;
+    }, []);
+
+    const handleTouchMove = useCallback((e: React.TouchEvent) => {
         const deltaX = e.touches[0].clientX - startX.current;
         requestAnimationFrame(() => {
             setTranslateX(Math.min(0, Math.max(-75, deltaX)));
         });
-    };
-    
+    }, []);
 
-const handleTouchEnd = () => {
-    requestAnimationFrame(() => {
-        setTimeout(() => {
-            setTranslateX(translateX < -40 ? -75 : 0);
-        }, 10);
-    });
-};
+    const handleTouchEnd = useCallback(() => {
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                setTranslateX(translateX < -40 ? -75 : 0);
+            }, 10);
+        });
+    }, [translateX]);
 
-    const handleInputChange = (field: keyof FatMeasuringData['measurements'], value: string) => {
-        setEditedMeasurements((prev) => ({
-            ...prev,
-            [field]: value === '' ? null : parseFloat(value),
-        }));
-    };
+    const handleInputChange = useCallback(
+        (field: keyof FatMeasuringData['measurements'], value: string) => {
+            setEditedMeasurements((prev) => ({
+                ...prev,
+                [field]: value === '' ? null : parseFloat(value),
+            }));
+        },
+        []
+    );
 
-    const handleSave = async () => {
+    const handleSave = useCallback(async () => {
         if (!item.id) return;
         await dispatch(
             updateFatMeasuringAsync({
@@ -85,36 +95,47 @@ const handleTouchEnd = () => {
             })
         );
         setIsEditing(false);
-    };
+    }, [dispatch, item.id, editedMeasurements, editedBodyFat, editedTimestamp]);
 
-    const handleDelete = async () => {
+    const handleDelete = useCallback(async () => {
         if (!item.id) return;
         await dispatch(deleteFatMeasuringAsync(item.id));
-    };
+    }, [dispatch, item.id]);
 
-    const toggleCollapse = () => setIsCollapsed((prev) => !prev);
+    const toggleCollapse = useCallback(() => setIsCollapsed((prev) => !prev), []);
+
+    const containerStyle = useMemo(
+        () => ({ backgroundColor: colorBgContainer, color: textColor }),
+        [colorBgContainer, textColor]
+    );
+
+    const fatMeasurementStyle = useMemo(
+        () => ({ transform: `translateX(${translateX}px)`, backgroundColor }),
+        [translateX, backgroundColor]
+    );
 
     return (
         <div
             className={style.container}
-            style={{ backgroundColor: colorBgContainer, color: textColor }}
+            style={containerStyle}
         >
-             <div className={style.deleteArea}>
+            <div className={style.deleteArea}>
                 <Popconfirm
-                    title="Удалить замер?"
+                    title='Удалить замер?'
                     onConfirm={handleDelete}
-                    okText="Да"
-                    cancelText="Нет"
+                    okText='Да'
+                    cancelText='Нет'
                 >
                     <DeleteOutlined className={style.deleteIcon} />
                 </Popconfirm>
             </div>
-            <div className={style.fatMeasurement}
-             style={{ transform: `translateX(${translateX}px)`, backgroundColor}}
-             onTouchStart={handleTouchStart}
-             onTouchMove={handleTouchMove}
-             onTouchEnd={handleTouchEnd}
-             >
+            <div
+                className={style.fatMeasurement}
+                style={fatMeasurementStyle}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+            >
                 <div className={style.content}>
                     <div className={style.header}>
                         <div className={style.leftRow}>
@@ -211,4 +232,4 @@ const handleTouchEnd = () => {
     );
 };
 
-export default FatMeasurement;
+export default React.memo(FatMeasurement);
