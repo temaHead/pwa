@@ -81,7 +81,7 @@ function EditProfile() {
                         type='date'
                         value={dateValue}
                         onChange={handleDateChange}
-                        style={{ width: '100%', minWidth:'100%' }}
+                        style={{ width: '100%', minWidth:'auto' }}
                     />
                 </Form.Item>
 

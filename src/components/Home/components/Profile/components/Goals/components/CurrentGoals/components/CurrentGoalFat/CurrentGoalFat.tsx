@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { GoalData } from '../../../../../../../../../../types';
 import style from './CurrentGoalFat.module.scss';
-import { theme } from 'antd';
+import { Progress, theme } from 'antd';
 
 interface CurrentGoalFatProps {
     goal: GoalData;
@@ -28,6 +28,10 @@ function CurrentGoalFat(props: CurrentGoalFatProps) {
     const currentDifference = Math.abs(bodyFat - initialFat);
     const progress = (currentDifference / totalDifference) * 100;
 
+    if(goal.goal.desiredFat === 5){
+        console.log(currentDifference, totalDifference, progress);
+    }
+
     return (
         <div
             className={style.goalFat}
@@ -37,9 +41,9 @@ function CurrentGoalFat(props: CurrentGoalFatProps) {
             <div className={style.title}>Прогресс цели</div>
             <div className={style.progress}>
                 <div className={style.initialFat}>{initialFat} %</div>
-                <progress
-                    value={progress}
-                    max='100'
+                <Progress
+                    percent={progress}
+                    showInfo={false} // Убираем цифры
                     className={style.progressBar}
                 />
                 <div className={style.targetFat}>{targetFat} %</div>

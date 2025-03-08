@@ -62,6 +62,10 @@ function Goal({ goal, currentWeight, bodyFat }: GoalProps) {
 
     let currentDifferenceWeight = Math.abs(currentWeight - initialWeight);
     let currentDifferenceFat = Math.abs(bodyFat - initialFat);
+    
+    if(goalData.desiredFat === 5){
+        console.log(currentDifferenceFat, totalDifferenceFat)
+    }
 
     // Коррекция, если цель "провалена" или текущий вес ушел в обратную сторону
     if (
@@ -89,7 +93,10 @@ function Goal({ goal, currentWeight, bodyFat }: GoalProps) {
             ? currentDifferenceWeight / totalDifferenceWeight
             : currentDifferenceFat / totalDifferenceFat;
 
-    const progress = status === 'active' ? Math.min(resultMath * 100, 100) : 100;
+    const progress = status === 'active' ? Math.min(resultMath * 100) : 100;
+      if(goalData.desiredFat === 5){
+        console.log(progress, goalData);
+    }
 
     // Размеры круга
     const r = 40;
@@ -152,6 +159,7 @@ function Goal({ goal, currentWeight, bodyFat }: GoalProps) {
                             stroke={progressColors[status] || '#19e27a'}
                             strokeDasharray={`${circumference}px`}
                             strokeDashoffset={`${offset}px`}
+                            transform='rotate(-90 50 50)'
                         />
                     </svg>
                     <div className={style.progressText}>

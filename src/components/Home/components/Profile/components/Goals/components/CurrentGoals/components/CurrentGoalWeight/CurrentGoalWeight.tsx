@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { GoalData } from '../../../../../../../../../../types';
 import style from './CurrentGoalWeight.module.scss';
-import { theme } from 'antd';
+import { Progress, theme } from 'antd';
 
 interface CurrentGoalWeightProps {
     goal: GoalData;
@@ -19,6 +19,7 @@ function CurrentGoalWeight(props: CurrentGoalWeightProps) {
     const { token } = theme.useToken(); // Получаем цвета текущей темы
     const backgroundColor = token.colorBgContainer; // Автоматически подстраивается
     const colorText = token.colorText;
+    // const progressColor = token.colorPrimary;
 
     const initialWeight = Number(goal.goal.initialWeight);
     const targetWeight = Number(goal.goal.desiredWeight);
@@ -56,9 +57,9 @@ function CurrentGoalWeight(props: CurrentGoalWeightProps) {
             <div className={style.title} >Прогресс цели</div>
             <div className={style.progress}>
                 <div className={style.initialWeight}>{initialWeight} кг</div>
-                <progress
-                    value={progress}
-                    max='100'
+                <Progress
+                    percent={progress}
+                    showInfo={false} // Убираем цифры
                     className={style.progressBar}
                 />
                 <div className={style.targetWeight}>{targetWeight} кг</div>
