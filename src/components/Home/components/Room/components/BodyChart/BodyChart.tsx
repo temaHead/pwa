@@ -63,6 +63,8 @@ const BodyChart: React.FC = () => {
         }));
     };
 
+    if (!bodyMeasuring.length) return;
+
     return (
         <div className={style.chart}>
             <div className={style.chartTitle}>📊 График замеров тела</div>

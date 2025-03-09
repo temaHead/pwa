@@ -97,26 +97,26 @@ button {
     font-family: TTNormsPro;
     font-style: normal;
     font-weight: 400;
-    src: url(/public/static/media/TTNormsPro-Regular.ttf) format("truetype")
+    src: url(/static/media/TTNormsPro-Regular.ttf) format("truetype")
 }
 
 @font-face {
     font-family: TTNormsPro;
     font-style: normal;
     font-weight: 500;
-    src: url(/public/static/media/TTNormsPro-Medium.ttf) format("truetype")
+    src: url(/static/media/TTNormsPro-Medium.ttf) format("truetype")
 }
 
 @font-face {
     font-family: TTNormsPro;
     font-style: normal;
     font-weight: 600;
-    src: url(/public/static/media/TTNormsPro-Bold.ttf) format("truetype")
+    src: url(/static/media/TTNormsPro-Bold.ttf) format("truetype")
 }
 
 @font-face {
     font-family: KievitPro;
     font-style: normal;
     font-weight: 400;
-    src: url(/public/static/media/KievitPro-Regular.ttf) format("truetype")
+    src: url(/static/media/KievitPro-Regular.ttf) format("truetype")
 }

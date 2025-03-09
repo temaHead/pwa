@@ -115,119 +115,119 @@ function App() {
         loadUser();
     }, [dispatch, id]);
 
-    if (loading) {
-        return <div>'app'</div>;
-    }
-
     return (
         <ConfigProvider
             locale={ruRU}
             theme={themeConfig}
         >
-            <Routes>
-                <Route
-                    path='/'
-                    element={
-                        !loading ? (
-                            isAuth ? (
-                                user?.currentWeight ? (
-                                    (pin && pinVerified) || skipPin ? (
-                                        <Home />
+            {loading ? (
+                <LoadingSpinner />
+            ) : (
+                <Routes>
+                    <Route
+                        path='/'
+                        element={
+                            !loading ? (
+                                isAuth ? (
+                                    user?.currentWeight ? (
+                                        (pin && pinVerified) || skipPin ? (
+                                            <Home />
+                                        ) : (
+                                            <Navigate to='/pin' />
+                                        )
                                     ) : (
-                                        <Navigate to='/pin' />
+                                        <Navigate to='/addUser' />
                                     )
                                 ) : (
-                                    <Navigate to='/addUser' />
+                                    <Navigate to='/start' />
                                 )
                             ) : (
-                                <Navigate to='/start' />
+                                <div>'loading'</div>
                             )
-                        ) : (
-                            <div>'loading'</div>
-                        )
-                    }
-                >
-                    <Route
-                        path=''
-                        element={<Desktop />}
+                        }
                     >
                         <Route
-                            index
-                            element={<Room />}
-                        />
-                        <Route
-                            path='room'
-                            element={<Room />}
-                        />
-                        <Route
-                            path='/measurements'
-                            element={<Measurements />}
-                        />
-                        <Route
-                            path='/profile'
-                            element={<Profile />}
-                        />
-                        <Route
-                            path='/editProfile'
-                            element={<EditProfile />}
-                        />
-                        <Route
-                            path='/addGoal'
-                            element={<AddGoal />}
-                        />
-                        <Route
-                            path='/goalEditing/:goalId'
-                            element={<GoalEditing />}
-                        />
-                        <Route
-                            path='/settings'
-                            element={<Settings />}
-                        />
+                            path=''
+                            element={<Desktop />}
+                        >
+                            <Route
+                                index
+                                element={<Room />}
+                            />
+                            <Route
+                                path='room'
+                                element={<Room />}
+                            />
+                            <Route
+                                path='/measurements'
+                                element={<Measurements />}
+                            />
+                            <Route
+                                path='/profile'
+                                element={<Profile />}
+                            />
+                            <Route
+                                path='/editProfile'
+                                element={<EditProfile />}
+                            />
+                            <Route
+                                path='/addGoal'
+                                element={<AddGoal />}
+                            />
+                            <Route
+                                path='/goalEditing/:goalId'
+                                element={<GoalEditing />}
+                            />
+                            <Route
+                                path='/settings'
+                                element={<Settings />}
+                            />
+                        </Route>
                     </Route>
-                </Route>
-                <Route
-                    path='/pin'
-                    element={
-                        (pin && pinVerified) || skipPin ? (
-                            <Navigate to='/' />
-                        ) : (
-                            <PinCodeInput setPinVerified={setPinVerified} />
-                        )
-                    }
-                />
-                <Route
-                    path='/start'
-                    element={isAuth ? <Navigate to='/' /> : <Start />}
-                />
-                <Route
-                    path='/signIn'
-                    element={
-                        isAuth ? (
-                            <Navigate to='/' />
-                        ) : (
-                            <Suspense fallback={<LoadingSpinner />}>
-                                <SignIn />
-                            </Suspense>
-                        )
-                    }
-                />
-                <Route
-                    path='/signUp'
-                    element={
-                        isAuth ? (
-                            <Navigate to='/' />
-                        ) : (
-                            <Suspense fallback={<LoadingSpinner />}>
-                                <SignUp />
-                            </Suspense>
-                        )
-                    }
-                />
-                <Route
-                    path='/addUser'
-                    element={user && user.currentWeight ? <Navigate to='/' /> : <AddUser />}
-                />
-            </Routes>
+                    <Route
+                        path='/pin'
+                        element={
+                            (pin && pinVerified) || skipPin ? (
+                                <Navigate to='/' />
+                            ) : (
+                                <PinCodeInput setPinVerified={setPinVerified} />
+                            )
+                        }
+                    />
+                    <Route
+                        path='/start'
+                        element={isAuth ? <Navigate to='/' /> : <Start />}
+                    />
+                    <Route
+                        path='/signIn'
+                        element={
+                            isAuth ? (
+                                <Navigate to='/' />
+                            ) : (
+                                <Suspense fallback={<LoadingSpinner />}>
+                                    <SignIn />
+                                </Suspense>
+                            )
+                        }
+                    />
+                    <Route
+                        path='/signUp'
+                        element={
+                            isAuth ? (
+                                <Navigate to='/' />
+                            ) : (
+                                <Suspense fallback={<LoadingSpinner />}>
+                                    <SignUp />
+                                </Suspense>
+                            )
+                        }
+                    />
+                    <Route
+                        path='/addUser'
+                        element={user && user.currentWeight ? <Navigate to='/' /> : <AddUser />}
+                    />
+                </Routes>
+            )}
         </ConfigProvider>
     );
 }

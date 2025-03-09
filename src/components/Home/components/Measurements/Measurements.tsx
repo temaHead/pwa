@@ -23,6 +23,7 @@ import Header from '../../../../shared/components/Header/Header';
 import { getEntityFromIDB, saveEntityToIDB } from '../../../../shared/utils/idb';
 import { updateUserProfileAsync } from '../../../../store/slices/userSlice';
 import React from 'react';
+import _ from 'lodash';
 
 function Measurements() {
     const dispatch = useDispatch<AppDispatch>();
@@ -71,25 +72,25 @@ function Measurements() {
     useEffect(() => {
         const syncData = async () => {
             const fatFromIDB = await getEntityFromIDB('fatStore');
-            if (JSON.stringify(fatFromIDB) !== JSON.stringify(fatMeasuring)) {
+            if (!_.isEqual(fatFromIDB, fatMeasuring)) {
                 const latestFat = fatMeasuring[0];
-                if (latestFat.bodyFat !== user.bodyFat) {
+                if ( latestFat && latestFat.bodyFat !== user.bodyFat) {
                     dispatch(updateUserProfileAsync({ ...user, bodyFat: latestFat.bodyFat }));
                 }
                 await saveEntityToIDB('fatStore', fatMeasuring);
             }
 
             const weightFromIDB = await getEntityFromIDB('weightStore');
-            if (JSON.stringify(weightFromIDB) !== JSON.stringify(weightMeasuring)) {
+            if (!_.isEqual(weightFromIDB, weightMeasuring)) {
                 const latestWeight = weightMeasuring[0];
-                if (latestWeight.weight !== user.currentWeight) {
+                if ( latestWeight && latestWeight.weight !== user.currentWeight) {
                     dispatch(updateUserProfileAsync({ ...user, currentWeight: latestWeight.weight }));
                 }
                 await saveEntityToIDB('weightStore', weightMeasuring);
             }
 
             const bodyFromIDB = await getEntityFromIDB('bodyStore');
-            if (JSON.stringify(bodyFromIDB) !== JSON.stringify(bodyMeasuring)) {
+            if (!_.isEqual(bodyFromIDB, bodyMeasuring)) {
                 await saveEntityToIDB('bodyStore', bodyMeasuring);
             }
         };

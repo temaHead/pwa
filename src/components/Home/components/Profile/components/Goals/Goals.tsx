@@ -24,27 +24,37 @@ function Goals() {
         });
 
     return (
-        <div className={style.goals} style={{ backgroundColor }}>
+        <div>
+            <div className={style.title}>Цели ({goals.length})</div>
+
             <div
-                className={style.addGoal}
-                onClick={() => navigate('/addGoal')}
+                className={style.goals}
+                style={{ backgroundColor }}
             >
-                <div className={style.circle} onClick={() => navigate('/addGoal')}>
-                    <div className={style.statusLine}>
-                        <div className={style.content}>
-                            <PlusOutlined style={{ fontSize: 32 }} />
+                <div
+                    className={style.addGoal}
+                    onClick={() => navigate('/addGoal')}
+                >
+                    <div
+                        className={style.circle}
+                        onClick={() => navigate('/addGoal')}
+                    >
+                        <div className={style.statusLine}>
+                            <div className={style.content}>
+                                <PlusOutlined style={{ fontSize: 32 }} />
+                            </div>
                         </div>
                     </div>
                 </div>
+                {sortedGoals.map((goal) => (
+                    <Goal
+                        key={goal.id}
+                        goal={goal}
+                        currentWeight={user.currentWeight || 0}
+                        bodyFat={user.bodyFat || 0}
+                    />
+                ))}
             </div>
-            {sortedGoals.map((goal) => (
-                <Goal
-                    key={goal.id}
-                    goal={goal}
-                    currentWeight={user.currentWeight || 0}
-                    bodyFat={user.bodyFat || 0}
-                />
-            ))}
         </div>
     );
 }

@@ -72,6 +72,8 @@ const FatChart: React.FC = () => {
         }));
     };
 
+    if (!fatMeasuring.length) return null;
+
     return (
         <div className={style.chart}>
             <div className={style.chartTitle}>📊 График замеров жира</div>

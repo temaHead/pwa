@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Select, Form, Input, Alert, theme } from 'antd';
 import { AppDispatch, RootState } from '../../../../../../../../store';
-import { updateGoalAsync } from '../../../../../../../../store/slices/goalsSlice';
+import { deleteGoalAsync, updateGoalAsync } from '../../../../../../../../store/slices/goalsSlice';
 import { Goal } from '../../../../../../../../types';
 import CustomSelect from '../../../../../../../../shared/components/CustomSelect/CustomSelect';
 import Header from '../../../../../../../../shared/components/Header/Header';
@@ -49,9 +49,15 @@ const GoalEditing = memo(() => {
         });
     }, [dispatch, goalData, updatedStatus, form, navigate]);
 
+    const handleDelete = useCallback(async() => {
+        if(!goalId) return;
+        await dispatch(deleteGoalAsync(goalId));
+        navigate(-1);
+    },[dispatch, goalId, navigate]);
+
     return (
-        <div style={{  padding: 15, color: textColor }}>
-             <Header
+        <div style={{ padding: 15, color: textColor }}>
+            <Header
                 title={'Редактирование цели'}
                 showBackButton
             />
@@ -138,15 +144,24 @@ const GoalEditing = memo(() => {
                         style={{ width: '100%' }}
                     />
                 </Form.Item>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
-                    <Button onClick={() => navigate(-1)}>Отмена</Button>
+                <Form.Item>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
+                        <Button onClick={() => navigate(-1)}>Отмена</Button>
+                        <Button
+                            type='primary'
+                            onClick={handleSave}
+                        >
+                            Сохранить
+                        </Button>
+                    </div>
+                </Form.Item>
+                <Form.Item>
                     <Button
                         type='primary'
-                        onClick={handleSave}
-                    >
-                        Сохранить
-                    </Button>
-                </div>
+                        danger
+                        onClick={handleDelete}
+                        >Удалить</Button>
+                </Form.Item>
             </Form>
         </div>
     );

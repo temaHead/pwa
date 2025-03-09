@@ -1,0 +1,13 @@
+.emptyGoal {
+    margin-top: 20px;
+    padding: 20px;
+    .body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        .title{
+            font-size: 20px;
+        }
+    }
+}

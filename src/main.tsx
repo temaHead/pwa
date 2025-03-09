@@ -47,11 +47,14 @@ const updateSW = registerSW({
     onNeedRefresh() {
         const shouldUpdate = window.confirm('Доступна новая версия приложения. Хотите обновить?');
         if (shouldUpdate) {
-            updateSW(); // Обновляем Service Worker
+            updateSW(true); // Обновляем Service Worker
         }
     },
     onOfflineReady() {
         console.log('Приложение готово для работы в оффлайн-режиме.');
+    },
+    onRegisterError(error) {
+        console.error('Ошибка при регистрации Service Worker:', error);
     },
 });
 

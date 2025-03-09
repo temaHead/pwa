@@ -22,10 +22,11 @@ export default defineConfig({
     plugins: [
         react(),
         VitePWA({
-            registerType: 'autoUpdate',
+            // registerType: 'autoUpdate',
+            registerType: 'prompt', // Запрашивать подтверждение перед обновлением
             workbox: {
-                skipWaiting: true,
-                clientsClaim: true,
+                // skipWaiting: true,
+                // clientsClaim: true,
                 globPatterns: ['**/*.{html,css,scss,js,ico,png,svg,woff2,woff,ttf,tsx,ts,jsx,jpg}'],
                 maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
                 runtimeCaching: [
@@ -54,7 +55,7 @@ export default defineConfig({
                             cacheName: 'fonts-cache',
                             expiration: {
                                 maxEntries: 10,
-                                maxAgeSeconds: 60 * 24 * 60 * 60, // 60 дней
+                                maxAgeSeconds: 365 * 24 * 60 * 60, // 60 дней
                             },
                         },
                     },
@@ -73,10 +74,10 @@ export default defineConfig({
                 ],
             },
             manifest: manifest,
-            injectManifest: {
-                swSrc: 'src/sw.ts',
-                swDest: 'dist/sw.js',
-            },
+            // injectManifest: {
+            //     swSrc: 'src/sw.ts',
+            //     swDest: 'dist/sw.js',
+            // },
         }),
     ],
     css: {

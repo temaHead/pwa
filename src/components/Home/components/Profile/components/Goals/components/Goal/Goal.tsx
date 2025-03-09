@@ -27,9 +27,16 @@ function Goal({ goal, currentWeight, bodyFat }: GoalProps) {
     // Функция определения статуса
     const isGoalDoneStatus = useCallback( () => {
         const startDate = new Date(goalData.startDate);
+        startDate.setHours(0, 0, 0, 0);
+        
         const endDate = new Date(goalData.endDate);
-        if (startDate <= currentDate && endDate >= currentDate) return 'active';
-        if (startDate > currentDate) return 'pending';
+        endDate.setHours(0, 0, 0, 0);
+
+        const currentDateLocal = new Date(currentDate);
+        currentDateLocal.setHours(0, 0, 0, 0);
+
+        if (startDate <= currentDateLocal && endDate >= currentDateLocal) return 'active';
+        if (startDate > currentDateLocal) return 'pending';
         return 'done';
     },[ currentDate, goalData.endDate, goalData.startDate]);
 

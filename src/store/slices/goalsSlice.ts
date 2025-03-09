@@ -1,13 +1,20 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { addGoal, deleteGoal, getAllGoals, updateGoal } from '../../api/goals-api';
 import { GoalData, Goal } from '../../types';
+import { message } from 'antd';
 
 interface GoalsState {
     goals: GoalData[];
+    loading: boolean;
+    updating: boolean;
+    deleting: boolean;
 }
 
 const initialState: GoalsState = {
     goals: [],
+    loading: false, // Состояние загрузки целей
+    updating: false, // Состояние обновления цели
+    deleting: false, // Состояние удаления цели
 };
 
 // Загрузка всех целей
@@ -46,25 +53,56 @@ const goalsSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
+            // Загрузка целей
+            .addCase(getAllGoalsAsync.pending, (state) => {
+                state.loading = true;
+            })
             .addCase(getAllGoalsAsync.fulfilled, (state, action) => {
                 state.goals = action.payload;
+                state.loading = false;
+            })
+            .addCase(getAllGoalsAsync.rejected, (state) => {
+                state.loading = false;
+                message.error('Не удалось загрузить цели');
             })
             // Обработка добавления цели
             .addCase(addGoalAsync.fulfilled, (state, action) => {
                 state.goals = [...state.goals, action.payload];
+                message.success('Цель успешно добавлена')
+            })
+            .addCase(addGoalAsync.rejected, () => {
+                message.error('Не удалось добавить цель'); // Уведомление об ошибке
             })
 
-            // Обработка обновления цели
+            // Обновление цели
+            .addCase(updateGoalAsync.pending, (state) => {
+                state.updating = true;
+            })
             .addCase(updateGoalAsync.fulfilled, (state, action) => {
                 const index = state.goals.findIndex((goal) => goal.id === action.payload.id);
                 if (index !== -1) {
                     state.goals[index] = { ...state.goals[index], ...action.payload };
                 }
+                state.updating = false;
+                message.success('Цель успешно отредактирована'); // разобраться почему всплывает после добавления цели
+            })
+            .addCase(updateGoalAsync.rejected, (state) => {
+                state.updating = false;
+                message.error('Не удалось обновить цель');
             })
 
-            // Обработка удаления цели
+            // Удаление цели
+            .addCase(deleteGoalAsync.pending, (state) => {
+                state.deleting = true;
+            })
             .addCase(deleteGoalAsync.fulfilled, (state, action) => {
                 state.goals = state.goals.filter((goal) => goal.id !== action.payload);
+                state.deleting = false;
+                message.success('Цель успешно удалена');
+            })
+            .addCase(deleteGoalAsync.rejected, (state) => {
+                state.deleting = false;
+                message.error('Не удалось удалить цель');
             });
     },
 });

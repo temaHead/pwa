@@ -10,7 +10,7 @@ import CurrentGoals from './components/Goals/components/CurrentGoals/CurrentGoal
 import style from './Profile.module.scss';
 import Header from '../../../../shared/components/Header/Header';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 function Profile() {
     const navigate = useNavigate();
@@ -76,7 +76,6 @@ function Profile() {
 
                 {/* Список целей */}
                 <div className={style.goals}>
-                    <Title level={5}>Цели</Title>
                     <Goals />
                 </div>
             </div>

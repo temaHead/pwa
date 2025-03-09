@@ -38,6 +38,7 @@ const WeightChart: React.FC = () => {
                 })),
         },
     ];
+    if(!weightMeasuring.length) return
 
     return (
         <div className={style.weightChart}>

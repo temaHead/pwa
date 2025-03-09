@@ -78,6 +78,8 @@ const PureWeightChart: React.FC = () => {
         ].filter((series) => visibleLines[series.id as keyof typeof visibleLines]);
     }, [pureData, visibleLines]);
 
+
+    if(!weightMeasuring.length && !fatMeasuring.length) return;
     return (
         <div className={style.pureWeightChart}>
             <div>График изменения веса и чистой массы тела</div>
