@@ -22,11 +22,11 @@ export default defineConfig({
     plugins: [
         react(),
         VitePWA({
-            // registerType: 'autoUpdate',
-            registerType: 'prompt', // Запрашивать подтверждение перед обновлением
+            registerType: 'autoUpdate',
+            // registerType: 'prompt', // Запрашивать подтверждение перед обновлением
             workbox: {
-                // skipWaiting: true,
-                // clientsClaim: true,
+                skipWaiting: true,
+                clientsClaim: true,
                 globPatterns: ['**/*.{html,css,scss,js,ico,png,svg,woff2,woff,ttf,tsx,ts,jsx,jpg}'],
                 maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
                 runtimeCaching: [

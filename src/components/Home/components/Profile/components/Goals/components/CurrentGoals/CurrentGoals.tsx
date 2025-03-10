@@ -5,9 +5,14 @@ import CurrentGoalFat from './components/CurrentGoalFat/CurrentGoalFat';
 import style from './CurrentGoals.module.scss';
 import { Skeleton, theme } from 'antd';
 import EmptyGoal from './components/EmptyGoal/EmptyGoal';
+import { GoalData } from '../../../../../../../../types';
 
-function CurrentGoals() {
-    const { goals, loading } = useSelector((state: RootState) => state.goals);
+interface CurrentGoalsProps {
+    goals: GoalData[];
+    loading: boolean;
+}
+
+function CurrentGoals({ goals, loading }: CurrentGoalsProps) {
     const activeGoals = goals.filter((goal) => goal.goal.status === 'active');
     const user = useSelector((state: RootState) => state.user);
 
@@ -23,7 +28,7 @@ function CurrentGoals() {
     return (
         <>
             <div className={style.title}>Текущие цели ({activeGoals.length})</div>
-            {loading ? (
+            {loading && isEmpty ? (
                 <div
                     className={style.skeleton}
                     style={{ backgroundColor: backgroundColorSkeleton }}

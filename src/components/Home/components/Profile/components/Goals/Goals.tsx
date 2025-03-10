@@ -5,10 +5,14 @@ import style from './Goals.module.scss';
 import { useNavigate } from 'react-router-dom';
 import { PlusOutlined } from '@ant-design/icons';
 import { theme } from 'antd';
+import { GoalData } from '../../../../../../types';
 
-function Goals() {
+interface IGoalData {
+    goals: GoalData[]
+}
+
+function Goals( { goals }: IGoalData ) {
     const navigate = useNavigate();
-    const goals = useSelector((state: RootState) => state.goals.goals);
     const user = useSelector((state: RootState) => state.user);
 
     const statusOrder = ['initial', 'done', 'pending', 'success', 'failed'];

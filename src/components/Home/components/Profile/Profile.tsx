@@ -5,10 +5,12 @@ import { UserOutlined, SettingOutlined } from '@ant-design/icons';
 import { Button, Typography, Flex, Avatar, theme } from 'antd';
 import Goals from './components/Goals/Goals';
 import { useEffect } from 'react';
-import { getAllGoalsAsync } from '../../../../store/slices/goalsSlice';
+import { getAllGoalsAsync, setGoals } from '../../../../store/slices/goalsSlice';
 import CurrentGoals from './components/Goals/components/CurrentGoals/CurrentGoals';
 import style from './Profile.module.scss';
 import Header from '../../../../shared/components/Header/Header';
+import { getEntityFromIDB, saveEntityToIDB } from '../../../../shared/utils/idb';
+import _ from 'lodash';
 
 const { Text } = Typography;
 
@@ -18,24 +20,44 @@ function Profile() {
 
     // Извлечение данных из Redux Store
     const user = useSelector((state: RootState) => state.user);
+    const {goals, loading} = useSelector((state: RootState) => state.goals);
     const { token } = theme.useToken(); // Получаем цвета текущей темы
     const backgroundColor = token.colorBgLayout; // Автоматически подстраивается
     const textColor = token.colorTextBase;
     const colorIcon = token.colorIcon;
+
     useEffect(() => {
-        if (user.id) dispatch(getAllGoalsAsync(user.id));
+        const loadAndSyncData = async () => {
+            const goalsFromIDB = await getEntityFromIDB('goalsStore');
+            if (goalsFromIDB) {
+                console.log('goalsFromIDB', goalsFromIDB);
+                dispatch(setGoals(goalsFromIDB));
+            }
+            if (user.id) dispatch(getAllGoalsAsync(user.id));
+        };
+        loadAndSyncData();
     }, [dispatch, user.id]);
+
+    useEffect(() => {
+        const syncData = async () => {
+            const goalsFromIDB = await getEntityFromIDB('goalsStore');
+            if (!_.isEqual(goalsFromIDB, goals)) {
+                console.log('сверили goalsFromIDB', goalsFromIDB);
+                await saveEntityToIDB('goalsStore', goals);
+            }
+        };
+        syncData();
+    }, [dispatch, goals]);
 
     return (
         <div
             className={style.profile}
             style={{ backgroundColor, color: textColor }}
         >
-
             <Header
-            title={user.name || 'Профиль'}
-            rightIcon={<SettingOutlined style={{ color: colorIcon }} />}
-            onRightClick={() => navigate('/settings')}
+                title={user.name || 'Профиль'}
+                rightIcon={<SettingOutlined style={{ color: colorIcon }} />}
+                onRightClick={() => navigate('/settings')}
             />
 
             {/* Аватар */}
@@ -71,12 +93,12 @@ function Profile() {
 
                 {/* Текущие цели */}
                 <div className={style.currentGoals}>
-                    <CurrentGoals />
+                    <CurrentGoals loading={loading} goals={goals} />
                 </div>
 
                 {/* Список целей */}
                 <div className={style.goals}>
-                    <Goals />
+                    <Goals goals={goals} />
                 </div>
             </div>
 

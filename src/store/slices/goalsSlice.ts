@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { addGoal, deleteGoal, getAllGoals, updateGoal } from '../../api/goals-api';
 import { GoalData, Goal } from '../../types';
 import { message } from 'antd';
@@ -18,10 +18,13 @@ const initialState: GoalsState = {
 };
 
 // Загрузка всех целей
-export const getAllGoalsAsync = createAsyncThunk('goals/getAllGoals', async (userId: string) => {
-    const goals = await getAllGoals(userId);
-    return goals;
-});
+export const getAllGoalsAsync = createAsyncThunk(
+    'goals/getAllGoals',
+    async (userId: string): Promise<GoalData[]> => {
+        const goals = await getAllGoals(userId);
+        return goals;
+    }
+);
 
 // Добавление новой цели
 export const addGoalAsync = createAsyncThunk(
@@ -50,7 +53,12 @@ export const deleteGoalAsync = createAsyncThunk('goals/deleteGoal', async (id: s
 const goalsSlice = createSlice({
     name: 'goals',
     initialState,
-    reducers: {},
+    reducers: {
+        // Перезапись всех целей
+        setGoals: (state, action: PayloadAction<GoalData[]>) => {
+            state.goals = action.payload;
+        },
+    },
     extraReducers: (builder) => {
         builder
             // Загрузка целей
@@ -68,7 +76,7 @@ const goalsSlice = createSlice({
             // Обработка добавления цели
             .addCase(addGoalAsync.fulfilled, (state, action) => {
                 state.goals = [...state.goals, action.payload];
-                message.success('Цель успешно добавлена')
+                message.success('Цель успешно добавлена');
             })
             .addCase(addGoalAsync.rejected, () => {
                 message.error('Не удалось добавить цель'); // Уведомление об ошибке
@@ -106,5 +114,7 @@ const goalsSlice = createSlice({
             });
     },
 });
+
+export const{ setGoals } = goalsSlice.actions;
 
 export default goalsSlice.reducer;
