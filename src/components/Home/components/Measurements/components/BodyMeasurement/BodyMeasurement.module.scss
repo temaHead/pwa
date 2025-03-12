@@ -74,7 +74,8 @@
         .measurements {
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
+            gap: 5px;
+            align-items: center;
             max-height: 0; /* Начальное состояние: скрыто */
             overflow: hidden; /* Скрываем содержимое */
             transition: max-height 0.5s ease; /* Плавное изменение высоты */
@@ -82,9 +83,12 @@
             .measurement {
                 display: flex;
                 gap: 5px;
+                align-items: center;
 
                 .title {
-                    width: 120px;
+                    width: 50px;
+                    display: flex;
+                    justify-content: flex-start;
                 }
 
                 .value {
@@ -95,6 +99,14 @@
 
         .measurements.open {
             max-height: 500px; /* Максимальная высота (должна быть больше, чем высота содержимого) */
+        }
+
+        
+        .actions{
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+
         }
     }
 }

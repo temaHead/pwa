@@ -92,7 +92,7 @@ const goalsSlice = createSlice({
                     state.goals[index] = { ...state.goals[index], ...action.payload };
                 }
                 state.updating = false;
-                message.success('Цель успешно отредактирована'); // разобраться почему всплывает после добавления цели
+                // message.success('Цель успешно отредактирована'); // разобраться почему всплывает после добавления цели
             })
             .addCase(updateGoalAsync.rejected, (state) => {
                 state.updating = false;

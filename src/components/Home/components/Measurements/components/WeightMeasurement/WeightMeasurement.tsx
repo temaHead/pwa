@@ -53,11 +53,13 @@ const WeightMeasurement: React.FC<WeightMeasurementProps> = ({ item }) => {
             return;
         }
         try {
-            await dispatch(updateWeightMeasuringAsync({
-                id: item.id,
-                weight: editedWeight,
-                timestamp: editedTimestamp,
-            }));
+            await dispatch(
+                updateWeightMeasuringAsync({
+                    id: item.id,
+                    weight: editedWeight,
+                    timestamp: editedTimestamp,
+                })
+            );
             setIsEditing(false);
         } catch (error) {
             console.error('Ошибка при сохранении данных:', error);
@@ -89,13 +91,16 @@ const WeightMeasurement: React.FC<WeightMeasurementProps> = ({ item }) => {
     );
 
     return (
-        <div className={style.container} style={containerStyle}>
+        <div
+            className={style.container}
+            style={containerStyle}
+        >
             <div className={style.deleteArea}>
                 <Popconfirm
-                    title="Удалить замер?"
+                    title='Удалить замер?'
                     onConfirm={handleDelete}
-                    okText="Да"
-                    cancelText="Нет"
+                    okText='Да'
+                    cancelText='Нет'
                 >
                     <DeleteOutlined className={style.deleteIcon} />
                 </Popconfirm>
@@ -115,9 +120,15 @@ const WeightMeasurement: React.FC<WeightMeasurementProps> = ({ item }) => {
                             <div className={style.value}>
                                 {isEditing ? (
                                     <Input
+                                        suffix='кг'
+                                        style={{ maxWidth: '100px' }}
                                         type='number'
                                         value={editedWeight ?? ''}
-                                        onChange={(e) => setEditedWeight(e.target.value ? parseFloat(e.target.value) : null)}
+                                        onChange={(e) =>
+                                            setEditedWeight(
+                                                e.target.value ? parseFloat(e.target.value) : null
+                                            )
+                                        }
                                     />
                                 ) : (
                                     <div>{item.weight} кг</div>
@@ -126,31 +137,33 @@ const WeightMeasurement: React.FC<WeightMeasurementProps> = ({ item }) => {
                         </div>
 
                         <div className={style.rightRow}>
-                            <div className={style.date}>
-                                {isEditing ? (
-                                    <Input
-                                        type='date'
-                                        value={editedTimestamp ?? ''}
-                                        onChange={(e) => setEditedTimestamp(e.target.value)}
-                                    />
-                                ) : (
-                                    <div>{format(parseISO(item.timestamp || ''), 'dd.MM.yyyy')}</div>
-                                )}
-                            </div>
-                            <div className={style.icon}>
-                                {!isEditing && (
-                                    <EditOutlined onClick={toggleEdit} />
-                                )}
-                            </div>
+                            {isEditing ? (
+                                <Input
+                                    type='date'
+                                    value={editedTimestamp ?? ''}
+                                    onChange={(e) => setEditedTimestamp(e.target.value)}
+                                />
+                            ) : (
+                                <div>{format(parseISO(item.timestamp || ''), 'dd.MM.yyyy')}</div>
+                            )}
+                            {!isEditing && <EditOutlined onClick={toggleEdit} />}
                         </div>
                     </div>
 
                     {isEditing && (
                         <div className={style.actions}>
-                            <Button icon={<CloseOutlined />} onClick={() => setIsEditing(false)}>
+                            <Button
+                                danger
+                                icon={<CloseOutlined />}
+                                onClick={() => setIsEditing(false)}
+                            >
                                 Отменить
                             </Button>
-                            <Button type='primary' icon={<CheckOutlined />} onClick={handleSave}>
+                            <Button
+                                type='primary'
+                                icon={<CheckOutlined />}
+                                onClick={handleSave}
+                            >
                                 Сохранить
                             </Button>
                         </div>

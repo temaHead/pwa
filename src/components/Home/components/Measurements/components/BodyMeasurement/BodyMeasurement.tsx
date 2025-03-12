@@ -143,9 +143,15 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
     );
 
     return (
-        <div className={style.container} style={containerStyle}>
+        <div
+            className={style.container}
+            style={containerStyle}
+        >
             <div className={style.deleteArea}>
-                <DeleteOutlined className={style.deleteIcon} onClick={handleDelete} />
+                <DeleteOutlined
+                    className={style.deleteIcon}
+                    onClick={handleDelete}
+                />
             </div>
 
             <div
@@ -158,33 +164,32 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
                 <div className={style.content}>
                     <div className={style.header}>
                         <div className={style.leftRow}>
-                            <div className={style.title}>Замеры тела:</div>
+                            <div className={style.title}>Замеры тела</div>
                         </div>
                         <div className={style.rightRow}>
-                            <div className={style.date}>
-                                {isEditing ? (
-                                    <Input
-                                        name="timestamp"
-                                        type="date"
-                                        value={editedTimestamp}
-                                        onChange={(e) => setEditedTimestamp(e.target.value)}
-                                    />
-                                ) : (
-                                    <div>{item.timestamp ? format(parseISO(item.timestamp), 'dd.MM.yyyy') : '-'}</div>
-                                )}
-                            </div>
-                            <div className={style.icon}>
-                                {!isEditing && (
-                                    <div onClick={() => setIsEditing(true)}>
-                                        <EditOutlined />
-                                    </div>
-                                )}
-                            </div>
+                            {isEditing ? (
+                                <Input
+                                    name='timestamp'
+                                    type='date'
+                                    value={editedTimestamp}
+                                    onChange={(e) => setEditedTimestamp(e.target.value)}
+                                />
+                            ) : (
+                                <span>{format(parseISO(item.timestamp || ''), 'dd.MM.yyyy')}</span>
+                            )}
+                            {!isEditing && (
+                                <div onClick={() => setIsEditing(true)}>
+                                    <EditOutlined />
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    <div className={style.toggleCollapse} onClick={toggleCollapse}>
-                        <div className={style.title}>Показать замеры</div>
+                    <div
+                        className={style.toggleCollapse}
+                        onClick={toggleCollapse}
+                    >
+                        <div className={style.title}>{isCollapsed ? 'Показать' : 'Скрыть'}</div>
                         <div className={style.icon}>
                             {isCollapsed ? <ArrowDownOutlined /> : <ArrowUpOutlined />}
                         </div>
@@ -192,20 +197,33 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
 
                     <div className={`${style.measurements} ${!isCollapsed ? style.open : ''}`}>
                         {Object.entries(measurementLabels).map(([key, label]) => (
-                            <div key={key} className={style.measurement}>
+                            <div
+                                key={key}
+                                className={style.measurement}
+                            >
                                 <div className={style.title}>{label}: </div>
                                 {isEditing ? (
                                     <Input
+                                        suffix='см'
+                                        style={{ maxWidth: '80px' }}
                                         name={key}
-                                        type="number"
-                                        value={editedBody[key as keyof BodyMeasuringData['bodyMeasuring']] ?? ''}
+                                        type='number'
+                                        value={
+                                            editedBody[key as keyof BodyMeasuringData['bodyMeasuring']] ?? ''
+                                        }
                                         onChange={(e) =>
-                                            handleInputChange(key as keyof BodyMeasuringData['bodyMeasuring'], e.target.value)
+                                            handleInputChange(
+                                                key as keyof BodyMeasuringData['bodyMeasuring'],
+                                                e.target.value
+                                            )
                                         }
                                     />
                                 ) : (
                                     <div className={style.value}>
-                                        {item.bodyMeasuring?.[key as keyof BodyMeasuringData['bodyMeasuring']] ?? '-'} см
+                                        {item.bodyMeasuring?.[
+                                            key as keyof BodyMeasuringData['bodyMeasuring']
+                                        ] ?? '-'}{' '}
+                                        см
                                     </div>
                                 )}
                             </div>
@@ -214,10 +232,18 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
 
                     {isEditing && (
                         <div className={style.actions}>
-                            <Button danger icon={<CloseOutlined />} onClick={handleCancel}>
+                            <Button
+                                danger
+                                icon={<CloseOutlined />}
+                                onClick={handleCancel}
+                            >
                                 Отменить
                             </Button>
-                            <Button type="primary" icon={<CheckOutlined />} onClick={handleSave}>
+                            <Button
+                                type='primary'
+                                icon={<CheckOutlined />}
+                                onClick={handleSave}
+                            >
                                 Сохранить
                             </Button>
                         </div>

@@ -1,6 +1,5 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import WeightChart from './components/WeightChart/WeightChart';
 import FatChart from './components/FatChart/FatChart';
 import BodyChart from './components/BodyChart/BodyChart';
 import GraphFilter from './components/GraphFilter/GraphFilter';
@@ -19,8 +18,6 @@ const Room: React.FC = () => {
 
     const getGraphComponent = (id: string) => {
         switch (id) {
-            case 'weight':
-                return <WeightChart />;
             case 'fat':
                 return <FatChart />;
             case 'body':

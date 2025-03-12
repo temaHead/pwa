@@ -43,6 +43,8 @@ function App() {
             colorBgContainer: themeMode === 'dark' ? '#1f2636' : '#ffffff',
             colorPrimaryActive: themeMode === 'dark' ? '#1890ff' : '#e9e9e9',
             colorIcon: themeMode === 'dark' ? '#b7b8bc' : '#bebfc1',
+            colorLinkActive: themeMode === 'dark' ? '#d8ce04' : '#2196f3',
+            colorInfoTextActive: themeMode === 'dark' ? '#d8ce04' : '#2196f3',
         },
     };
 

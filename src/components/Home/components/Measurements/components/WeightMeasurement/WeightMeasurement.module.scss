@@ -28,7 +28,6 @@
 
     .measurement {
         position: relative;
-        // border: 1px solid #ccc;
         border-radius: 8px;
         padding: 10px;
         z-index: 1;
@@ -47,9 +46,14 @@
             .leftRow {
                 display: flex;
                 gap: 10px;
+                align-items: center;
 
                 .title {
                     font-weight: bold;
+                }
+                .value {
+                    display: flex;
+                    width: 80px;
                 }
             }
 
@@ -59,5 +63,9 @@
             }
         }
 
+        .actions {
+            display: flex;
+            justify-content: space-between;
+        }
     }
 }

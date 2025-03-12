@@ -201,8 +201,6 @@ function Settings() {
                     <Switch
                         checked={userTheme === 'dark'}
                         onChange={toggleTheme}
-                        checkedChildren={<BulbOutlined />}
-                        unCheckedChildren={<BulbOutlined />}
                     />
                 </div>
 

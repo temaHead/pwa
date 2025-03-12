@@ -11,9 +11,20 @@ const BodyChart: React.FC = () => {
     const bodyMeasuring = useSelector((state: RootState) => state.measurements.bodyMeasuring);
     const dispatch = useDispatch<AppDispatch>();
     const { id } = useSelector((state: RootState) => state.user);
-    const { token } = theme.useToken(); // Получаем цвета текущей темы
-    const colorText = token.colorTextBase; // Автоматически подстраивается
+    const { token } = theme.useToken();
+    const colorText = token.colorTextBase;
     const colorBackground = token.colorBgLayout;
+
+    const LABELS_MAP: Record<string, string> = useMemo(() => {
+        return {
+            chest: 'Грудь',
+            hips: 'Ягодицы',
+            thigh: 'Бедро',
+            arms: 'Бицепс',
+            waist: 'Талия',
+        };
+    }, []);
+
     const defaultVisibleLines = {
         chest: true,
         hips: true,
@@ -23,18 +34,21 @@ const BodyChart: React.FC = () => {
     };
     const [visibleLines, setVisibleLines] = useState(defaultVisibleLines);
 
-    useEffect(() => {
-        if (id) {
-            dispatch(getAllBodyMeasuringAsync(id));
+    const bodyMeasuringSorted = useMemo(() => {
+        if (!Array.isArray(bodyMeasuring) || bodyMeasuring.length === 0) {
+            return [];
         }
-    }, [dispatch, id]);
+        return [...bodyMeasuring].sort(
+            (a, b) => new Date(a.timestamp || 0).getTime() - new Date(b.timestamp || 0).getTime()
+        );
+    }, [bodyMeasuring]);
 
     const chartData = useMemo(
         () =>
             Object.keys(visibleLines)
                 .map((key) => ({
-                    id: key,
-                    data: bodyMeasuring.map((item) => ({
+                    id: LABELS_MAP[key] || key,
+                    data: bodyMeasuringSorted.map((item) => ({
                         x: new Date(item.timestamp || 0).toLocaleDateString('ru-RU', {
                             day: 'numeric',
                             month: 'short',
@@ -42,19 +56,26 @@ const BodyChart: React.FC = () => {
                         y: item.bodyMeasuring[key as keyof typeof visibleLines],
                     })),
                 }))
-                .filter((series) => visibleLines[series.id as keyof typeof visibleLines]),
-        [bodyMeasuring, visibleLines]
+                .filter(
+                    (series) =>
+                        visibleLines[
+                            Object.keys(LABELS_MAP).find(
+                                (key) => LABELS_MAP[key] === series.id
+                            ) as keyof typeof visibleLines
+                        ]
+                ),
+        [LABELS_MAP, bodyMeasuringSorted, visibleLines]
     );
 
     const areaBaseline = useMemo(() => {
-        const values = bodyMeasuring.flatMap((item) =>
+        const values = bodyMeasuringSorted.flatMap((item) =>
             (Object.keys(visibleLines) as Array<keyof BodyMeasuring>)
                 .filter((key) => visibleLines[key]) // Берем только активные линии
                 .map((key) => item.bodyMeasuring[key] ?? null)
         );
 
         return values.length > 0 ? Math.min(...values.filter((val): val is number => val !== null)) : 0;
-    }, [bodyMeasuring, visibleLines]);
+    }, [bodyMeasuringSorted, visibleLines]);
 
     const handleToggleLine = (key: keyof typeof visibleLines) => {
         setVisibleLines((prev) => ({
@@ -63,7 +84,13 @@ const BodyChart: React.FC = () => {
         }));
     };
 
-    if (!bodyMeasuring.length) return;
+    useEffect(() => {
+        if (id) {
+            dispatch(getAllBodyMeasuringAsync(id));
+        }
+    }, [dispatch, id]);
+
+    if (!bodyMeasuringSorted.length) return;
 
     return (
         <div className={style.chart}>
@@ -74,35 +101,15 @@ const BodyChart: React.FC = () => {
                         key={key}
                         checked={visibleLines[key as keyof typeof visibleLines]}
                         onChange={() => handleToggleLine(key as keyof typeof visibleLines)}
-                        checkedChildren={
-                            key === 'chest'
-                                ? 'Грудь'
-                                : key === 'hips'
-                                ? 'Бедра'
-                                : key === 'thigh'
-                                ? 'Бедро'
-                                : key === 'arms'
-                                ? 'Руки'
-                                : 'Талия'
-                        }
-                        unCheckedChildren={
-                            key === 'chest'
-                                ? 'Грудь'
-                                : key === 'hips'
-                                ? 'Бедра'
-                                : key === 'thigh'
-                                ? 'Бедро'
-                                : key === 'arms'
-                                ? 'Руки'
-                                : 'Талия'
-                        }
+                        checkedChildren={LABELS_MAP[key] || key}
+                        unCheckedChildren={LABELS_MAP[key] || key}
                     />
                 ))}
             </div>
             <div className={style.chartContainer}>
                 <ResponsiveLine
                     data={chartData}
-                    margin={{ top: 50, right: 20, bottom: 100, left: 60 }}
+                    margin={{ top: 50, right: 20, bottom: 110, left: 60 }}
                     xScale={{ type: 'point' }}
                     yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false, reverse: false }}
                     curve='monotoneX'
@@ -136,7 +143,7 @@ const BodyChart: React.FC = () => {
                     enableArea={true}
                     areaBlendMode='normal'
                     areaBaselineValue={areaBaseline}
-                    areaOpacity={0.15}
+                    areaOpacity={0.1}
                     useMesh={true}
                     enableSlices='x'
                     motionConfig='wobbly'
@@ -145,10 +152,11 @@ const BodyChart: React.FC = () => {
                             anchor: 'bottom-left',
                             direction: 'row',
                             translateY: 90,
-                            translateX: -20,
+                            translateX: -50,
                             itemsSpacing: 0,
-                            itemWidth: 80,
+                            itemWidth: 70,
                             itemHeight: 20,
+                            itemDirection: 'top-to-bottom',
                             itemOpacity: 0.75,
                             symbolSize: 12,
                             symbolShape: 'circle',

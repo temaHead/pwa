@@ -76,6 +76,7 @@ button {
 .ant-notification-notice-message,
 .ant-tabs-tab,
 .ant-list-item,
+.ant-collapse,
 .ant-table {
     font-family: var(--font-family) !important;
 }

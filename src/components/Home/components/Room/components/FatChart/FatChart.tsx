@@ -8,7 +8,7 @@ import { FatMeasuringData } from '../../../../../../types';
 import { Switch, theme } from 'antd';
 
 const FatChart: React.FC = () => {
-    const fatMeasuring = useSelector((state: RootState) => state.measurements.fatMeasuring);
+    const fatMeasurements = useSelector((state: RootState) => state.measurements.fatMeasuring);
     const dispatch = useDispatch<AppDispatch>();
     const { id, gender } = useSelector((state: RootState) => state.user);
     const { token } = theme.useToken(); // Получаем цвета текущей темы
@@ -22,15 +22,30 @@ const FatChart: React.FC = () => {
 
     const [visibleLines, setVisibleLines] = useState(defaultVisibleLines);
 
-    useEffect(() => {
-        if (id) {
-            dispatch(getAllFatMeasuringAsync(id));
+    const fatMeasuringSorted = useMemo(() => {
+        if (!Array.isArray(fatMeasurements) || fatMeasurements.length === 0) {
+            return []; // Возвращаем пустой массив, если данных нет
         }
-    }, [dispatch, id]);
+
+        return [...fatMeasurements].sort(
+            (a, b) => new Date(a.timestamp || 0).getTime() - new Date(b.timestamp || 0).getTime()
+        );
+    }, [fatMeasurements]);
+
+    const LABELS_MAP: Record<string, string> = useMemo(() => {
+        return {
+            chest: 'Грудь',
+            abdomen: 'Живот',
+            thigh: 'Бедро',
+            tricep: 'Трицепс',
+            waist: 'Талия',
+            bodyFat: '% жира',
+        };
+    }, []);
 
     // Вычисление минимального значения среди видимых серий
     const areaBaseline = useMemo(() => {
-        const values = fatMeasuring
+        const values = fatMeasuringSorted
             .flatMap((item) =>
                 Object.keys(visibleLines)
                     .filter((key) => visibleLines[key as keyof typeof visibleLines]) // Берем только активные линии
@@ -43,14 +58,14 @@ const FatChart: React.FC = () => {
             .filter((val) => val !== undefined && val !== null); // Исключаем null/undefined
 
         return values.length > 0 ? Math.min(...values) : 0;
-    }, [fatMeasuring, visibleLines]);
+    }, [fatMeasuringSorted, visibleLines]);
 
     const chartData = useMemo(
         () =>
             (Object.keys(visibleLines) as Array<keyof FatMeasuringData['measurements'] | 'bodyFat'>)
                 .map((key) => ({
-                    id: key,
-                    data: fatMeasuring.map((item) => ({
+                    id: LABELS_MAP[key] || key,
+                    data: fatMeasuringSorted.map((item) => ({
                         x: new Date(item.timestamp || 0).toLocaleDateString('ru-RU', {
                             day: 'numeric',
                             month: 'short',
@@ -61,8 +76,15 @@ const FatChart: React.FC = () => {
                                 : item.measurements[key as keyof FatMeasuringData['measurements']],
                     })),
                 }))
-                .filter((series) => visibleLines[series.id as keyof typeof visibleLines]),
-        [fatMeasuring, visibleLines]
+                .filter(
+                    (series) =>
+                        visibleLines[
+                            Object.keys(LABELS_MAP).find(
+                                (key) => LABELS_MAP[key] === series.id
+                            ) as keyof typeof visibleLines
+                        ]
+                ),
+        [LABELS_MAP, fatMeasuringSorted, visibleLines]
     );
 
     const handleToggleLine = (key: keyof typeof visibleLines) => {
@@ -72,34 +94,26 @@ const FatChart: React.FC = () => {
         }));
     };
 
-    if (!fatMeasuring.length) return null;
+    useEffect(() => {
+        if (id) {
+            dispatch(getAllFatMeasuringAsync(id));
+        }
+    }, [dispatch, id]);
+
+    if (!fatMeasuringSorted.length) return null;
 
     return (
         <div className={style.chart}>
             <div className={style.chartTitle}>📊 График замеров жира</div>
             <div className={style.switchContainer}>
                 {Object.keys(visibleLines).map((key) => {
-                    const label =
-                        key === 'chest'
-                            ? 'Грудь'
-                            : key === 'abdomen'
-                            ? 'Живот'
-                            : key === 'thigh'
-                            ? 'Бедро'
-                            : key === 'tricep'
-                            ? 'Трицепс'
-                            : key === 'waist'
-                            ? 'Талия'
-                            : key === 'bodyFat'
-                            ? '% жира'
-                            : key;
                     return (
                         <Switch
                             key={key}
                             checked={visibleLines[key as keyof typeof visibleLines]}
                             onChange={() => handleToggleLine(key as keyof typeof visibleLines)}
-                            checkedChildren={label}
-                            unCheckedChildren={label}
+                            checkedChildren={LABELS_MAP[key] || key}
+                            unCheckedChildren={LABELS_MAP[key] || key}
                         />
                     );
                 })}
@@ -107,7 +121,7 @@ const FatChart: React.FC = () => {
             <div className={style.chartContainer}>
                 <ResponsiveLine
                     data={chartData}
-                    margin={{ top: 50, right: 20, bottom: 100, left: 60 }}
+                    margin={{ top: 40, right: 20, bottom: 130, left: 60 }}
                     xScale={{ type: 'point' }}
                     yScale={{
                         type: 'linear',
@@ -147,7 +161,7 @@ const FatChart: React.FC = () => {
                     enableArea={true}
                     areaBlendMode='normal'
                     areaBaselineValue={areaBaseline}
-                    areaOpacity={0.15}
+                    areaOpacity={0.1}
                     useMesh={true}
                     enableSlices='x'
                     motionConfig='wobbly'
@@ -159,6 +173,7 @@ const FatChart: React.FC = () => {
                             translateX: -20,
                             itemsSpacing: 0,
                             itemWidth: 80,
+                            itemDirection: 'top-to-bottom',
                             itemHeight: 20,
                             itemOpacity: 0.75,
                             symbolSize: 12,
@@ -214,7 +229,7 @@ const FatChart: React.FC = () => {
                                 background: colorBackground,
                                 color: colorText,
                             },
-                        }
+                        },
                     }}
                 />
             </div>

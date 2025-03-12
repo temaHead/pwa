@@ -14,7 +14,6 @@
         align-items: center;
         justify-content: center;
         z-index: 0;
-        // border: white 1px solid;
         border-radius: 0 8px 8px 0;
         will-change: opacity, transform;
         transition: opacity 0.3s ease, transform 0.3s ease;
@@ -28,7 +27,6 @@
 
     .fatMeasurement {
         position: relative;
-        // border: 1px solid #ccc;
         border-radius: 8px;
         padding: 10px;
         z-index: 1;
@@ -40,14 +38,16 @@
     .content {
         .header {
             display: flex;
+            gap: 5px;
             justify-content: space-between;
             margin-bottom: 20px;
+            align-items: center;
             .leftRow {
                 display: flex;
                 gap: 5px;
+                align-items: center;
                 .title {
                     font-weight: bold;
-                    width: 120px;
                 }
                 .value {
                     width: 70px;
@@ -69,21 +69,33 @@
         }
         .measurements {
             display: flex;
+            gap: 5px;
             flex-direction: column;
-            align-items: flex-start;
+            align-items: center;
             max-height: 0; /* Начальное состояние: скрыто */
             overflow: hidden; /* Скрываем содержимое */
             transition: max-height 0.5s ease; /* Плавное изменение высоты */
-            .title {
-                width: 120px;
-            }
+
             .measurement {
                 display: flex;
-                gap: 5px;
+                align-items: center;
+                gap: 10px;
+
+                .title {
+                    width: 60px;
+                    display: flex;
+                    justify-content: flex-start;
+                }
             }
         }
         .measurements.open {
             max-height: 500px; /* Максимальная высота (должна быть больше, чем высота содержимого) */
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
         }
     }
 }

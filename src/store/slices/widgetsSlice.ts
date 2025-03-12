@@ -14,7 +14,6 @@ interface WidgetsState {
 
 const initialState: WidgetsState = {
     widgets: [
-        { id: 'weight', label: 'График веса', visible: true },
         { id: 'fat', label: 'График жира', visible: true },
         { id: 'body', label: 'График замеров', visible: true },
         { id: 'pureWeight', label: 'График чистой массы тела', visible: true },

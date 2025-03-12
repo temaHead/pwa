@@ -74,15 +74,12 @@ const FatMeasurement: React.FC<FatMeasurementProps> = ({ item }) => {
         });
     }, [translateX]);
 
-    const handleInputChange = useCallback(
-        (field: keyof FatMeasuringData['measurements'], value: string) => {
-            setEditedMeasurements((prev) => ({
-                ...prev,
-                [field]: value === '' ? null : parseFloat(value),
-            }));
-        },
-        []
-    );
+    const handleInputChange = useCallback((field: keyof FatMeasuringData['measurements'], value: string) => {
+        setEditedMeasurements((prev) => ({
+            ...prev,
+            [field]: value === '' ? null : parseFloat(value),
+        }));
+    }, []);
 
     const handleSave = useCallback(async () => {
         if (!item.id) return;
@@ -140,19 +137,22 @@ const FatMeasurement: React.FC<FatMeasurementProps> = ({ item }) => {
                     <div className={style.header}>
                         <div className={style.leftRow}>
                             <span className={style.title}>% жира в теле:</span>
-                            {isEditing ? (
-                                <Input
-                                    type='number'
-                                    value={editedBodyFat ?? ''}
-                                    onChange={(e) =>
-                                        setEditedBodyFat(
-                                            e.target.value === '' ? null : parseFloat(e.target.value)
-                                        )
-                                    }
-                                />
-                            ) : (
-                                <span>{item.bodyFat} %</span>
-                            )}
+                            <div className={style.value}>
+                                {isEditing ? (
+                                    <Input
+                                        style={{ maxWidth: '70px' }}
+                                        type='number'
+                                        value={editedBodyFat ?? ''}
+                                        onChange={(e) =>
+                                            setEditedBodyFat(
+                                                e.target.value === '' ? null : parseFloat(e.target.value)
+                                            )
+                                        }
+                                    />
+                                ) : (
+                                    <span>{item.bodyFat} %</span>
+                                )}
+                            </div>
                         </div>
                         <div className={style.rightRow}>
                             {isEditing ? (
@@ -185,6 +185,8 @@ const FatMeasurement: React.FC<FatMeasurementProps> = ({ item }) => {
                                 </span>
                                 {isEditing ? (
                                     <Input
+                                        style={{ maxWidth: '70px' }}
+                                        suffix='мм'
                                         type='number'
                                         value={
                                             editedMeasurements[
@@ -202,7 +204,7 @@ const FatMeasurement: React.FC<FatMeasurementProps> = ({ item }) => {
                                     <span className={style.value}>
                                         {item.measurements[key as keyof FatMeasuringData['measurements']] ??
                                             'Не указано'}{' '}
-                                        см
+                                        мм
                                     </span>
                                 )}
                             </div>

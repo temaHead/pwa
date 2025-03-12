@@ -47,7 +47,6 @@ const GraphFilter: React.FC = memo(() => {
     const colorText = token.colorTextBase;
 
     const [widgets, setWidgets] = useState<WidgetSettings[]>([
-        { id: 'weight', label: 'График веса', visible: true },
         { id: 'fat', label: 'График жира', visible: true },
         { id: 'body', label: 'График замеров', visible: true },
         { id: 'pureWeight', label: 'График чистой массы тела', visible: true },

@@ -98,7 +98,7 @@ const PureWeightChart: React.FC = () => {
             <div className={style.chartContainer}>
                 <ResponsiveLine
                     data={chartData}
-                    margin={{ top: 50, right: 20, bottom: 100, left: 60 }}
+                    margin={{ top: 40, right: 20, bottom: 120, left: 60 }}
                     xScale={{ type: 'point' }}
                     yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false, reverse: false }}
                     curve='monotoneX'
@@ -132,7 +132,7 @@ const PureWeightChart: React.FC = () => {
                     enableArea={true}
                     areaBlendMode='normal'
                     areaBaselineValue={areaBaseline}
-                    areaOpacity={0.15}
+                    areaOpacity={0.1}
                     useMesh={true}
                     enableSlices='x'
                     motionConfig='wobbly'
@@ -141,8 +141,9 @@ const PureWeightChart: React.FC = () => {
                             anchor: 'bottom-left',
                             direction: 'row',
                             translateY: 90,
-                            translateX: -20,
-                            itemsSpacing: 40,
+                            translateX: 60,
+                            itemsSpacing: 20,
+                            itemDirection: 'top-to-bottom',
                             itemWidth: 80,
                             itemHeight: 20,
                             itemOpacity: 0.75,
