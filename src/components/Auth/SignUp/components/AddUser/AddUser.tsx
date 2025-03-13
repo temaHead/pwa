@@ -139,13 +139,10 @@ const AddUser: React.FC = () => {
     const currentStep = steps[currentStepIndex];
     const isLastStep = currentStepIndex === steps.length - 1;
 
-    const handleInputChange = useCallback(
-        (name: string, value: string) => {
-            setFormData((prev) => ({ ...prev, [name]: value }));
-            setErrors('');
-        },
-        []
-    );
+    const handleInputChange = useCallback((name: string, value: string) => {
+        setFormData((prev) => ({ ...prev, [name]: value }));
+        setErrors('');
+    }, []);
 
     const handleSubFormInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -180,7 +177,9 @@ const AddUser: React.FC = () => {
                     email: user.email,
                     id: user.id,
                     bodyFat: formData['bodyFat'] ? parseFloat(formData['bodyFat']) : null,
-                    theme: user.theme,
+                    theme: user.theme || 'light',
+                    pin: user.pin || null,
+                    skipPin: user.skipPin || false,
                 },
                 fatMeasuring: {
                     chest: subFormData['chest'] || null,
@@ -247,8 +246,8 @@ const AddUser: React.FC = () => {
                 <div className={style.stepCounter}>
                     Шаг {currentStepIndex + 1} из {steps.length}
                 </div>
-                <h2 className={style.title}>{currentStep.label}</h2>
             </div>
+            <h2 className={style.title}>{currentStep.label}</h2>
             {showSubForm && currentStep.id === 'bodyFat' ? (
                 <div className={style.subForm}>
                     {subFormFields.map((field) => (
@@ -274,6 +273,7 @@ const AddUser: React.FC = () => {
                                 onChange={handleSubFormInputChange}
                                 type='number'
                                 placeholder={field.placeholder}
+                                required
                             />
                         </div>
                     ))}
@@ -281,26 +281,32 @@ const AddUser: React.FC = () => {
                         className={style.buttonCalculate}
                         onClick={handleCalculateBodyFat}
                         type='primary'
+                        size='large'
                     >
                         Рассчитать
+                    </Button>
+                    <Button
+                        className={style.buttonCloseCalculate}
+                        onClick={() => setShowSubForm(false)}
+                        type='primary'
+                    >
+                        Выйти из калькулятора
                     </Button>
                 </div>
             ) : currentStep.type === 'select' ? (
                 <CustomSelect
-                value={formData[currentStep.id] ?? undefined}
-                onChange={(value) => handleInputChange(currentStep.id, value)}
-                options={currentStep.options || []}
-            />
-            
-            
+                    value={formData[currentStep.id] ?? undefined}
+                    onChange={(value) => handleInputChange(currentStep.id, value)}
+                    options={currentStep.options || []}
+                />
             ) : (
                 <Input
-                name={currentStep.id}
-                type={currentStep.type || 'text'}
-                value={formData[currentStep.id] || ''}
-                onChange={(e) => handleInputChange(e.target.name, e.target.value)}
-                placeholder={currentStep.placeholder}
-            />
+                    name={currentStep.id}
+                    type={currentStep.type || 'text'}
+                    value={formData[currentStep.id] || ''}
+                    onChange={(e) => handleInputChange(e.target.name, e.target.value)}
+                    placeholder={currentStep.placeholder}
+                />
             )}
             {errors && <p style={{ color: 'red' }}>{errors}</p>}
             <div className={style.buttons}>
@@ -309,7 +315,7 @@ const AddUser: React.FC = () => {
                         onClick={startSubForm}
                         type='primary'
                     >
-                        Рассчитать самостоятельно
+                        Открыть калькулятор калипера
                     </Button>
                 ) : null}
                 {formData[currentStep.id] && (

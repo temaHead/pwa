@@ -34,7 +34,6 @@ const SignIn = () => {
                     const user = {
                         email: userCredential.user.email,
                         id: userId,
-                        token: userCredential.user.refreshToken,
                         name: userData.name || '',
                         birthDate: userData.birthDate || '',
                         currentWeight: userData.currentWeight || null,
@@ -59,7 +58,7 @@ const SignIn = () => {
 
                     // Навигация на главную страницу
                     message.success(`Добро пожаловать, ${user.name}`);
-                    navigate('/');
+                    window.location.reload();
                 } else {
                     setError('Профиль пользователя не найден');
                 }

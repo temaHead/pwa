@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { doc, DocumentData, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { FatMeasuring, UserProfile } from '../types';
@@ -6,7 +7,6 @@ import { addFatMeasuring, addWeightMeasuring } from './measurement-api';
 export async function updateUserProfile(profile: UserProfile, id: string): Promise<DocumentData> {
     try {
         // Создаем новый объект, исключая поля theme, pin и skipPin
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { theme, pin, skipPin, ...profileWithoutSensitiveData } = profile;
         const userRef = doc(db, 'users', id);
         await setDoc(userRef, profileWithoutSensitiveData, { merge: true });
@@ -24,8 +24,9 @@ export async function addUserProfile(
     fatMeasuring?: FatMeasuring
 ): Promise<DocumentData> {
     try {
+        const { theme, pin, skipPin, ...profileWithoutSensitiveData } = profile;
         const userRef = doc(db, 'users', id);
-        await setDoc(userRef, profile);
+        await setDoc(userRef, profileWithoutSensitiveData);
         const newData = await getDoc(userRef);
         if (profile.bodyFat && fatMeasuring) {
             await addFatMeasuring(profile.bodyFat, fatMeasuring, id);

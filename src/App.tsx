@@ -108,12 +108,18 @@ function App() {
         });
 
         return () => unsubscribe();
-    }, [dispatch, id]);
+    }, [dispatch, id, setIsAuth]);
 
     useEffect(() => {
         setLoading(true);
         loadUser();
     }, [loadUser]);
+
+    useEffect(() => {
+        console.log('isAuth:', isAuth);
+        console.log('user:', user);
+        console.log('loading:', loading);
+    }, [isAuth, user, loading, dispatch]);
 
     // Мемоизация маршрутов
     const routes = useMemo(
@@ -124,7 +130,7 @@ function App() {
                     element={
                         !loading ? (
                             isAuth ? (
-                                user?.currentWeight ? (
+                                user.name ? (
                                     (pin && pinVerified) || skipPin ? (
                                         <Home />
                                     ) : (
@@ -228,7 +234,7 @@ function App() {
                 />
                 <Route
                     path='/addUser'
-                    element={user && user.currentWeight ? <Navigate to='/' /> : <AddUser />}
+                    element={isAuth ? <AddUser /> : <Navigate to='/' />}
                 />
             </Routes>
         ),

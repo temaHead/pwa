@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../../../firebase';
 import { Link, useNavigate } from 'react-router-dom';
@@ -8,6 +8,7 @@ import style from './SignUp.module.scss';
 import icon from '../../../assets/close-line-icon.svg';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Button, Form, Input, message } from 'antd';
+import { saveUserToIDB } from '../../../shared/utils/idb';
 
 const SignUp = () => {
     const navigate = useNavigate();
@@ -31,8 +32,7 @@ const SignUp = () => {
                 try {
                     await setDoc(doc(db, 'users', uid), {
                         email: email,
-                        name: 'name',
-                        uid: uid,
+                        id: uid,
                     });
 
                     // Проверка, что документ был добавлен в Firestore
@@ -49,14 +49,16 @@ const SignUp = () => {
                         setUser({
                             email: userCredential.user.email,
                             id: userCredential.user.uid,
-                            token: userCredential.user.refreshToken,
                         })
                     );
+
+                    // Сохранение данных пользователя в IndexedDB
+                    await saveUserToIDB(userDoc.data());
 
                     window.localStorage.setItem('id', userCredential.user.uid);
                     setError('');
                     message.success('Регистрация прошла успешно!');
-                    navigate('/');
+                    window.location.reload();
                 } catch (error) {
                     console.log(error);
                     message.error('Ошибка при добавлении пользователя в Firestore');
@@ -73,7 +75,10 @@ const SignUp = () => {
             <div className={style.header}>
                 <div className={style.iconWrapper}>
                     <Link to='/start'>
-                        <img src={icon} alt='iconCross' />
+                        <img
+                            src={icon}
+                            alt='iconCross'
+                        />
                     </Link>
                 </div>
             </div>
