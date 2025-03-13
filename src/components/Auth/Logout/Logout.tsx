@@ -4,7 +4,7 @@ import { auth } from '../../../firebase';
 import { removeUser } from '../../../store/slices/userSlice';
 import { useNavigate } from 'react-router-dom';
 import { Button } from 'antd';
-import { deleteUserFromIDB } from '../../../shared/utils/idb';
+import { deleteAllIndexedDBs } from '../../../shared/utils/idb';
 
 interface LogoutProps {
     text?: string; // Текст кнопки (опциональный, по умолчанию "Выйти")
@@ -22,7 +22,7 @@ const Logout: React.FC<LogoutProps> = ({ text = 'Выйти', ...props }) => {
             // Если пользователь подтвердил, выполняем логаут
             await signOut(auth);
             dispatch(removeUser());
-            await deleteUserFromIDB();
+            await deleteAllIndexedDBs();
             navigate('/');
         }
     };

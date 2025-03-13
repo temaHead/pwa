@@ -1,6 +1,9 @@
 .signUpPage {
     display: flex;
     flex-direction: column;
+    height: 100dvh;
+    padding: 30px;
+    position: relative;
     .header {
         display: flex;
         .iconWrapper {
@@ -22,24 +25,16 @@
     .form {
         display: flex;
         flex-direction: column;
-        .input {
-            border: none;
-            background-color: rgb(240, 240, 240);
-            height: 30px;
-            margin-bottom: 10px;
-            padding: 7px;
-            border-radius: 7px;
-        }
-        .checkbox {
-            margin-bottom: 50px;
-        }
-        .buttonSubmit{
+
+        .buttonSubmit {
             background-color: #fbe765;
+            margin: 60px 0;
         }
     }
-    .buttonSignIn {
-        margin-top: 20px;
-        background-color: transparent;
-
+    .error {
+        position: absolute;
+        top: 440px;
+        color: red;
+        font-weight: 500;
     }
 }

@@ -8,6 +8,8 @@ export type UserProfile = {
     id: string | null;
     bodyFat: number | null;
     theme: "light" | "dark";
+    pin: string | null;
+    skipPin: boolean;
 };
 
 export type FatMeasuring = {

@@ -28,6 +28,7 @@ const PinCodeInput = ({
     const [showFaceIdBanner, setShowFaceIdBanner] = useState(false);
     const dispatch = useDispatch();
     const userTheme = useSelector((state: RootState) => state.user.theme);
+    const userPin = useSelector((state: RootState) => state.user.pin);
 
     const navigate = useNavigate();
     const user = useSelector((state: RootState) => state.user);
@@ -160,11 +161,10 @@ const PinCodeInput = ({
 
     // Проверяем, есть ли пин-код в localStorage
     useEffect(() => {
-        const storedPin = localStorage.getItem('pin');
-        if (storedPin) {
+        if (userPin) {
             setHasPin(true); // Пин-код уже установлен
         }
-    }, []);
+    }, [userPin]);
 
     // Хеширование пин-кода
     const hashPin = (pin: string) => {
@@ -197,12 +197,12 @@ const PinCodeInput = ({
 
     // Обработчик подтверждения пин-кода
     const handleSubmit = useCallback( async () => {
-        if (hasPin) {
+        if (hasPin && userPin) {
             // Если пин-код уже есть, проверяем введённый пин-код
-            const storedPin = localStorage.getItem('pin');
-            const hashedPin = hashPin(firstPin);
-            if (hashedPin === storedPin) {
+            const hashedPinInput = hashPin(firstPin);
+            if (hashedPinInput === userPin) {
                 sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
+                dispatch(setSkipPin(false))
                 setPinVerified('true');
             } else {
                 setError(true);
@@ -227,6 +227,7 @@ const PinCodeInput = ({
                         console.log('Face ID не поддерживается');
                         const hashedPin = hashPin(firstPin);
                         dispatch(setPin(hashedPin));
+                        dispatch(setSkipPin(false))
                         localStorage.setItem('pin', hashPin(firstPin)); // Сохраняем пин-код в localStorage
                         sessionStorage.setItem('pinVerified', 'true'); // Сохраняем флаг успешного ввода
                         setPinVerified('true');
@@ -244,7 +245,7 @@ const PinCodeInput = ({
                 }
             }
         }
-    },[hasPin, firstPin, setPinVerified, isSecondInput, secondPin, dispatch, navigate]);
+    },[hasPin, userPin, firstPin, dispatch, setPinVerified, isSecondInput, secondPin, navigate]);
 
     const checkFaceID = useCallback( async () => {
         if (hasPin && faceIDRegistered) {

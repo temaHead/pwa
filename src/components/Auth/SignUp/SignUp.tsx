@@ -1,4 +1,3 @@
-// src/components/Auth.js
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../../../firebase';
@@ -8,26 +7,26 @@ import { setUser } from '../../../store/slices/userSlice';
 import style from './SignUp.module.scss';
 import icon from '../../../assets/close-line-icon.svg';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { Button, Form, Input, message } from 'antd';
 
 const SignUp = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [passwordConfirm, setPassConfirm] = useState('');
+    const [form] = Form.useForm(); // Хук для управления формой
     const [error, setError] = useState('');
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    const handleSubmit = async (values: { email: string; password: string; passwordConfirm: string }) => {
+        const { email, password, passwordConfirm } = values;
+
+        // Проверка совпадения паролей
         if (password !== passwordConfirm) {
             setError('Пароли не совпадают');
             return;
         }
+
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             if (userCredential) {
-                console.log(userCredential);
                 const { email, uid } = userCredential.user;
                 try {
                     await setDoc(doc(db, 'users', uid), {
@@ -35,16 +34,17 @@ const SignUp = () => {
                         name: 'name',
                         uid: uid,
                     });
-                    // Теперь проверим, что документ действительно был добавлен в Firestore
+
+                    // Проверка, что документ был добавлен в Firestore
                     const userDocRef = doc(db, 'users', uid);
                     const userDoc = await getDoc(userDocRef);
-                    console.log(userDoc);
 
                     if (userDoc.exists()) {
                         console.log('Пользователь успешно добавлен в Firestore:', userDoc.data());
                     } else {
                         console.log('Не удалось найти пользователя в Firestore');
                     }
+
                     dispatch(
                         setUser({
                             email: userCredential.user.email,
@@ -52,18 +52,19 @@ const SignUp = () => {
                             token: userCredential.user.refreshToken,
                         })
                     );
+
                     window.localStorage.setItem('id', userCredential.user.uid);
-                    setEmail('');
-                    setPassword('');
-                    setPassConfirm('');
                     setError('');
+                    message.success('Регистрация прошла успешно!');
                     navigate('/');
                 } catch (error) {
                     console.log(error);
+                    message.error('Ошибка при добавлении пользователя в Firestore');
                 }
             }
         } catch (error) {
             console.log(error);
+            message.error('Ошибка при регистрации');
         }
     };
 
@@ -72,61 +73,77 @@ const SignUp = () => {
             <div className={style.header}>
                 <div className={style.iconWrapper}>
                     <Link to='/start'>
-                        <img
-                            src={icon}
-                            alt='iconCross'
-                        />
+                        <img src={icon} alt='iconCross' />
                     </Link>
                 </div>
             </div>
             <div className={style.title}>Регистрация</div>
 
-            <form
+            <Form
+                form={form}
                 className={style.form}
-                onSubmit={handleSubmit}
+                onFinish={handleSubmit} // Используем onFinish вместо onSubmit
+                layout='vertical'
             >
-                <input
-                    className={style.input}
-                    type='email'
-                    placeholder='Email'
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
+                <Form.Item
+                    label='E-mail'
+                    name='email'
+                    rules={[
+                        { required: true, message: 'Пожалуйста, введите ваш email' },
+                        { type: 'email', message: 'Введите корректный email' },
+                    ]}
+                >
+                    <Input type='email' />
+                </Form.Item>
 
-                <input
-                    className={style.input}
-                    type='password'
-                    placeholder='Пароль'
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <input
-                    className={style.input}
-                    type='password'
-                    placeholder='Повторите пароль'
-                    value={passwordConfirm}
-                    onChange={(e) => setPassConfirm(e.target.value)}
-                    required
-                />
-                <button
-                    className={style.buttonSubmit}
-                    type='submit'
+                <Form.Item
+                    label='Пароль'
+                    name='password'
+                    rules={[
+                        { required: true, message: 'Пожалуйста, введите пароль' },
+                        { min: 7, message: 'Пароль должен содержать минимум 7 символов' },
+                    ]}
                 >
-                    {' '}
-                    Зарегистрироваться
-                </button>
-            </form>
+                    <Input.Password />
+                </Form.Item>
+
+                <Form.Item
+                    label='Повторите пароль'
+                    name='passwordConfirm'
+                    dependencies={['password']} // Зависимость от поля password
+                    rules={[
+                        { required: true, message: 'Пожалуйста, повторите пароль' },
+                        ({ getFieldValue }) => ({
+                            validator(_, value) {
+                                if (!value || getFieldValue('password') === value) {
+                                    return Promise.resolve();
+                                }
+                                return Promise.reject(new Error('Пароли не совпадают'));
+                            },
+                        }),
+                    ]}
+                >
+                    <Input.Password />
+                </Form.Item>
+
+                <Form.Item>
+                    <button
+                        className={style.buttonSubmit}
+                        type='submit'
+                    >
+                        Зарегистрироваться
+                    </button>
+                </Form.Item>
+            </Form>
+
             {error && <div className={style.error}>{error}</div>}
-            <Link to='/signIn'>
-                <button
-                    type='button'
-                    className={style.buttonSignIn}
-                >
-                    У меня уже есть аккаунт
-                </button>
-            </Link>
+
+            <Button
+                type='text'
+                onClick={() => navigate('/signIn')}
+            >
+                У меня уже есть аккаунт
+            </Button>
         </div>
     );
 };

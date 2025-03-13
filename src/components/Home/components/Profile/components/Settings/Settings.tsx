@@ -4,7 +4,7 @@ import style from './Settings.module.scss';
 import { AppDispatch, RootState } from '../../../../../../store';
 import { useDispatch, useSelector } from 'react-redux';
 import { useState, useEffect, useCallback } from 'react';
-import { setPin, setSkipPin, updateUserProfileAsync } from '../../../../../../store/slices/userSlice';
+import { setPin, setSkipPin, setTheme } from '../../../../../../store/slices/userSlice';
 import Logout from '../../../../../Auth/Logout/Logout';
 import CustomModal from '../../../../../../shared/components/CustomModal/CustomModal';
 import Header from '../../../../../../shared/components/Header/Header';
@@ -43,8 +43,8 @@ function Settings() {
     const toggleTheme = async () => {
         const newTheme: 'light' | 'dark' = userTheme === 'light' ? 'dark' : 'light';
         setUserTheme(newTheme);
-        const updatedProfile = { ...user, theme: newTheme };
-        await dispatch(updateUserProfileAsync(updatedProfile));
+        localStorage.setItem('theme', newTheme);
+        dispatch(setTheme(newTheme));
     };
 
     const handlePinCodeToggle = () => {

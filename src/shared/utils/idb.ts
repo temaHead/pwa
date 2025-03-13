@@ -55,3 +55,24 @@ export const deleteUserFromIDB = async () => {
     const db = await openUserDB();
     await db.delete('user', 'currentUser');
 };
+
+export const deleteAllIndexedDBs = async () => {
+    // Список известных баз данных
+    const databases = ['user', 'fatStore', 'weightStore', 'bodyStore', 'filterStore', 'goalsStore'];
+
+    databases.forEach((dbName) => {
+        const request = indexedDB.deleteDatabase(dbName);
+
+        request.onsuccess = () => {
+            console.log(`База данных "${dbName}" успешно удалена.`);
+        };
+
+        request.onerror = (event) => {
+            console.error(`Ошибка при удалении базы данных "${dbName}":`, event);
+        };
+
+        request.onblocked = () => {
+            console.warn(`Удаление базы данных "${dbName}" заблокировано.`);
+        };
+    });
+};

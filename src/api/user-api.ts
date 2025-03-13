@@ -5,8 +5,11 @@ import { addFatMeasuring, addWeightMeasuring } from './measurement-api';
 
 export async function updateUserProfile(profile: UserProfile, id: string): Promise<DocumentData> {
     try {
+        // Создаем новый объект, исключая поля theme, pin и skipPin
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { theme, pin, skipPin, ...profileWithoutSensitiveData } = profile;
         const userRef = doc(db, 'users', id);
-        await setDoc(userRef, profile, { merge: true });
+        await setDoc(userRef, profileWithoutSensitiveData, { merge: true });
         const newData = await getDoc(userRef);
         return newData.data() as DocumentData;
     } catch (error) {

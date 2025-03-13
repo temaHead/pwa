@@ -1,5 +1,4 @@
-// src/components/Auth.js
-import React, { useState } from 'react';
+import React from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../../../firebase';
 import { Link, useNavigate } from 'react-router-dom';
@@ -8,18 +7,17 @@ import style from './SignIn.module.scss';
 import icon from '../../../assets/close-line-icon.svg';
 import { setUser } from '../../../store/slices/userSlice';
 import { doc, getDoc } from 'firebase/firestore';
-import { Button, Form, Input } from 'antd';
+import { Button, Form, Input, message } from 'antd';
 import { saveUserToIDB } from '../../../shared/utils/idb';
 
 const SignIn = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [form] = Form.useForm(); // Хук для управления формой
+    const [error, setError] = React.useState('');
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    const handleSubmit = async (values: { email: string; password: string }) => {
+        const { email, password } = values;
 
         try {
             // Вход с помощью email и пароля
@@ -56,11 +54,11 @@ const SignIn = () => {
                     await saveUserToIDB(user);
 
                     // Очистка полей формы
-                    setEmail('');
-                    setPassword('');
+                    form.resetFields();
                     setError('');
 
                     // Навигация на главную страницу
+                    message.success(`Добро пожаловать, ${user.name}`);
                     navigate('/');
                 } else {
                     setError('Профиль пользователя не найден');
@@ -69,6 +67,7 @@ const SignIn = () => {
         } catch (error) {
             console.log(error);
             setError('Пользователь с таким e-mail не найден');
+            message.error('Ошибка при входе');
         }
     };
 
@@ -85,27 +84,33 @@ const SignIn = () => {
                 </div>
             </div>
             <div className={style.title}>Авторизация</div>
-            <form
+
+            <Form
+                form={form}
                 className={style.form}
-                onSubmit={handleSubmit}
+                onFinish={handleSubmit} // Используем onFinish вместо onSubmit
+                layout='vertical'
             >
-                <Form.Item>
-                    <Input
-                        type='email'
-                        placeholder='E-mail'
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        name='email'
-                    />
+                <Form.Item
+                    label='E-mail'
+                    name='email'
+                    rules={[
+                        { required: true, message: 'Пожалуйста, введите ваш email' },
+                        { type: 'email', message: 'Введите корректный email' },
+                    ]}
+                >
+                    <Input type='email' />
                 </Form.Item>
 
-                <Form.Item>
-                    <Input.Password
-                        placeholder='Пароль'
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        name='password'
-                    />
+                <Form.Item
+                    label='Пароль'
+                    name='password'
+                    rules={[
+                        { required: true, message: 'Пожалуйста, введите пароль' },
+                        { min: 7, message: 'Пароль должен содержать минимум 7 символов' },
+                    ]}
+                >
+                    <Input.Password />
                 </Form.Item>
 
                 <Form.Item>
@@ -117,16 +122,16 @@ const SignIn = () => {
                         Войти
                     </Button>
                 </Form.Item>
-            </form>
+            </Form>
+
             {error && <div className={style.error}>{error}</div>}
-            <Link to='/signUp'>
-                <button
-                    type='button'
-                    className={style.buttonSignUp}
-                >
-                    Создать аккаунт
-                </button>
-            </Link>
+
+            <Button
+                type='text'
+                onClick={() => navigate('/signUp')}
+            >
+                Создать аккаунт
+            </Button>
         </div>
     );
 };

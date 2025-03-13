@@ -68,12 +68,10 @@ const userSlice = createSlice({
             state.height = null;
             state.bodyFat = null;
             state.theme = 'light';
-            window.localStorage.removeItem('id');
-            localStorage.removeItem('skipPin');
-            localStorage.removeItem('pin');
-            sessionStorage.removeItem('pinVerified');
-            localStorage.removeItem('faceID');
-            localStorage.removeItem('faceIDRegistered');
+            state.skipPin = false;
+            state.pin = null;
+            localStorage.clear();
+            sessionStorage.clear();
         },
 
         setPin(state, action) {
@@ -92,6 +90,11 @@ const userSlice = createSlice({
                 localStorage.removeItem('skipPin');
             }
         },
+
+        setTheme(state, action) {
+            state.theme = action.payload;
+            localStorage.setItem('theme', action.payload);
+        }
     },
     extraReducers: (builder) => {
         builder.addCase(updateUserProfileAsync.fulfilled, (state, action) => {
@@ -105,7 +108,6 @@ const userSlice = createSlice({
             state.gender = updatedData.gender || null;
             state.height = updatedData.height || null;
             state.bodyFat = updatedData.bodyFat || null;
-            state.theme = updatedData.theme || 'light';
         });
         builder.addCase(addUserProfileAsync.fulfilled, (state, action) => {
             // Обновляем профиль в состоянии после успешного запроса
@@ -118,10 +120,9 @@ const userSlice = createSlice({
             state.gender = updatedData.gender || null;
             state.height = updatedData.height || null;
             state.bodyFat = updatedData.bodyFat || null;
-            state.theme = updatedData.theme || 'light';
         });
     },
 });
 
-export const { setUser, removeUser, setPin, setSkipPin } = userSlice.actions;
+export const { setUser, removeUser, setPin, setSkipPin, setTheme } = userSlice.actions;
 export default userSlice.reducer;
