@@ -55,12 +55,12 @@ export const getAllBodyMeasuringAsync = createAsyncThunk(
         const bodyMeasuring = await getAllBodyMeasuring(userId);
         return bodyMeasuring;
     }
-)
+);
 //Добавление измерения жира
 export const addFatMeasuringAsync = createAsyncThunk(
     'user/addFatMeasuring',
     async (
-        fatMeasuring: { bodyFat: number; measurements: FatMeasuring; timestamp?: string },
+        fatMeasuring: { bodyFat: number | null; measurements: FatMeasuring; timestamp?: string },
         { getState }
     ) => {
         const state = getState() as RootState;
@@ -87,7 +87,7 @@ export const updateFatMeasuringAsync = createAsyncThunk(
         id: string;
         measurements: FatMeasuring;
         bodyFat: number | null;
-        timestamp?: string
+        timestamp?: string;
     }) => {
         await updateFatMeasuring(id, measurements, bodyFat, timestamp);
         return { id, measurements, bodyFat, timestamp };
@@ -114,7 +114,7 @@ export const addWeightMeasuringAsync = createAsyncThunk(
 // Редактирование измерения веса
 export const updateWeightMeasuringAsync = createAsyncThunk(
     'user/updateWeightMeasuring',
-    async ({ id, weight, timestamp }: { id: string; weight: number | null, timestamp?: string }) => {
+    async ({ id, weight, timestamp }: { id: string; weight: number | null; timestamp?: string }) => {
         await updateWeightMeasuring(id, weight, timestamp); // Предположим, что у вас есть такая функция в API
         return { id, weight, timestamp };
     }
@@ -143,8 +143,16 @@ export const addBodyMeasuringAsync = createAsyncThunk(
 // Редактирование измерения лентой
 export const updateBodyMeasuringAsync = createAsyncThunk(
     'user/updateBodyMeasuring',
-    async ({ id, bodyMeasuring, timestamp }: { id: string; bodyMeasuring: BodyMeasuring, timestamp?: string }) => {
-        await updateBodyMeasuring(id, bodyMeasuring); // Предположим, что у вас есть такая функция в API
+    async ({
+        id,
+        bodyMeasuring,
+        timestamp,
+    }: {
+        id: string;
+        bodyMeasuring: BodyMeasuring;
+        timestamp?: string;
+    }) => {
+        await updateBodyMeasuring(id, bodyMeasuring, timestamp); // Предположим, что у вас есть такая функция в API
         return { id, bodyMeasuring, timestamp };
     }
 );
@@ -180,7 +188,7 @@ const measurementSlice = createSlice({
         });
         builder.addCase(getAllBodyMeasuringAsync.fulfilled, (state, action) => {
             state.bodyMeasuring = action.payload;
-        })
+        });
         builder.addCase(addFatMeasuringAsync.fulfilled, (state, action) => {
             state.fatMeasuring = [...state.fatMeasuring, action.payload];
         });

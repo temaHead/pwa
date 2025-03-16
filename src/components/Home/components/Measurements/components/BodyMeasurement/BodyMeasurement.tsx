@@ -34,7 +34,7 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
         arms: item.bodyMeasuring?.arms || null,
         waist: item.bodyMeasuring?.waist || null,
     });
-    const [editedTimestamp, setEditedTimestamp] = useState(item.timestamp || '');
+    const [editedTimestamp, setEditedTimestamp] = useState(item.timestamp);
     const [translateX, setTranslateX] = useState(0);
     const startX = useRef(0);
 
@@ -113,7 +113,7 @@ const BodyMeasurement: React.FC<BodyMeasurementProps> = ({ item }) => {
             arms: item.bodyMeasuring?.arms || null,
             waist: item.bodyMeasuring?.waist || null,
         });
-        setEditedTimestamp(item.timestamp || '');
+        setEditedTimestamp(item.timestamp);
         setIsEditing(false);
     }, [item.bodyMeasuring, item.timestamp]);
 

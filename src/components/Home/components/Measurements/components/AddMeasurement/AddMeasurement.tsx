@@ -164,13 +164,13 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
         ) {
             dispatch(
                 addFatMeasuringAsync({
-                    bodyFat: Number(formData.bodyFat),
+                    bodyFat: formData.bodyFat,
                     measurements: {
-                        chest: Number(formData.chestCaliper),
-                        abdomen: Number(formData.bellyCaliper),
-                        thigh: Number(formData.thighCaliper),
-                        tricep: Number(formData.tricepsCaliper),
-                        waist: Number(formData.waistCaliper),
+                        chest: formData.chestCaliper,
+                        abdomen: formData.bellyCaliper,
+                        thigh: formData.thighCaliper,
+                        tricep: formData.tricepsCaliper,
+                        waist: formData.waistCaliper,
                     },
                     timestamp: formData.date,
                 })
@@ -186,11 +186,11 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
             dispatch(
                 addBodyMeasuringAsync({
                     measurements: {
-                        chest: Number(formData.chest),
-                        hips: Number(formData.hips),
-                        thigh: Number(formData.thigh),
-                        arms: Number(formData.arms),
-                        waist: Number(formData.waist),
+                        chest: formData.chest,
+                        hips: formData.hips,
+                        thigh: formData.thigh,
+                        arms: formData.arms,
+                        waist: formData.waist,
                     },
                     timestamp: formData.date,
                 })
@@ -237,101 +237,99 @@ const AddMeasurement: React.FC<AddMeasurementProps> = ({ isOpen, onClose, gender
                     </Button>
                 </div>
                 <div className={style.content}>
-                    <form>
-                        <div className={style.fieldGroup}>
-                            <div>Дата замера</div>
-                            <Input
-                                name='date'
-                                value={formData.date}
-                                onChange={handleSubFormInputChange}
-                                type='date'
-                            />
-                        </div>
+                    <div className={style.fieldGroup}>
+                        <div>Дата замера</div>
+                        <Input
+                            name='date'
+                            value={formData.date}
+                            onChange={handleSubFormInputChange}
+                            type='date'
+                        />
+                    </div>
 
-                        <div className={style.fieldGroup}>
-                            <Form layout='vertical'>
-                                <Form.Item label='Введите вес (кг)'>
-                                    <Input
-                                        name='weight'
-                                        value={formData.weight || undefined}
-                                        onChange={handleSubFormInputChange}
-                                        type='number'
-                                        placeholder='кг'
-                                    />
-                                </Form.Item>
-                            </Form>
-                        </div>
-                        <CollapsibleSection title='Замеры лентой'>
-                            <Form layout='vertical'>
-                                {['chest', 'hips', 'thigh', 'waist', 'arms'].map((area) => (
-                                    <div
-                                        className={style.fieldGroup}
-                                        key={area}
+                    <div className={style.fieldGroup}>
+                        <Form layout='vertical'>
+                            <Form.Item label='Введите вес (кг)'>
+                                <Input
+                                    name='weight'
+                                    value={formData.weight || undefined}
+                                    onChange={handleSubFormInputChange}
+                                    type='number'
+                                    placeholder='кг'
+                                />
+                            </Form.Item>
+                        </Form>
+                    </div>
+                    <CollapsibleSection title='Замеры лентой'>
+                        <Form layout='vertical'>
+                            {['chest', 'hips', 'thigh', 'waist', 'arms'].map((area) => (
+                                <div
+                                    className={style.fieldGroup}
+                                    key={area}
+                                >
+                                    <Form.Item
+                                        label={measurementLabels[area as keyof typeof measurementLabels]}
                                     >
-                                        <Form.Item
-                                            label={measurementLabels[area as keyof typeof measurementLabels]}
-                                        >
-                                            <Input
-                                                style={{ backgroundColor }}
-                                                name={area}
-                                                value={formData[area as keyof typeof formData] || undefined}
-                                                onChange={handleSubFormInputChange}
-                                                type='number'
-                                                placeholder='см'
-                                            />
-                                        </Form.Item>
-                                    </div>
-                                ))}
-                            </Form>
-                        </CollapsibleSection>
-                        <CollapsibleSection title='Замеры жира'>
-                            <Form layout='vertical'>
-                                {(gender === 'male'
-                                    ? ['chestCaliper', 'bellyCaliper', 'thighCaliper']
-                                    : ['thighCaliper', 'tricepsCaliper', 'waistCaliper']
-                                ).map((area) => (
-                                    <div
-                                        className={style.fieldGroup}
-                                        key={area}
+                                        <Input
+                                            style={{ backgroundColor }}
+                                            name={area}
+                                            value={formData[area as keyof typeof formData] || undefined}
+                                            onChange={handleSubFormInputChange}
+                                            type='number'
+                                            placeholder='см'
+                                        />
+                                    </Form.Item>
+                                </div>
+                            ))}
+                        </Form>
+                    </CollapsibleSection>
+                    <CollapsibleSection title='Замеры жира'>
+                        <Form layout='vertical'>
+                            {(gender === 'male'
+                                ? ['chestCaliper', 'bellyCaliper', 'thighCaliper']
+                                : ['thighCaliper', 'tricepsCaliper', 'waistCaliper']
+                            ).map((area) => (
+                                <div
+                                    className={style.fieldGroup}
+                                    key={area}
+                                >
+                                    <Form.Item
+                                        label={measurementLabels[area as keyof typeof measurementLabels]}
                                     >
-                                        <Form.Item
-                                            label={measurementLabels[area as keyof typeof measurementLabels]}
-                                        >
-                                            <Input
-                                                style={{ backgroundColor }}
-                                                name={area}
-                                                value={formData[area as keyof typeof formData] || undefined}
-                                                onChange={handleCaliperInputChange}
-                                                type='number'
-                                                placeholder='мм'
-                                            />
-                                        </Form.Item>
-                                    </div>
-                                ))}
-                                <div>
-                                    Процент жира подставится автоматически после заполнения замеров калипером
+                                        <Input
+                                            style={{ backgroundColor }}
+                                            name={area}
+                                            value={formData[area as keyof typeof formData] || undefined}
+                                            onChange={handleCaliperInputChange}
+                                            type='number'
+                                            placeholder='мм'
+                                        />
+                                    </Form.Item>
                                 </div>
-                                <div className={style.fieldGroup}>
-                                    <Input
-                                        style={{ backgroundColor }}
-                                        name='bodyFat'
-                                        value={formData.bodyFat || undefined}
-                                        onChange={handleSubFormInputChange}
-                                        type='number'
-                                        placeholder='Введите процент жира вручную'
-                                    />
-                                </div>
-                            </Form>
-                        </CollapsibleSection>
+                            ))}
+                            <div>
+                                Процент жира подставится автоматически после заполнения замеров калипером
+                            </div>
+                            <div className={style.fieldGroup}>
+                                <Input
+                                    style={{ backgroundColor }}
+                                    name='bodyFat'
+                                    value={formData.bodyFat || undefined}
+                                    onChange={handleSubFormInputChange}
+                                    type='number'
+                                    placeholder='Введите процент жира вручную'
+                                />
+                            </div>
+                        </Form>
+                    </CollapsibleSection>
 
-                        <Button
-                            type='primary'
-                            className={style.saveButton}
-                            onClick={handleAddMeasurement}
-                        >
-                            Сохранить
-                        </Button>
-                    </form>
+                    <Button
+                        type='primary'
+                        className={style.saveButton}
+                        onClick={handleAddMeasurement}
+                    >
+                        Сохранить
+                    </Button>
                 </div>
             </animated.div>
         </>

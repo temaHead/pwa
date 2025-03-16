@@ -90,6 +90,8 @@ const BodyChart: React.FC = () => {
         }
     }, [dispatch, id]);
 
+    console.log(chartData)
+
     if (!bodyMeasuringSorted.length) return;
 
     return (

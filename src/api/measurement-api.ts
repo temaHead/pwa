@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 
 // Функция для добавления замеров жира в коллекцию FatMeasuring
 export async function addFatMeasuring(
-    bodyFat: number,
+    bodyFat: number | null,
     fatMeasuring: FatMeasuring,
     userId: string,
     timestamp?: string
@@ -148,7 +148,7 @@ export async function addBodyMeasuring(
  ): Promise<void> {
     try {
         const docRef = doc(db, 'bodyMeasuring', id);
-        await updateDoc(docRef, { measurements, timestamp });
+        await updateDoc(docRef, { bodyMeasuring:measurements, timestamp });
         console.log('Измерение лентой успешно обновлено');
     }catch (error) {
         console.error('Ошибка обновления измерения лентой:', error);

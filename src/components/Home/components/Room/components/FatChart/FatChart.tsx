@@ -63,19 +63,29 @@ const FatChart: React.FC = () => {
     const chartData = useMemo(
         () =>
             (Object.keys(visibleLines) as Array<keyof FatMeasuringData['measurements'] | 'bodyFat'>)
-                .map((key) => ({
-                    id: LABELS_MAP[key] || key,
-                    data: fatMeasuringSorted.map((item) => ({
-                        x: new Date(item.timestamp || 0).toLocaleDateString('ru-RU', {
-                            day: 'numeric',
-                            month: 'short',
-                        }),
-                        y:
+                .map((key) => {
+                    // Создаём новый массив с данными для графика
+                    const data = fatMeasuringSorted.map((item) => {
+                        const value =
                             key === 'bodyFat'
                                 ? item.bodyFat
-                                : item.measurements[key as keyof FatMeasuringData['measurements']],
-                    })),
-                }))
+                                : item.measurements[key as keyof FatMeasuringData['measurements']];
+    
+                        // Если данных нет (значение undefined или null), ставим null для пропуска
+                        return {
+                            x: new Date(item.timestamp || 0).toLocaleDateString('ru-RU', {
+                                day: 'numeric',
+                                month: 'short',
+                            }),
+                            y: value ?? null, // Пропуск данных будет интерпретирован как null
+                        };
+                    });
+    
+                    return {
+                        id: LABELS_MAP[key] || key,
+                        data,
+                    };
+                })
                 .filter(
                     (series) =>
                         visibleLines[
@@ -86,6 +96,8 @@ const FatChart: React.FC = () => {
                 ),
         [LABELS_MAP, fatMeasuringSorted, visibleLines]
     );
+    
+    console.log(chartData);
 
     const handleToggleLine = (key: keyof typeof visibleLines) => {
         setVisibleLines((prev) => ({
