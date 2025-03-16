@@ -10,6 +10,8 @@ html {
     user-select: none; /* Разрешает выбор текста */
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none; /* Отключает растяжение страницы */
+    height: 100%;
 
 }
 

@@ -124,6 +124,31 @@ function App() {
         console.log('loading:', loading);
     }, [isAuth, user, loading, dispatch]);
 
+    useEffect(() => {
+        const handleFocusIn = () => {
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+        };
+    
+        const handleFocusOut = () => {
+            setTimeout(() => {
+                document.body.style.overflow = '';
+                document.body.style.position = '';
+                document.body.style.width = '';
+            }, 300); // Даем время клавиатуре скрыться
+        };
+    
+        window.addEventListener('focusin', handleFocusIn);
+        window.addEventListener('focusout', handleFocusOut);
+    
+        return () => {
+            window.removeEventListener('focusin', handleFocusIn);
+            window.removeEventListener('focusout', handleFocusOut);
+        };
+    }, []);
+    
+
     // Мемоизация маршрутов
     const routes = useMemo(
         () => (
