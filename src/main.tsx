@@ -42,6 +42,25 @@ document.addEventListener(
     { passive: false }
 );
 
+// Запрет скролла при взаимодействии с инпутами на iOS
+const preventScroll = (event: TouchEvent) => {
+    if (event.touches.length > 1) {
+        event.preventDefault(); // Запрещаем зум
+    }
+};
+
+// Блокируем скролл при открытии клавиатуры
+document.addEventListener('focusin', () => {
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('touchmove', preventScroll, { passive: false });
+});
+
+// Разрешаем скролл при закрытии клавиатуры
+document.addEventListener('focusout', () => {
+    document.body.style.overflow = '';
+    document.removeEventListener('touchmove', preventScroll);
+});
+
 // Регистрация Service Worker с обработкой обновлений
 const updateSW = registerSW({
     onNeedRefresh() {
