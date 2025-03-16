@@ -1,10 +1,10 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../store';
 import { useNavigate } from 'react-router-dom';
-import { UserOutlined, SettingOutlined } from '@ant-design/icons';
-import { Button, Typography, Flex, Avatar, theme } from 'antd';
+import { UserOutlined, SettingOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Button, Typography, Flex, Avatar, theme, Spin } from 'antd';
 import Goals from './components/Goals/Goals';
-import { useEffect } from 'react';
+import { useEffect, useMemo, useCallback, useState } from 'react';
 import { getAllGoalsAsync, setGoals } from '../../../../store/slices/goalsSlice';
 import CurrentGoals from './components/Goals/components/CurrentGoals/CurrentGoals';
 import style from './Profile.module.scss';
@@ -20,44 +20,80 @@ function Profile() {
 
     // Извлечение данных из Redux Store
     const user = useSelector((state: RootState) => state.user);
-    const {goals, loading} = useSelector((state: RootState) => state.goals);
+    const { goals, loading } = useSelector((state: RootState) => state.goals);
     const { token } = theme.useToken(); // Получаем цвета текущей темы
     const backgroundColor = token.colorBgLayout; // Автоматически подстраивается
     const textColor = token.colorTextBase;
     const colorIcon = token.colorIcon;
 
-    useEffect(() => {
-        const loadAndSyncData = async () => {
-            const goalsFromIDB = await getEntityFromIDB('goalsStore');
-            if (goalsFromIDB) {
-                console.log('goalsFromIDB', goalsFromIDB);
-                dispatch(setGoals(goalsFromIDB));
-            }
-            if (user.id) dispatch(getAllGoalsAsync(user.id));
-        };
-        loadAndSyncData();
+    const [loadingStatus, setLoadingStatus] = useState<'loading' | 'success' | 'idle'>('idle');
+
+    const loadAndSyncData = useCallback(async () => {
+        setLoadingStatus('loading');
+        const goalsFromIDB = await getEntityFromIDB('goalsStore');
+        if (goalsFromIDB) {
+            console.log('goalsFromIDB', goalsFromIDB);
+            dispatch(setGoals(goalsFromIDB));
+        }
+        if (user.id) dispatch(getAllGoalsAsync(user.id));
+
+        // Добавляем задержку перед изменением статуса на success
+        setTimeout(() => {
+            setLoadingStatus('success'); // Данные успешно загружены
+        }, 1000);
+        setTimeout(() => setLoadingStatus('idle'), 2000);
     }, [dispatch, user.id]);
 
+    const syncData = useCallback(async () => {
+        const goalsFromIDB = await getEntityFromIDB('goalsStore');
+        if (!_.isEqual(goalsFromIDB, goals)) {
+            console.log('сверили goalsFromIDB', goalsFromIDB);
+            await saveEntityToIDB('goalsStore', goals);
+        }
+    }, [goals]);
+
     useEffect(() => {
-        const syncData = async () => {
-            const goalsFromIDB = await getEntityFromIDB('goalsStore');
-            if (!_.isEqual(goalsFromIDB, goals)) {
-                console.log('сверили goalsFromIDB', goalsFromIDB);
-                await saveEntityToIDB('goalsStore', goals);
-            }
-        };
+        loadAndSyncData();
+    }, [loadAndSyncData]);
+
+    useEffect(() => {
         syncData();
-    }, [dispatch, goals]);
+    }, [syncData]);
+
+    const headerStyle = useMemo(
+        () => ({
+            backgroundColor,
+            color: textColor,
+        }),
+        [backgroundColor, textColor]
+    );
+
+    const iconStyle = useMemo(
+        () => ({
+            color: colorIcon,
+        }),
+        [colorIcon]
+    );
 
     return (
         <div
             className={style.profile}
-            style={{ backgroundColor, color: textColor }}
+            style={headerStyle}
         >
             <Header
                 title={user.name || 'Профиль'}
-                rightIcon={<SettingOutlined style={{ color: colorIcon }} />}
                 onRightClick={() => navigate('/settings')}
+                rightIcon={
+                    <>
+                        {loadingStatus === 'loading' ? (
+                            <Spin size='small' />
+                        ) : loadingStatus === 'success' ? (
+                            <CheckCircleOutlined style={{ color: 'green', fontSize: 20 }} />
+                        ) : (
+                            <SettingOutlined style={iconStyle} />
+                        )}
+                    </>
+                }
             />
 
             {/* Аватар */}
@@ -93,7 +129,10 @@ function Profile() {
 
                 {/* Текущие цели */}
                 <div className={style.currentGoals}>
-                    <CurrentGoals loading={loading} goals={goals} />
+                    <CurrentGoals
+                        loading={loading}
+                        goals={goals}
+                    />
                 </div>
 
                 {/* Список целей */}

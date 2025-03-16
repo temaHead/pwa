@@ -203,7 +203,7 @@ const FatMeasurement: React.FC<FatMeasurementProps> = ({ item }) => {
                                 ) : (
                                     <span className={style.value}>
                                         {item.measurements[key as keyof FatMeasuringData['measurements']] ??
-                                            'Не указано'}{' '}
+                                            '-'}{' '}
                                         мм
                                     </span>
                                 )}

@@ -7,7 +7,7 @@ const LoadingSpinner: React.FC = () => {
     const backgroundColor = token.colorBgLayout;
     return (
         <div className={style.spinnerContainer} style={{ backgroundColor }}>
-            <div className={style.spinner}></div>
+            {/* <div className={style.spinner}></div> */}
         </div>
     );
 };

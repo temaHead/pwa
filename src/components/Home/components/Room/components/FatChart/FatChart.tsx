@@ -97,8 +97,6 @@ const FatChart: React.FC = () => {
         [LABELS_MAP, fatMeasuringSorted, visibleLines]
     );
     
-    console.log(chartData);
-
     const handleToggleLine = (key: keyof typeof visibleLines) => {
         setVisibleLines((prev) => ({
             ...prev,

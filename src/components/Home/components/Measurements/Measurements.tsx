@@ -1,5 +1,5 @@
 import style from './Measurements.module.scss';
-import { PlusOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -18,7 +18,7 @@ import WeightMeasurement from './components/WeightMeasurement/WeightMeasurement'
 import BodyMeasurement from './components/BodyMeasurement/BodyMeasurement';
 import Filter from './components/Filter/Filter';
 import CollapsibleSection from '../../../../shared/components/CollapsibleSection/CollapsibleSection';
-import { theme } from 'antd';
+import { Spin, theme } from 'antd';
 import Header from '../../../../shared/components/Header/Header';
 import { getEntityFromIDB, saveEntityToIDB } from '../../../../shared/utils/idb';
 import { updateUserProfileAsync } from '../../../../store/slices/userSlice';
@@ -38,6 +38,7 @@ function Measurements() {
     const textColor = token.colorTextBase;
     const colorIcon = token.colorIcon;
     const [isModalOpen, setModalOpen] = useState(false);
+    const [loadingStatus, setLoadingStatus] = useState<'loading' | 'success' | 'idle'>('idle');
 
     const handleAddMeasurement = useCallback(() => {
         setModalOpen(true);
@@ -45,6 +46,7 @@ function Measurements() {
 
     useEffect(() => {
         const loadAndSyncData = async () => {
+            setLoadingStatus('loading');
             const fatFromIDB = await getEntityFromIDB('fatStore');
             const weightFromIDB = await getEntityFromIDB('weightStore');
             const bodyFromIDB = await getEntityFromIDB('bodyStore');
@@ -60,10 +62,18 @@ function Measurements() {
             }
 
             if (user.id) {
-                dispatch(getAllFatMeasuringAsync(user.id));
-                dispatch(getAllWeightMeasuringAsync(user.id));
-                dispatch(getAllBodyMeasuringAsync(user.id));
+                await Promise.all([
+                    dispatch(getAllFatMeasuringAsync(user.id)),
+                    dispatch(getAllWeightMeasuringAsync(user.id)),
+                    dispatch(getAllBodyMeasuringAsync(user.id)),
+                ]);
             }
+
+            // Добавляем задержку перед изменением статуса на success
+            setTimeout(() => {
+                setLoadingStatus('success'); // Данные успешно загружены
+            }, 1000);
+            setTimeout(() => setLoadingStatus('idle'), 2000);
         };
 
         loadAndSyncData();
@@ -74,7 +84,7 @@ function Measurements() {
             const fatFromIDB = await getEntityFromIDB('fatStore');
             if (!_.isEqual(fatFromIDB, fatMeasuring)) {
                 const latestFat = fatMeasuring[0];
-                if ( latestFat && latestFat.bodyFat !== user.bodyFat) {
+                if (latestFat && latestFat.bodyFat !== user.bodyFat) {
                     dispatch(updateUserProfileAsync({ ...user, bodyFat: latestFat.bodyFat }));
                 }
                 await saveEntityToIDB('fatStore', fatMeasuring);
@@ -83,7 +93,7 @@ function Measurements() {
             const weightFromIDB = await getEntityFromIDB('weightStore');
             if (!_.isEqual(weightFromIDB, weightMeasuring)) {
                 const latestWeight = weightMeasuring[0];
-                if ( latestWeight && latestWeight.weight !== user.currentWeight) {
+                if (latestWeight && latestWeight.weight !== user.currentWeight) {
                     dispatch(updateUserProfileAsync({ ...user, currentWeight: latestWeight.weight }));
                 }
                 await saveEntityToIDB('weightStore', weightMeasuring);
@@ -154,7 +164,7 @@ function Measurements() {
         }),
         [backgroundColor, textColor]
     );
-    
+
     const iconStyle = useMemo(
         () => ({
             color: colorIcon,
@@ -163,12 +173,7 @@ function Measurements() {
     );
 
     const filteredComponents = useMemo(
-        () =>
-            filters
-                .filter((f) => f.visible)
-                .map((f) => (
-                    <div key={f.id}>{getComponentById(f.id)}</div>
-                )),
+        () => filters.filter((f) => f.visible).map((f) => <div key={f.id}>{getComponentById(f.id)}</div>),
         [filters, getComponentById]
     );
 
@@ -179,8 +184,18 @@ function Measurements() {
         >
             <Header
                 title={'Mои замеры'}
-                rightIcon={<PlusOutlined style={iconStyle} />}
                 onRightClick={handleAddMeasurement}
+                rightIcon={
+                    <>
+                        {loadingStatus === 'loading' ? (
+                            <Spin size='small' />
+                        ) : loadingStatus === 'success' ? (
+                            <CheckCircleOutlined style={{ color: 'green', fontSize: 20 }} />
+                        ) : (
+                            <PlusOutlined style={iconStyle} />
+                        )}
+                    </>
+                }
             />
             <div className={style.filter}>
                 <Filter />
