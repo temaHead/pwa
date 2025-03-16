@@ -61,52 +61,55 @@ function App() {
     // Мемоизация функции загрузки пользователя
     const loadUser = useCallback(async () => {
         const userFromIDB = await getUserFromIDB();
-
+    
         if (userFromIDB) {
             dispatch(setUser(userFromIDB));
             setIsAuth(true);
+            setLoading(false); // ✅ Скрываем лоадер сразу после IndexedDB
         }
-
+    
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            if (firebaseUser && firebaseUser.uid === id) {
-                try {
-                    const userDocRef = doc(db, 'users', firebaseUser.uid);
-                    const userDoc = await getDoc(userDocRef);
-
-                    if (userDoc.exists()) {
-                        const userData = {
-                            email: firebaseUser.email,
-                            id: firebaseUser.uid,
-                            token: firebaseUser.refreshToken,
-                            name: userDoc.data()?.name || null,
-                            birthDate: userDoc.data()?.birthDate || null,
-                            currentWeight: userDoc.data()?.currentWeight || null,
-                            initialWeight: userDoc.data()?.initialWeight || null,
-                            desiredWeight: userDoc.data()?.desiredWeight || null,
-                            gender: userDoc.data()?.gender || null,
-                            height: userDoc.data()?.height || null,
-                            bodyFat: userDoc.data()?.bodyFat || null,
-                            theme: localStorage.getItem('theme') || 'light',
-                        };
-
-                        // Сравниваем данные из IndexedDB с данными из Firestore
-                        if (JSON.stringify(userFromIDB) !== JSON.stringify(userData)) {
-                            // Если данные изменились, обновляем Redux и IndexedDB
-                            dispatch(setUser(userData));
-                            await saveUserToIDB(userData);
-                        }
-                    }
-                } catch (error) {
-                    console.error('Ошибка при загрузке данных пользователя:', error);
-                }
-            } else {
+            if (!firebaseUser || firebaseUser.uid !== id) {
                 setIsAuth(false);
-                window.localStorage.removeItem('id');
+                localStorage.clear();
+                sessionStorage.clear();
                 await deleteUserFromIDB();
+                setLoading(false);
+                return;
             }
+    
+            try {
+                const userDocRef = doc(db, 'users', firebaseUser.uid);
+                const userDoc = await getDoc(userDocRef);
+    
+                if (userDoc.exists()) {
+                    const userData = {
+                        email: firebaseUser.email,
+                        id: firebaseUser.uid,
+                        token: firebaseUser.refreshToken,
+                        name: userDoc.data()?.name || null,
+                        birthDate: userDoc.data()?.birthDate || null,
+                        currentWeight: userDoc.data()?.currentWeight || null,
+                        initialWeight: userDoc.data()?.initialWeight || null,
+                        desiredWeight: userDoc.data()?.desiredWeight || null,
+                        gender: userDoc.data()?.gender || null,
+                        height: userDoc.data()?.height || null,
+                        bodyFat: userDoc.data()?.bodyFat || null,
+                        theme: localStorage.getItem('theme') || 'light',
+                    };
+    
+                    if (JSON.stringify(userFromIDB) !== JSON.stringify(userData)) {
+                        dispatch(setUser(userData));
+                        await saveUserToIDB(userData);
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка при загрузке данных пользователя:', error);
+            }
+    
             setLoading(false);
         });
-
+    
         return () => unsubscribe();
     }, [dispatch, id, setIsAuth]);
 
